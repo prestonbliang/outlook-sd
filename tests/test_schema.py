@@ -32,11 +32,15 @@ def test_columns_and_no_future(name):
 
 
 def test_tides_observed_not_in_future():
+    if not (PROCESSED / "tides_9410170.parquet").exists():
+        pytest.skip("tides not built (run make history SOURCES=tides)")
     df = pd.read_parquet(PROCESSED / "tides_9410170.parquet")
     assert df.loc[df.observed_ft.notna(), "ts_utc"].max() <= NOW  # predictions may extend into the future
 
 
 def test_ems_counts_are_nonnegative_integers():
+    if not (PROCESSED / "ems_daily_zip.parquet").exists():
+        pytest.skip("EMS history not built (run make history SOURCES=ems)")
     df = pd.read_parquet(PROCESSED / "ems_daily_zip.parquet")
     assert (df.calls >= 0).all() and (df.calls_medical <= df.calls).all()
     assert df.zip.str.fullmatch(r"\d{5}").all()

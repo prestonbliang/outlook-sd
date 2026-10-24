@@ -74,10 +74,11 @@ export default function DataPage() {
         </tbody>
       </table>
       <h2 id="community" style={{ marginTop: 24 }}>Community reports</h2>
-      <p>Anyone can tap a report on a hazard page, such as “Sewage smell or brown water” or “Water on a street.” We store the neighborhood, the hazard, the report type and the time, plus a random code kept in your browser to limit repeat reports. We do not store names, emails, exact locations or free text. Only daily counts are published. Reports are not checked by officials, do not change the forecasts, and are compared with the forecasts on the Track record page.</p>
+      <p>Anyone can report conditions on a hazard page or from the map. We store the neighborhood, hazard, report type, time, and a random browser code to limit repeat reports. We do not store names, emails, exact locations or free text. Only aggregate counts, reporting-browser counts, and the latest report time are published; raw reports and browser codes are not readable by public users. Reports are unverified, never change the forecasts, and are compared with them on the Track record page.</p>
+      <p>The map can highlight reporting blind spots: neighborhoods with observations from fewer than three browsers for a hazard over the past 24 hours or 7 days. This is a participation goal, not a measure of safety or model confidence. A browser code does not establish a unique person. Missing reports never mean missing hazards. Observations about water appearance cannot establish bacteria levels.</p>
       <h2 style={{ marginTop: 24 }}>How AI was used</h2>
-      <p>The code for this app was written with help from Claude Code, an AI coding assistant made by Anthropic, under the direction and review of the student developer. The full list of what it was used for is in CREDITS.md in the source code.</p>
-      <p>The forecasts themselves come from the machine-learning models in this project (LightGBM), trained only on the data above. No AI chatbot writes the forecasts or the text you see: verdicts and advice come from fixed tables.</p>
+      <p>The code for this app was written with help from Claude Code (Anthropic) and Codex (OpenAI), under the direction of the student developer. The full list of what these tools were used for is in CREDITS.md in the source code.</p>
+      <p>The forecasts themselves come from this project's LightGBM models trained on the data above. No chatbot generates forecasts or advice at runtime: verdicts and advice come from fixed tables.</p>
       <h2 style={{ marginTop: 24 }}>Libraries</h2>
       <p className="small">Python: pandas, NumPy, PyArrow, requests, LightGBM, scikit-learn, GeoPandas, Shapely, FastAPI. Web: Next.js, React, U.S. Web Design System (Public Sans font), MapLibre GL JS, react-map-gl, PMTiles, Protomaps basemaps, Observable Plot.</p>
     </main>

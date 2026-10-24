@@ -21,6 +21,7 @@ jobs:
       FIRMS_MAP_KEY: ${{ secrets.FIRMS_MAP_KEY }}
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      NWS_USER_AGENT: ${{ vars.NWS_USER_AGENT }}
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
@@ -34,7 +35,12 @@ jobs:
         working-directory: web
 
       - name: Restore state
-        run: gh release download state -p state.tar.gz && scripts/state.sh unpack
+        run: |
+          if ! gh release download state -p state.tar.gz; then
+            echo "Pipeline state is missing. Bootstrap the source tables and upload the state release asset; see docs/SETUP.md."
+            exit 1
+          fi
+          scripts/state.sh unpack
 
       - name: Fetch, forecast, log, score
         run: uv run python -m pipeline.run_all
@@ -49,9 +55,27 @@ jobs:
         run: npm run build
         working-directory: web
 
+      - run: npm run test:unit
+        working-directory: web
+      - run: npm run typecheck
+        working-directory: web
+      - name: Package live snapshot for Vercel
+        run: node scripts/prepare-vercel.mjs
+
       - name: Deploy to Vercel
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: npx --yes vercel@65.2.0 deploy web/out --prod --yes --token "$VERCEL_TOKEN"
+        id: deploy
+        run: |
+          scripts/deploy-vercel.sh production > deployment-url.txt
+          url="$(tail -n 1 deployment-url.txt)"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Deployment: $url" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Check deployed site
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.url }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        run: python scripts/check_deployment.py "$DEPLOY_URL"

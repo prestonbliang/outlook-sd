@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 RAW = ROOT / "data" / "raw"
 PROCESSED = ROOT / "data" / "processed"
 BBOX = (-117.60, 32.53, -116.08, 33.51)  # west, south, east, north — San Diego County
-UA = {"User-Agent": "OutlookSD (raunav.mendiratta@gmail.com)"}
+UA = {"User-Agent": os.environ.get("NWS_USER_AGENT") or "OutlookSD"}
 
 
 SECRET_VARS = ("AIRNOW_API_KEY", "FIRMS_MAP_KEY", "NEXT_PUBLIC_SUPABASE_ANON_KEY")

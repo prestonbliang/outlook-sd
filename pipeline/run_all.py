@@ -36,7 +36,7 @@ def run_source(con, name, fn, time_col=None, every_hours=None):
 
 
 def fetch_all(con):
-    zips = geo.zcta().zip.tolist()
+    zips = sorted({p["zip"] for p in json.loads((ROOT / "api" / "places.json").read_text())})
     run_source(con, "ibwc", lambda: ibwc.fetch_live()[1], "ts_utc")
     run_source(con, "noaa_tides", lambda: noaa_tides.fetch_live()[flood.STATION].dropna(subset=["observed_ft"]), "ts_utc")
     run_source(con, "cdip", cdip.fetch_live, "ts_utc")
@@ -59,8 +59,20 @@ def fetch_all(con):
 
 
 def weather_points():
-    _, st = water.labels()
-    return sorted({flood.POINT} | set(heat.zip_points().point_id) | set(st.point_id) | set(fire.grid().point_id))
+    points = {flood.POINT}
+    points.update(p["point_id"] for p in json.loads((ROOT / "api" / "places.json").read_text()) if p.get("point_id"))
+    # Include Air's inland monitor points even when they aren't near a named place.
+    for tile, files in {"water": ["stations.json"], "air": ["sites_pm25.json", "sites_ozone.json"]}.items():
+        for name in files:
+            path = ART / tile / name
+            if path.exists():
+                points.update(s["point_id"] for s in json.loads(path.read_text()) if s.get("point_id"))
+    if (PROCESSED / "zcta_sd.parquet").exists():
+        points.update(heat.zip_points().point_id)
+    if (PROCESSED / "fire_grid.parquet").exists() or all((PROCESSED / p).exists() for p in
+            ["county.parquet", "fhsz_sd.parquet", "calfire_perimeters.parquet", "roads_sd.parquet"]):
+        points.update(fire.grid().point_id)
+    return sorted(points)
 
 
 def model_version(tile):
@@ -70,10 +82,13 @@ def model_version(tile):
 
 def forecast_all(con, run_ts):
     now = pd.Timestamp.now(tz="UTC")
-    wx = run_source(con, "openmeteo", lambda: predict.forecast_hourly(weather_points()))
+    wx = run_source(con, "openmeteo", lambda: predict.forecast_hourly(weather_points()), time_col=None)
     if wx is None:
         return
-    save_weather_series(wx)
+    try:
+        save_weather_series(wx)
+    except Exception as e:
+        print(f"[weather series] FAILED: {redact(str(e))[:300]}")
     places = json.loads((ROOT / "api" / "places.json").read_text())
     tiles = [("flood", predict.predict_flood), ("water", predict.predict_water), ("heat", predict.predict_heat),
              ("fire", lambda n, w: predict.predict_fire(n, w, places)), ("air", predict.predict_air)]
@@ -87,10 +102,11 @@ def forecast_all(con, run_ts):
             db.log_forecasts(con, run_ts, tile, rows, model_version(tile))
             if tile == "flood":  # hourly curve for the detail chart
                 detail[["target", "tide_pred", "lvl50", "lvl90"]].to_parquet(PROCESSED / "flood_forecast_hourly.parquet")
-            if tile == "fire":  # today's cells rated Moderate or above, for the map
-                d0 = detail[(detail.date == detail.date.min()) & (detail.level != "low")]
-                cells = fire.grid().merge(d0[["cell", "p", "level"]], on="cell").to_crs(4326)
-                cells[["cell", "p", "level", "geometry"]].to_file(PROCESSED / "map_fire_cells.geojson", driver="GeoJSON")
+            if tile == "fire":
+                for date, day in detail.groupby("date"):
+                    cells = fire.grid().merge(day[["cell", "p", "level"]], on="cell").to_crs(4326)
+                    cells[["cell", "p", "level", "geometry"]].to_file(
+                        PROCESSED / f"map_fire_cells-{date:%Y-%m-%d}.geojson", driver="GeoJSON")
             print(f"{tile}: {len(rows)} forecasts")
         except Exception as e:
             print(f"[predict {tile}] FAILED: {redact(str(e))[:300]}")
@@ -125,14 +141,18 @@ def write_maps(con):
     z = geo.zcta().assign(geometry=lambda g: g.simplify(0.0005))
     h = pd.read_sql("SELECT unit_id AS zip, value, level, extra_json FROM forecasts WHERE tile='heat' AND target_date=? "
                     "AND run_ts=(SELECT MAX(run_ts) FROM forecasts WHERE tile='heat')", con, params=(today,))
-    chs = pd.read_parquet(PROCESSED / "calheatscore_log.parquet")
-    chs = chs[(chs.issued == chs.issued.max()) & (chs.lead_days == 0)].set_index("zip").chs
+    chs_path = PROCESSED / "calheatscore_log.parquet"
+    chs = pd.read_parquet(chs_path) if chs_path.exists() else pd.DataFrame()
+    chs = chs[(chs.issued == chs.issued.max()) & (chs.target_date.astype(str) == today)].set_index("zip").chs \
+        if len(chs) else pd.Series(dtype=float)
     z = z.merge(h, on="zip", how="left")
     z["source"] = z.value.notna().map({True: "outlook", False: "calheatscore"})
     z["chs"] = z.zip.map(chs)
     z[["zip", "value", "level", "source", "chs", "geometry"]].to_file(PROCESSED / "map_heat.geojson", driver="GeoJSON")
     f = pd.read_sql("SELECT value, level FROM forecasts WHERE tile='flood' AND target_date=? "
                     "AND run_ts=(SELECT MAX(run_ts) FROM forecasts WHERE tile='flood')", con, params=(today,))
+    if not (PROCESSED / "coastal_places.parquet").exists():
+        return
     cp = gpd.read_parquet(PROCESSED / "coastal_places.parquet")
     if len(f):
         cp["level"], cp["peak_ft_mllw"] = f.level.iloc[0], round(f.value.iloc[0] - 3.79, 2)
@@ -176,7 +196,11 @@ def score_all(con):
                           "LEFT JOIN scores s ON s.forecast_id = f.id WHERE s.forecast_id IS NULL", con)
     now, rows = str(pd.Timestamp.now(tz="UTC")), []
     for tile, g in pending.groupby("tile"):
-        obs = observed(tile)
+        try:
+            obs = observed(tile)
+        except (FileNotFoundError, KeyError) as e:
+            print(f"[score {tile}] Waiting for source data: {redact(str(e))[:200]}")
+            continue
         for r in g.itertuples():
             o = obs.get((r.unit_id, r.target_date))
             if o is None:
@@ -204,10 +228,16 @@ def score_all(con):
 
 def main():
     con = db.connect()
-    run_ts = pd.Timestamp.now(tz="UTC").floor("h").isoformat()
+    run_ts = pd.Timestamp.now(tz="UTC").isoformat()
     fetch_all(con)
     forecast_all(con, run_ts)
-    write_maps(con)
+    if (PROCESSED / "zcta_sd.parquet").exists():
+        try:
+            write_maps(con)
+        except Exception as e:
+            print(f"[map] FAILED: {redact(str(e))[:300]}")
+    else:
+        print("[map] ZIP outlines missing. Run make history SOURCES=geo to build them.")
     log_place_levels(con, run_ts)
     score_all(con)
     con.close()

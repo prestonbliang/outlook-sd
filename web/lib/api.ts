@@ -15,8 +15,9 @@ export interface Tile {
   official_advisory: { active: boolean | null; url: string; headline?: string | null };
   current?: { aqi: number; parameter: string; site: string; time: string; level: string; verdict: string };
   active_fires?: { name: string; acres: number; km: number; url: string }[]; red_flag?: string[];
+  active_fires_available?: boolean;
 }
-export interface Outlook { place: { id: string; name: string; zip: string }; updated_at: string | null; tiles: Tile[] }
+export interface Outlook { place: { id: string; name: string; zip: string; coastal?: boolean }; updated_at: string | null; tiles: Tile[] }
 export interface Series { units: string; threshold: { value: number; label: string } | null; observed_label?: string;
   observed: { t: string; v: number }[]; forecast: { t: string; v: number; hi?: number }[] }
 export interface Hazard extends Tile {
@@ -28,8 +29,8 @@ export interface TrackSummary { headline: string; period: string; inputs: string
   provisional?: boolean; beats_baseline: boolean; replays?: { name: string; issued?: string; note?: string;
   days?: { date: string; observed: number; lvl_q50: number; lvl_q90: number; lvl_tide: number }[] }[] }
 
-export async function get<T>(path: string): Promise<T> {
-  const r = await fetch(`${API}/${path}`, { cache: "no-store" });
+export async function get<T>(path: string, signal?: AbortSignal): Promise<T> {
+  const r = await fetch(`${API}/${path}`, { cache: "no-store", signal });
   if (!r.ok) throw new Error(`Could not load ${path} (HTTP ${r.status})`);
   return r.json();
 }

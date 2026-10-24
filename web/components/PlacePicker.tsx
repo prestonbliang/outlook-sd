@@ -12,6 +12,7 @@ export default function PlacePicker({ places, onPick }: { places: Place[]; onPic
   }, [q, places]);
 
   function locate() {
+    if (!places.length) { setMsg("Neighborhoods are still loading. Please try again shortly."); return; }
     if (!navigator.geolocation) { setMsg("Location is not available in this browser."); return; }
     setMsg("Finding your location…");
     navigator.geolocation.getCurrentPosition(
@@ -22,6 +23,7 @@ export default function PlacePicker({ places, onPick }: { places: Place[]; onPic
         setMsg(null); onPick(best);
       },
       () => setMsg("Location permission was not given. Pick a place instead."),
+      { timeout: 10000, maximumAge: 60000, enableHighAccuracy: false },
     );
   }
 

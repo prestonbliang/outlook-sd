@@ -35,8 +35,12 @@ export default function HazardDetail({ tile }: { tile: TileName }) {
   const [h, setH] = useState<Hazard | null>(null);
   const [err, setErr] = useState<string | null>(null);
   useEffect(() => {
+    const controller = new AbortController();
     const place = new URLSearchParams(window.location.search).get("place") || "downtown";
-    get<Hazard>(`hazard/${tile}/${place}.json`).then(setH).catch((e) => setErr(e.message));
+    setH(null); setErr(null);
+    get<Hazard>(`hazard/${tile}/${place}.json`, controller.signal).then(setH)
+      .catch((e) => { if (!controller.signal.aborted) setErr(e.message); });
+    return () => controller.abort();
   }, [tile]);
 
   if (err) return <main className="wrap"><p role="alert">Could not load this forecast: {err}</p><Link href="/">Back</Link></main>;
@@ -66,7 +70,7 @@ export default function HazardDetail({ tile }: { tile: TileName }) {
         {h.red_flag && h.red_flag.length > 0 && h.red_flag.map((r) => <p key={r}>{r}</p>)}
         {h.active_fires && h.active_fires.length > 0
           ? <ul>{h.active_fires.map((f) => <li key={f.name}><a href={f.url}>{f.name}</a>: {f.acres} acres, {f.km} km away</li>)}</ul>
-          : <p>No active CAL FIRE incidents within 50 km.</p>}
+          : <p>{h.active_fires_available ? "No active CAL FIRE incidents within 50 km." : "Active-fire data is unavailable or not current. Check the official source below."}</p>}
       </>}
 
       {h.series && <><h2 style={{ marginTop: 20 }}>Past 7 days and forecast</h2><ForecastChart series={h.series} /></>}
@@ -84,7 +88,9 @@ export default function HazardDetail({ tile }: { tile: TileName }) {
       <h2 style={{ marginTop: 20 }}>What to do</h2>
       <p>{h.what_to_do}</p>
 
-      <ReportBox tile={tile} placeId={h.place.id} placeName={h.place.name} />
+      <p><Link href={`/map/?place=${h.place.id}&hazard=${tile}`}>Explore this hazard on the map →</Link></p>
+      {tile === "water" && h.place.coastal === false ? <p className="notice">Choose a coastal neighborhood on the map to report beach conditions.</p> :
+        <ReportBox key={`${h.place.id}-${tile}`} tile={tile} placeId={h.place.id} placeName={h.place.name} />}
 
       {h.metrics && <p className="small">How accurate is this? {h.metrics.headline} <Link href={`/track-record/?place=${h.place.id}`}>Track record</Link></p>}
       <SourceLine sources={h.sources} updated={h.run_ts} stale={h.stale_inputs} />
