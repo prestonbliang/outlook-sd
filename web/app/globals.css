@@ -1,0 +1,27 @@
+@import "../styles/tokens.css";
+
+@font-face { font-family: "Public Sans"; font-weight: 400; font-display: swap; src: url("/fonts/PublicSans-Regular.woff2") format("woff2"); }
+@font-face { font-family: "Public Sans"; font-weight: 600; font-display: swap; src: url("/fonts/PublicSans-SemiBold.woff2") format("woff2"); }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { background: var(--paper); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.45;
+       font-variant-numeric: tabular-nums; }
+h1, h2, h3 { font-weight: 600; margin: 0; line-height: 1.2; }
+h1 { font-size: 28px; } h2 { font-size: 20px; } h3 { font-size: 16px; }
+a { color: var(--signal); }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+button { font: inherit; color: inherit; }
+.small { font-size: 14px; }
+.muted { color: var(--slate); }
+.wrap { max-width: 720px; margin: 0 auto; padding: 16px; }
+.nav { display: flex; gap: 20px; padding: 16px 0; border-top: 1px solid var(--rule); margin-top: 8px; flex-wrap: wrap; }
+.nav a { font-weight: 600; text-decoration: none; }
+.nav a:hover { text-decoration: underline; }
+.button-link { background: none; border: 0; padding: 0; color: var(--signal); cursor: pointer; text-decoration: underline; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 6px 8px 6px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 600; }
+td.num, th.num { text-align: right; }
+.disclaimer { font-size: 14px; color: var(--slate); margin: 12px 0 0; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

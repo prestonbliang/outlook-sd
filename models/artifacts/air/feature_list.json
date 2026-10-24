@@ -1,0 +1,17 @@
+[
+  "site",
+  "lead_k",
+  "aqi_prev",
+  "aqi_prev_mean7",
+  "tmax",
+  "tmin",
+  "rh_mean",
+  "sw_sum",
+  "wind_mean",
+  "wind_max",
+  "blh_max",
+  "precip",
+  "offshore_hours",
+  "dow",
+  "month"
+]

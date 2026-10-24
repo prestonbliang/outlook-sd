@@ -1,0 +1,11 @@
+{
+  "water": {"low": "Low risk", "moderate": "Swim with caution", "high": "Don't swim", "very_high": "Don't swim",
+            "none": "No monitored beach nearby"},
+  "heat": {"low": "Low", "moderate": "Moderate heat risk", "high": "High heat risk", "very_high": "Very high heat risk",
+           "none": "No heat rating yet"},
+  "flood": {"low": "No flooding expected", "moderate": "Higher than usual tide", "high": "Minor coastal flooding",
+            "very_high": "Moderate coastal flooding", "none": "Inland: not affected by coastal flooding"},
+  "air": {"good": "Good", "moderate": "Moderate", "usg": "Unhealthy for sensitive groups", "unhealthy": "Unhealthy",
+          "very_unhealthy": "Very unhealthy", "hazardous": "Hazardous", "none": "Coming soon"},
+  "fire": {"low": "Low", "moderate": "Moderate", "high": "High", "very_high": "Very high", "none": "Coming soon"}
+}

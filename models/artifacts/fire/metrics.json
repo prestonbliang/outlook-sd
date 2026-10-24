@@ -1,0 +1,127 @@
+{
+  "period": {
+    "train": "2014 \u2192 2023",
+    "val": "2024",
+    "test": "2025-01 \u2192 2026-10-17"
+  },
+  "inputs": "Scored with actual (ERA5) weather, an upper bound on live accuracy",
+  "test_cell_days": 1889450,
+  "test_fires": 46,
+  "base_rate": 2.4345709068776627e-05,
+  "auc_pr": {
+    "model": 6.625964173286436e-05,
+    "climatology": 4.976271286127544e-05,
+    "red_flag": 2.699064216960069e-05
+  },
+  "auc_roc": {
+    "model": 0.7720283175564082,
+    "climatology": 0.7123128567895299
+  },
+  "brier": {
+    "model": 2.4346094226906185e-05,
+    "climatology": 2.4344862826092366e-05
+  },
+  "fires_by_level": {
+    "low": 6,
+    "moderate": 10,
+    "high": 20,
+    "very_high": 10
+  },
+  "fires_high_or_above": 30,
+  "same_alarm_rate": {
+    "share_flagged": 0.02446426208685067,
+    "red_flag_caught": 3,
+    "model_caught": 10
+  },
+  "levels": {
+    "moderate": 4.0182082235501445e-05,
+    "high": 4.5869455529562866e-05,
+    "very_high": 0.000277700638711469
+  },
+  "beats_baseline": true,
+  "replays": [
+    {
+      "name": "Henderson Fire week (Oct 13\u201319, 2026)",
+      "days": [
+        {
+          "date": "2026-10-13",
+          "expected_fires": 0.019,
+          "share_cells_high": 0.009
+        },
+        {
+          "date": "2026-10-14",
+          "expected_fires": 0.07,
+          "share_cells_high": 0.119
+        },
+        {
+          "date": "2026-10-15",
+          "expected_fires": 0.128,
+          "share_cells_high": 0.432
+        },
+        {
+          "date": "2026-10-16",
+          "expected_fires": 0.145,
+          "share_cells_high": 0.645
+        },
+        {
+          "date": "2026-10-17",
+          "expected_fires": 0.001,
+          "share_cells_high": 0.0
+        }
+      ],
+      "normal_expected_fires": 0.077,
+      "fires": [
+        {
+          "name": "Henderson Fire",
+          "date": "2026-10-15",
+          "cell": "c00090",
+          "probability": 4.0182082235501445e-05,
+          "level": "moderate",
+          "percentile_that_day": 17.9
+        }
+      ]
+    },
+    {
+      "name": "January 2025 Santa Ana winds (Jan 6\u201312, 2025)",
+      "days": [
+        {
+          "date": "2025-01-06",
+          "expected_fires": 0.031,
+          "share_cells_high": 0.012
+        },
+        {
+          "date": "2025-01-07",
+          "expected_fires": 0.057,
+          "share_cells_high": 0.012
+        },
+        {
+          "date": "2025-01-08",
+          "expected_fires": 0.079,
+          "share_cells_high": 0.038
+        },
+        {
+          "date": "2025-01-09",
+          "expected_fires": 0.042,
+          "share_cells_high": 0.016
+        },
+        {
+          "date": "2025-01-10",
+          "expected_fires": 0.034,
+          "share_cells_high": 0.028
+        },
+        {
+          "date": "2025-01-11",
+          "expected_fires": 0.01,
+          "share_cells_high": 0.004
+        },
+        {
+          "date": "2025-01-12",
+          "expected_fires": 0.014,
+          "share_cells_high": 0.006
+        }
+      ],
+      "normal_expected_fires": 0.077,
+      "fires": []
+    }
+  ]
+}

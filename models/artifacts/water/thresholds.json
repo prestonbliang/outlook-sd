@@ -1,0 +1,25 @@
+{
+  "levels": {
+    "low": [
+      null,
+      0.2
+    ],
+    "moderate": [
+      0.2,
+      0.5
+    ],
+    "high": [
+      0.5,
+      0.8
+    ],
+    "very_high": [
+      0.8,
+      null
+    ]
+  },
+  "standard": {
+    "MPN/100ml": 104.0,
+    "CFU/100ml": 104.0,
+    "Copies/100ml": 1413.0
+  }
+}

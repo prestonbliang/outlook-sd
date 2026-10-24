@@ -1,0 +1,28 @@
+{
+  "aqi_categories": [
+    [
+      50,
+      "good"
+    ],
+    [
+      100,
+      "moderate"
+    ],
+    [
+      150,
+      "usg"
+    ],
+    [
+      200,
+      "unhealthy"
+    ],
+    [
+      300,
+      "very_unhealthy"
+    ],
+    [
+      10000,
+      "hazardous"
+    ]
+  ]
+}

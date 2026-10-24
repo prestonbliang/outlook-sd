@@ -1,0 +1,56 @@
+# Credits
+
+Outlook SD is built from public data and open-source software. Everything outside code written for this project is listed here, as the Congressional App Challenge rules require.
+
+## Datasets
+
+| Dataset | Publisher | License | Used for |
+|---|---|---|---|
+| Gauge 11-0133.00, Tijuana River at International Boundary (live telemetry) | U.S. Section, International Boundary and Water Commission | U.S. government work (public domain) | Water: border flow |
+| Tijuana River Discharge and Suspended Sediment Concentration (HydroShare d2f31999…) | HydroShare; IBWC gage data | CC BY 4.0 | Water: border-flow history 2000–2021 |
+| Beach Water Quality Monitoring: results, stations, advisories (Beach Watch) | California State Water Resources Control Board, via data.ca.gov | Open Data Commons Attribution (ODC-BY) | Water: outcome labels |
+| CDIP buoys 191 (Point Loma South) and 155 (Imperial Beach), via CeNCOOS ERDDAP | Coastal Data Information Program, Scripps Institution of Oceanography | Freely available; acknowledgement requested | Water, Flood: waves, ocean temperature |
+| CO-OPS stations 9410170 (San Diego) and 9410230 (La Jolla): water levels, predictions, datums, flood levels | NOAA | U.S. government work (public domain) | Flood: labels, tide predictions, thresholds |
+| ERA5 reanalysis, forecasts and archived forecasts (Open-Meteo APIs) | Open-Meteo (ECMWF ERA5 and national weather models) | CC BY 4.0 — "Weather data by Open-Meteo.com" | All tiles: weather |
+| Active alerts (api.weather.gov) | National Weather Service | U.S. government work (public domain) | Flood, Fire: official warnings |
+| NWS warning archive (VTEC) | Iowa Environmental Mesonet, Iowa State University | Freely available | Baselines |
+| Fire-Rescue calls for service 2016–2026 | City of San Diego (data.sandiego.gov) | Open Data Commons PDDL | Heat: labels |
+| CalHeatScore (live API) | CalEPA / OEHHA | State of California open data (no license listed) | Heat: comparison and fallback rating |
+| EPA AirData daily PM2.5 (88101) and ozone (44201) | U.S. EPA | U.S. government work (public domain) | Air: training labels |
+| AirNow API | U.S. EPA | U.S. government work (public domain) | Air: live hourly observations (daily AQI computed with EPA breakpoints) |
+| California Historic Fire Perimeters; CAL FIRE incident API | CAL FIRE | State of California public information | Fire |
+| Spatial wildfire occurrence data 1992–2020, 6th ed. (FPA FOD, RDS-2013-0009.6) | USDA Forest Service | U.S. government work (public domain) | Fire: labels 2014–2020 |
+| Fire Hazard Severity Zones in State Responsibility Areas (FHSZ in SRA) | CAL FIRE | State of California public information | Fire: hazard share per 2 km cell |
+| FIRMS VIIRS active-fire detections | NASA | Freely available; acknowledgement requested | Fire: satellite detections |
+| Cartographic boundaries (county, ZCTA, places), TIGER roads and area water, Gazetteer | U.S. Census Bureau | U.S. government work (public domain) | Neighborhoods, ZIPs, shoreline, roads |
+| ACS 2019–2023 5-year summary files (tables B01003, B01001, B19013, B25035) | U.S. Census Bureau | U.S. government work (public domain) | Heat: population for per-resident levels; context |
+| Community reports (one-tap, structured) | Outlook SD users, stored in Supabase | Collected by this app; published only as daily counts | Shown next to forecasts; compared with forecasts; never used for training |
+| Community planning areas | City of San Diego | Open Data Commons PDDL | Named neighborhoods |
+| Protomaps daily basemap build (OpenStreetMap data) | Protomaps; OpenStreetMap contributors | ODbL (© OpenStreetMap contributors) | Map background |
+
+Water exceedance standards: 104 MPN or CFU per 100 mL for culture methods (California 17 CCR §7958); 1,413 DNA copies per 100 mL for ddPCR (Crain et al., 2021; EPA Region 9 approval for San Diego County, May 2022).
+
+## Libraries
+
+Python: pandas 3.1 (BSD-3), NumPy 2.5 (BSD-3), PyArrow 26 (Apache-2.0), requests 2.34 (Apache-2.0), LightGBM 4.7 (MIT), scikit-learn 1.9 (BSD-3), GeoPandas 1.2 (BSD-3), Shapely 2.2 (BSD-3), pyogrio 0.13 (MIT), pyproj 3.8 (MIT), FastAPI 0.162 (MIT), Uvicorn 0.54 (BSD-3), HTTPX 0.28 (BSD-3), python-dotenv 1.2 (BSD-3), pytest 9.1 (MIT).
+
+Web: Next.js 16.4 (MIT), React 19.3 (MIT), U.S. Web Design System 3.14 (CC0 / Apache-2.0; Public Sans font under SIL OFL 1.1), MapLibre GL JS 5.24 (BSD-3), react-map-gl 8.1 (MIT), PMTiles 4.5 (BSD-3), Protomaps basemaps 5.7 (BSD-3), Observable Plot 0.6 (ISC), TypeScript 5.9 (Apache-2.0), Playwright 1.64 (Apache-2.0).
+
+Tools: go-pmtiles 1.31 (BSD-3) to cut the San Diego basemap; uv (Astral) for Python environments; GitHub Actions; Vercel; Supabase (Postgres + PostgREST) for community reports; Docker images postgres:16 and postgrest/postgrest v12.2.3 for local testing only.
+
+## AI tools
+
+**Claude Code (Anthropic; model Claude Opus 5.5)** was used in this project to:
+
+- turn the project brief into a build plan;
+- probe every data source and write the ingestion code (`pipeline/sources/`);
+- write the feature builders, training scripts and evaluation (`pipeline/features/`, `models/`);
+- write the hourly pipeline, the API, the static export and the GitHub Actions workflow;
+- write the Next.js front end, the tests, and the first drafts of README.md and this file;
+- design and test the community-report database schema (`supabase/schema.sql`) and report features, after a teammate proposed crowdsourcing.
+
+No AI model produces the forecasts or the text shown in the app. Forecasts come from the LightGBM models trained here on the data above. Verdicts and advice come from the fixed tables in `api/verdicts.json` and `api/actions.json`.
+
+### Student contributions
+
+_To be written by the student: what you designed, decided, checked, changed or wrote yourself._

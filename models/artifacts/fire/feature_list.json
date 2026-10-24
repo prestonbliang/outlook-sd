@@ -1,0 +1,14 @@
+[
+  "fhsz_very_high",
+  "fhsz_high",
+  "fires_1990_2013",
+  "dist_road_km",
+  "tmax",
+  "rh_min",
+  "wind_max",
+  "wind_mean",
+  "offshore_hours",
+  "days_since_rain",
+  "precip",
+  "month"
+]

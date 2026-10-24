@@ -1,0 +1,18 @@
+[
+  "station",
+  "lead_k",
+  "dist_mouth_km",
+  "q_24h",
+  "q_72h",
+  "q_7d",
+  "q_max_7d",
+  "rain_24h",
+  "rain_72h",
+  "rain_fcst",
+  "hs",
+  "tp",
+  "dp",
+  "sst",
+  "tide_max",
+  "month"
+]

@@ -1,0 +1,121 @@
+[
+  {
+    "site": "060730001",
+    "lat": 32.631242,
+    "lon": -117.059088,
+    "name": "Chula Vista",
+    "point_id": "g32.75_-117.00"
+  },
+  {
+    "site": "060730003",
+    "lat": 32.791194,
+    "lon": -116.942092,
+    "name": "El Cajon",
+    "point_id": "g32.75_-117.00"
+  },
+  {
+    "site": "060730006",
+    "lat": 32.836461,
+    "lon": -117.128752,
+    "name": "Kearny Mesa",
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "site": "060730077",
+    "lat": 32.6509,
+    "lon": -116.365,
+    "name": "Campo Indian Reservation",
+    "point_id": "g32.75_-116.25"
+  },
+  {
+    "site": "060731002",
+    "lat": 33.127769,
+    "lon": -117.075086,
+    "name": "Escondido",
+    "point_id": "g33.25_-117.00"
+  },
+  {
+    "site": "060731006",
+    "lat": 32.842318,
+    "lon": -116.768293,
+    "name": "Alpine",
+    "point_id": "g32.75_-116.75"
+  },
+  {
+    "site": "060731008",
+    "lat": 33.217046,
+    "lon": -117.396249,
+    "name": "Camp Pendleton",
+    "point_id": "g33.25_-117.50"
+  },
+  {
+    "site": "060731010",
+    "lat": 32.701492,
+    "lon": -117.149653,
+    "name": "San Diego - Beardsley Street",
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "site": "060731011",
+    "lat": 32.725226,
+    "lon": -116.365203,
+    "name": "La Posta Reservation",
+    "point_id": "g32.75_-116.25"
+  },
+  {
+    "site": "060731014",
+    "lat": 32.578165,
+    "lon": -116.921374,
+    "name": "Donovan",
+    "point_id": "g32.50_-117.00"
+  },
+  {
+    "site": "060731016",
+    "lat": 32.845709,
+    "lon": -117.123964,
+    "name": "San Diego - Kearny Villa Rd.",
+    "point_id": "g32.75_-117.00"
+  },
+  {
+    "site": "060731017",
+    "lat": 32.985428,
+    "lon": -117.082198,
+    "name": "San Diego -Rancho Carmel Drive",
+    "point_id": "g33.00_-117.00"
+  },
+  {
+    "site": "060731018",
+    "lat": 32.817978,
+    "lon": -116.968133,
+    "name": "El Cajon - Floyd Smith Dr.",
+    "point_id": "g32.75_-117.00"
+  },
+  {
+    "site": "060731022",
+    "lat": 32.789565,
+    "lon": -116.944308,
+    "name": "El Cajon - Lexington Elementary School",
+    "point_id": "g32.75_-117.00"
+  },
+  {
+    "site": "060731025",
+    "lat": 32.552824,
+    "lon": -117.047345,
+    "name": "San Ysidro",
+    "point_id": "g32.50_-117.00"
+  },
+  {
+    "site": "060731026",
+    "lat": 32.710177,
+    "lon": -117.142665,
+    "name": "San Diego - Sherman Elementary School",
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "site": "060731201",
+    "lat": 33.362593,
+    "lon": -117.09023,
+    "name": "Pala Airpad",
+    "point_id": "g33.25_-117.00"
+  }
+]

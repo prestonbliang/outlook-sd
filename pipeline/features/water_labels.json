@@ -1,0 +1,18 @@
+{
+  "station": "This beach's track record",
+  "lead_k": "Days ahead",
+  "dist_mouth_km": "Distance from the Tijuana River mouth",
+  "q_24h": "Border flow, last 24 hours",
+  "q_72h": "Border flow, last 3 days",
+  "q_7d": "Border flow, last 7 days",
+  "q_max_7d": "Peak border flow, last 7 days",
+  "rain_24h": "Rain, last 24 hours",
+  "rain_72h": "Rain, last 3 days",
+  "rain_fcst": "Rain expected",
+  "hs": "Wave height",
+  "tp": "Wave period",
+  "dp": "Swell direction",
+  "sst": "Ocean temperature",
+  "tide_max": "High tide",
+  "month": "Time of year"
+}

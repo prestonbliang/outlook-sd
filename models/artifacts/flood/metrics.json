@@ -1,0 +1,242 @@
+{
+  "residual_rmse_ft": {
+    "q50": {
+      "value": 0.10823317853767678,
+      "ci95": [
+        0.10004020605538039,
+        0.11682883017047511
+      ]
+    },
+    "zero": {
+      "value": 0.4532255986395569,
+      "ci95": [
+        0.39175929493701567,
+        0.5102804252592246
+      ]
+    },
+    "persist": {
+      "value": 0.14524168718813588,
+      "ci95": [
+        0.13832281340051567,
+        0.15281205741184015
+      ]
+    }
+  },
+  "residual_rmse_by_day": {
+    "day1": {
+      "q50": 0.09552505007324778,
+      "zero": 0.45109272824550317,
+      "persist": 0.1175382965263099
+    },
+    "day2": {
+      "q50": 0.10770522693816705,
+      "zero": 0.453070677196479,
+      "persist": 0.1471456296901545
+    },
+    "day3": {
+      "q50": 0.12007419251365917,
+      "zero": 0.4555026254318484,
+      "persist": 0.16678835572230488
+    }
+  },
+  "q90_coverage": 0.8412896216768916,
+  "minor_flood_days": {
+    "q50": {
+      "hits": 70,
+      "misses": 11,
+      "false_alarms": 12,
+      "observed_events": 81,
+      "hit_rate": 0.8641975308641975,
+      "false_alarm_ratio": 0.14634146341463414
+    },
+    "q90": {
+      "hits": 79,
+      "misses": 2,
+      "false_alarms": 27,
+      "observed_events": 81,
+      "hit_rate": 0.9753086419753086,
+      "false_alarm_ratio": 0.25471698113207547
+    },
+    "zero": {
+      "hits": 0,
+      "misses": 81,
+      "false_alarms": 0,
+      "observed_events": 81,
+      "hit_rate": 0.0,
+      "false_alarm_ratio": 0.0
+    },
+    "persist": {
+      "hits": 69,
+      "misses": 12,
+      "false_alarms": 16,
+      "observed_events": 81,
+      "hit_rate": 0.8518518518518519,
+      "false_alarm_ratio": 0.18823529411764706
+    }
+  },
+  "peak_mae_ft": {
+    "q50": 0.08357958240789597,
+    "zero": 0.38588535276073627,
+    "persist": 0.11602799079754605
+  },
+  "period": {
+    "train": "2014-01 \u2192 2023-12",
+    "val": "2024",
+    "test": "2025-01 \u2192 2026-10-14"
+  },
+  "inputs": "Scored with actual (ERA5) weather, an upper bound on live accuracy",
+  "replays": [
+    {
+      "name": "Tropical Storm Rachel (Oct 10\u201312, 2026)",
+      "issued": "2026-10-09 12:00",
+      "days": [
+        {
+          "date": "2026-10-09",
+          "observed": 11.49,
+          "lvl_q50": 11.54,
+          "lvl_q90": 11.66,
+          "lvl_tide": 10.06
+        },
+        {
+          "date": "2026-10-10",
+          "observed": 11.71,
+          "lvl_q50": 11.79,
+          "lvl_q90": 11.94,
+          "lvl_tide": 10.18
+        },
+        {
+          "date": "2026-10-11",
+          "observed": 11.64,
+          "lvl_q50": 11.84,
+          "lvl_q90": 12.03,
+          "lvl_tide": 10.25
+        },
+        {
+          "date": "2026-10-12",
+          "observed": 9.24,
+          "lvl_q50": 9.39,
+          "lvl_q90": 9.59,
+          "lvl_tide": 7.99
+        }
+      ]
+    },
+    {
+      "name": "January 2024 storm (validation year)",
+      "issued": "2024-01-20 12:00",
+      "days": [
+        {
+          "date": "2024-01-20",
+          "observed": 10.03,
+          "lvl_q50": 10.07,
+          "lvl_q90": 10.17,
+          "lvl_tide": 9.54
+        },
+        {
+          "date": "2024-01-21",
+          "observed": 10.14,
+          "lvl_q50": 10.33,
+          "lvl_q90": 10.49,
+          "lvl_tide": 9.74
+        },
+        {
+          "date": "2024-01-22",
+          "observed": 10.74,
+          "lvl_q50": 10.56,
+          "lvl_q90": 10.81,
+          "lvl_tide": 9.87
+        },
+        {
+          "date": "2024-01-23",
+          "observed": 8.56,
+          "lvl_q50": 8.37,
+          "lvl_q90": 8.56,
+          "lvl_tide": 7.78
+        }
+      ]
+    }
+  ],
+  "hindcast": {
+    "residual_rmse_ft": {
+      "q50": {
+        "value": 0.11225151939726549,
+        "ci95": [
+          0.10459795843805642,
+          0.12150452282832462
+        ]
+      },
+      "zero": {
+        "value": 0.45421055389843956,
+        "ci95": [
+          0.3923588315196689,
+          0.513244029631415
+        ]
+      },
+      "persist": {
+        "value": 0.14534860066917366,
+        "ci95": [
+          0.13840599629231765,
+          0.15305336749514237
+        ]
+      }
+    },
+    "residual_rmse_by_day": {
+      "day1": {
+        "q50": 0.10330932757251521,
+        "zero": 0.45208566490680396,
+        "persist": 0.1175786242917654
+      },
+      "day2": {
+        "q50": 0.1094089581923351,
+        "zero": 0.45405490013535654,
+        "persist": 0.14725618052957998
+      },
+      "day3": {
+        "q50": 0.12311812833521567,
+        "zero": 0.4564804279123325,
+        "persist": 0.1669417010664392
+      }
+    },
+    "q90_coverage": 0.8468691148775894,
+    "minor_flood_days": {
+      "q50": {
+        "hits": 69,
+        "misses": 12,
+        "false_alarms": 13,
+        "observed_events": 81,
+        "hit_rate": 0.8518518518518519,
+        "false_alarm_ratio": 0.15853658536585366
+      },
+      "q90": {
+        "hits": 76,
+        "misses": 5,
+        "false_alarms": 29,
+        "observed_events": 81,
+        "hit_rate": 0.9382716049382716,
+        "false_alarm_ratio": 0.2761904761904762
+      },
+      "zero": {
+        "hits": 0,
+        "misses": 81,
+        "false_alarms": 0,
+        "observed_events": 81,
+        "hit_rate": 0.0,
+        "false_alarm_ratio": 0.0
+      },
+      "persist": {
+        "hits": 69,
+        "misses": 12,
+        "false_alarms": 16,
+        "observed_events": 81,
+        "hit_rate": 0.8518518518518519,
+        "false_alarm_ratio": 0.18823529411764706
+      }
+    },
+    "peak_mae_ft": {
+      "q50": 0.088489962152983,
+      "zero": 0.3867973805855161,
+      "persist": 0.11604468412942993
+    },
+    "n_issues": 1298
+  },
+  "beats_baseline": true
+}

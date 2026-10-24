@@ -1,0 +1,161 @@
+{
+  "provisional_split": true,
+  "period": {
+    "train": [
+      "2014-01-08",
+      "2019-12-31"
+    ],
+    "val": [
+      "2020-01-01",
+      "2020-12-31"
+    ],
+    "test": [
+      "2021-01-01",
+      "2021-05-29"
+    ]
+  },
+  "inputs": "Scored with actual (ERA5) rain, an upper bound on live accuracy",
+  "all": {
+    "prob": {
+      "n": 10275,
+      "positives": 1154,
+      "auc": 0.8536210740369654,
+      "recall_at_80pct_precision": 0.28422876949740034,
+      "brier": 0.07127045200366515,
+      "hit_rate": 0.38648180242634317,
+      "false_alarm_ratio": 0.2864
+    },
+    "last_ratio": {
+      "n": 10275,
+      "positives": 1154,
+      "auc": 0.8222259580753045,
+      "recall_at_80pct_precision": 0.2244367417677643,
+      "hit_rate": 0.5069324090121318,
+      "false_alarm_ratio": 0.4681818181818182
+    },
+    "rain_rule": {
+      "n": 10275,
+      "positives": 1154,
+      "auc": 0.5355682137532048,
+      "recall_at_80pct_precision": 0.0,
+      "hit_rate": 0.33362218370883884,
+      "false_alarm_ratio": 0.8622540250447227
+    }
+  },
+  "south_bay": {
+    "prob": {
+      "n": 4833,
+      "positives": 954,
+      "auc": 0.8088507271590345,
+      "recall_at_80pct_precision": 0.3228511530398323,
+      "brier": 0.11399981661540876,
+      "hit_rate": 0.38784067085953877,
+      "false_alarm_ratio": 0.22268907563025211
+    },
+    "last_ratio": {
+      "n": 4833,
+      "positives": 954,
+      "auc": 0.7863947028643727,
+      "recall_at_80pct_precision": 0.1970649895178197,
+      "hit_rate": 0.5387840670859538,
+      "false_alarm_ratio": 0.44967880085653106
+    },
+    "rain_rule": {
+      "n": 4833,
+      "positives": 954,
+      "auc": 0.5257005279732884,
+      "recall_at_80pct_precision": 0.0,
+      "hit_rate": 0.3385744234800839,
+      "false_alarm_ratio": 0.7565938206480783
+    }
+  },
+  "rest": {
+    "prob": {
+      "n": 5442,
+      "positives": 200,
+      "auc": 0.8698187714612744,
+      "recall_at_80pct_precision": 0.26,
+      "brier": 0.03332281893336806,
+      "hit_rate": 0.38,
+      "false_alarm_ratio": 0.4899328859060403
+    },
+    "last_ratio": {
+      "n": 5442,
+      "positives": 200,
+      "auc": 0.8132578214421975,
+      "recall_at_80pct_precision": 0.2,
+      "hit_rate": 0.355,
+      "false_alarm_ratio": 0.572289156626506
+    },
+    "rain_rule": {
+      "n": 5442,
+      "positives": 200,
+      "auc": 0.5168704692865319,
+      "recall_at_80pct_precision": 0.02,
+      "hit_rate": 0.31,
+      "false_alarm_ratio": 0.9577656675749319
+    }
+  },
+  "auc_ci": {
+    "prob": {
+      "value": 0.8536210740369654,
+      "ci95": [
+        0.8166604832075682,
+        0.8902429772067525
+      ]
+    },
+    "last_ratio": {
+      "value": 0.8222259580753045,
+      "ci95": [
+        0.7822081865955128,
+        0.8593146989954308
+      ]
+    },
+    "rain_rule": {
+      "value": 0.5355682137532048,
+      "ci95": [
+        0.4570968086406871,
+        0.6161991469306572
+      ]
+    }
+  },
+  "by_lead": {
+    "0": {
+      "n": 2547,
+      "positives": 288,
+      "auc": 0.8562294033741578,
+      "recall_at_80pct_precision": 0.2951388888888889,
+      "brier": 0.07052951282436976,
+      "hit_rate": 0.3715277777777778,
+      "false_alarm_ratio": 0.2302158273381295
+    },
+    "1": {
+      "n": 2567,
+      "positives": 288,
+      "auc": 0.8539068975184047,
+      "recall_at_80pct_precision": 0.2847222222222222,
+      "brier": 0.07103259444557086,
+      "hit_rate": 0.3819444444444444,
+      "false_alarm_ratio": 0.28104575163398693
+    },
+    "2": {
+      "n": 2576,
+      "positives": 289,
+      "auc": 0.8542098183958374,
+      "recall_at_80pct_precision": 0.27335640138408307,
+      "brier": 0.07126931247418425,
+      "hit_rate": 0.3875432525951557,
+      "false_alarm_ratio": 0.28662420382165604
+    },
+    "3": {
+      "n": 2585,
+      "positives": 289,
+      "auc": 0.8513632856298904,
+      "recall_at_80pct_precision": 0.28719723183391005,
+      "brier": 0.07223783609234456,
+      "hit_rate": 0.40484429065743943,
+      "false_alarm_ratio": 0.3352272727272727
+    }
+  },
+  "beats_baseline": true
+}

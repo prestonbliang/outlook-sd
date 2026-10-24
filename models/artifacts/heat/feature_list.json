@@ -1,0 +1,13 @@
+[
+  "zip_code",
+  "dow",
+  "month",
+  "holiday",
+  "level_365d",
+  "tmax",
+  "tmin",
+  "heat_index_max",
+  "rh_mean",
+  "tmax_lag1",
+  "hot_streak"
+]
