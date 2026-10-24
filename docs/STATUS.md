@@ -2,6 +2,10 @@
 
 Updated October 24, 2026. Outlook SD is a locally tested release candidate. It is not deployed, and its live source archive and reporting service are not configured in this checkout. See [RELEASE.md](RELEASE.md) for reproducible QA, launch requirements and a competition demonstration.
 
+Vercel GitHub integration is now configured explicitly in the root `vercel.json`. A local Vercel CLI production build successfully emitted one static web service, all 690 API JSON files, and no serverless functions. The Git build supports safe optional runtime-state restoration; the prebuilt hourly path uses the same service layout. See [VERCEL.md](VERCEL.md) for the required project settings and environment-variable locations. The counts below describe the prior finalization pass; deployment-specific regressions are covered additionally in `tests/test_vercel_git.py` and the web packaging unit tests.
+
+Deployment follow-up verification: **65 Python tests passed, 9 existing source-data tests skipped; 27 frontend unit tests and 15 browser smoke/journey executions passed.** Strict TypeScript, Ruff, shell syntax, the Git build with uv bootstrap, and prebuilt service packaging passed. Enabling the live-forecast requirement correctly rejected the state-free build. The local Vercel CLI used temporary fixture project settings and did not contact or change a hosted project.
+
 ## Completed
 
 - Cohesive navigation, responsive hazard cards, saved neighborhoods, shareable map views, browser history restoration, loading/error recovery and keyboard controls.

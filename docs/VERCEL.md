@@ -1,76 +1,104 @@
-# Launch on Vercel
+# Deploy Outlook SD on Vercel
 
-Outlook SD uses Vercel to serve a static Next.js export. GitHub Actions runs the Python forecasting job, preserves its SQLite log in the `state` release, and publishes a tested snapshot. Supabase handles community observations directly from the browser.
+The root [`vercel.json`](../vercel.json) supports Vercel's GitHub integration and its Services project detection. It explicitly declares **one deployable service**, `web`, rooted in `web/`. This follows Vercel's current [Services configuration](https://vercel.com/docs/services); a single service is supported.
 
-The deploy scripts use Vercel's [Build Output API](https://vercel.com/docs/build-output-api) and [`deploy --prebuilt`](https://vercel.com/docs/cli/deploy). The prepared `.vercel/output` contains only the built site, with explicit page routing and cache rules. The Python datasets and private API keys are never uploaded as public files.
+## Architecture
 
-## 1. Link the existing Vercel project
+| Component | Location | Runs where |
+| --- | --- | --- |
+| Next.js 16 / React frontend | `web/`, `web/package.json` | Vercel, as a static export |
+| Forecast API assembly | `api/main.py`, `api/export.py` | Build time; emits `web/public/api/*.json` |
+| Models, source ingestion, SQLite forecast/score log | `models/`, `pipeline/`, `data/` | Hourly GitHub Actions job with persisted state |
+| Community reports and coverage RPCs | `supabase/schema.sql`, browser `web/lib/reports.ts` | Supabase PostgreSQL/PostgREST |
+| Basemap, fonts, sprites, map worker | `web/public/`, asset-copy scripts | Static files on Vercel |
 
-Use the existing Outlook SD project. Do not create a second project just to deploy from this repository.
+The browser already requests static URLs such as `/api/places.json`, `/api/outlook/imperial-beach.json` and `/api/map/heat.json`. These are served by the **web service**, not rewritten into Python endpoints. Reports go directly to Supabase using its public anon key and database policies. There are no Next API route handlers, websocket services, or authenticated application servers to provision.
 
-In Vercel, find the project ID and the account/team ID in Settings. Create a deployment token with access to that project. Configure these **GitHub repository Actions secrets**:
+The Python API reads precomputed source tables and SQLite. Its mutable database and the hourly ingestion/inference process must not be placed in request-time Vercel Functions. They remain in GitHub Actions. Do not add `api/main.py` as a second Vercel service. Vercel CLI's warning that the root `api/` directory is not built is expected: its code generates the static JSON during the web build.
 
-| Secret | Purpose |
+## Vercel project settings
+
+Connect `raunavm/outlook-sd` to the existing Vercel project:
+
+| Setting | Value |
 | --- | --- |
-| `VERCEL_TOKEN` | Authenticate the Vercel CLI |
-| `VERCEL_ORG_ID` | Existing account/team ID |
-| `VERCEL_PROJECT_ID` | Existing Outlook SD project ID |
-| `NEXT_PUBLIC_SUPABASE_URL` | Reporting project URL, embedded at build time |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Reporting public key, embedded at build time |
-| `AIRNOW_API_KEY` | Live air observations and forecasts |
-| `FIRMS_MAP_KEY` | Satellite fire detections |
-| `VERCEL_AUTOMATION_BYPASS_SECRET` | Optional: let the read-only check access protected previews |
+| Root Directory | Repository root (`.`); **not** `web` |
+| Project framework | Services / repository configuration |
+| Service name | `web` |
+| Service framework/root | `nextjs` / `web` (defined in `vercel.json`) |
+| Node.js | `22.x` (also pinned in `web/package.json`) |
+| Service Install Command | `npm ci` (defined in configuration) |
+| Service Build Command | `bash ../scripts/vercel-git-build.sh` (defined in configuration) |
+| Output Directory override | Leave unset/automatic |
+| Production branch | Match the branch used by the hourly workflow; normally the repository default branch |
 
-Use the anon public key for reporting, never a Supabase service-role key. Apply `supabase/schema.sql` to that project first. A Vercel-only environment variable does not automatically become available to a build performed in GitHub Actions; configure the public settings in Actions as well.
+Remove old root-level build/install/output overrides or an old FastAPI service configuration from the dashboard. Build/runtime settings belong to the configured web service. Do not set Output Directory to `out`: with the Next.js framework integration, Vercel first reads Next's internal `.next` manifests, recognizes `output: "export"`, and then publishes `web/out` itself. An `out` override makes the Next builder look for `out/routes-manifest.json`, which does not exist.
 
-Keep Vercel's project Root Directory at the repository root for this CLI deployment path. The Python pipeline belongs in GitHub Actions. Avoid parallel Git-based production deployments that build directly from source without the generated forecast API: use the workflow below as the release path for this architecture.
+The top-level catch-all rewrite delegates to the web service while preserving the requested path. It is **not** an SPA rewrite to `/index.html`: exported pages retain their routes, API URLs return JSON, unknown paths return 404, and assets retain their file paths. JSON uses `Cache-Control: no-store`; hashed Next assets use immutable caching; security headers preserve geolocation for this origin. Vercel serves PMTiles with normal HTTP byte-range support.
 
-## 2. Run repository checks
+No Vercel token or project/team IDs are required as application environment variables for the GitHub integration. The integration handles deployment authorization.
 
-The `checks` workflow runs Python regressions, verifies the reporting schema/permissions/limits against an isolated PostgreSQL service, generates API files without historical data, builds the frontend, checks TypeScript, validates Vercel packaging, and runs Playwright in Chromium, Firefox and WebKit with a mocked reporting endpoint. It does not deploy its test build.
+## Environment variables
 
-Merge a validated code change before starting the hourly production job. A static prebuilt deployment is the exact output of the tested build, so public environment values must be present before `npm run build`.
+Set the following in Vercel's Environment Variables UI for the environments where each feature should work. Values are never committed.
 
-Each build writes credential-free configuration metadata. Packaging rejects reserved test reporting endpoints unless `--allow-test-reporting` is explicitly used for QA. The deployment script always rejects test reporting builds, including prepackaged output. Rebuild with real public settings before deployment; `--allow-unavailable` does not bypass this protection.
+| Variable | Needed for | Visibility |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Community reports; set together with the key below | Public, embedded in the browser build |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Community reports; use the anon/public key, never service-role or secret keys | Public by design; RLS restricts access |
+| `OUTLOOK_STATE_URL` | Optional HTTPS download URL for `scripts/state.sh`'s `state.tar.gz` | Build-only; a signed URL must remain secret |
+| `OUTLOOK_REQUIRE_LIVE_FORECASTS` | Set `1` for a live production release; fails builds without current forecast coverage | Build-only; default `0` permits an initial unavailable-data launch |
+| `NEXT_PUBLIC_API_URL` | Optional; default `/api` already points at the generated JSON | Public |
+| `NEXT_PUBLIC_PMTILES_URL` | Optional; default `/tiles/sandiego.pmtiles` | Public |
 
-## 3. First launch before forecast state exists
+With both Supabase values unset, the app explicitly says reporting is disconnected and does not present a working submission form. A partial configuration or private Supabase key fails the build. Reserved test-reporting endpoints also fail the Git deployment build. Rebuild after changing public environment variables.
 
-Open Actions → **deploy-vercel** → Run workflow:
+The separate **GitHub Actions** pipeline needs `AIRNOW_API_KEY`, `FIRMS_MAP_KEY`, both Supabase public values, and a `NWS_USER_AGENT` repository variable containing a project contact. Source API keys are not needed on Vercel: the Git build exports existing predictions and never runs ingestion/training. The CLI/hourly publishing workflows additionally need GitHub Actions secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, and optionally `VERCEL_AUTOMATION_BYPASS_SECRET` for protected-preview checks.
 
-- Target: `preview`.
-- Enable `allow_unavailable` only if you deliberately want the first site to display unavailable forecasts while data is being configured.
+## What the Git build does
 
-This path creates the map/neighborhood interface and supports reporting when Supabase is configured. It does not invent live forecasts. The default launch refuses a snapshot without recent forecasts.
+1. `npm ci` installs the web dependencies.
+2. `scripts/vercel-git-build.sh` uses uv, or bootstraps pinned uv into an isolated temporary Python environment if the frontend build image does not have it. It installs the frozen Python dependencies using Python 3.12.
+3. If `OUTLOOK_STATE_URL` is set, it downloads the archive over HTTPS and restores only ordinary files under `data/processed/` and `data/outlook.db`. It rejects links, traversal/source-code paths, oversized archives, and failed downloads. Signed URLs are not printed. A configured download failure fails the build rather than silently substituting empty data.
+4. `python -m api.export` generates all 690 JSON files through the existing API contracts. It does not create sample forecasts or user reports.
+5. `npm --prefix web run build` copies local map assets and produces the Next.js static export.
+6. The existing release validator checks complete pages, neighborhood/hazard/date JSON, map data, basemap bytes, build configuration, and freshness. `OUTLOOK_REQUIRE_LIVE_FORECASTS=1` requires current real forecast coverage.
 
-The workflow prints the deployment URL in its summary, then checks the pages, JSON API, and a 16-byte PMTiles range request. An initial deployment to a brand-new Vercel project can become its first production deployment even when `--prod` is omitted, as described in the CLI documentation. Reuse the existing project and inspect the target in the dashboard.
+Without a state URL, an existing local state can be used for local validation. A fresh Git build has none and shows truthful unavailable states. That is sufficient to deploy the map/interface and configure reporting, but not a live forecast launch. See [SETUP.md](SETUP.md) to bootstrap actual data. Never run `make train` simply to deploy the committed models.
 
-## 4. Supply the live pipeline state
+For a public GitHub repository with a populated `state` release, its asset URL can be used as `OUTLOOK_STATE_URL`. A private repository's release asset needs a genuinely accessible signed/private-storage download URL: Vercel's GitHub checkout permission does not automatically authenticate arbitrary archive downloads. Keep the archive current through the existing pipeline. The URL is a build input, not something the browser fetches.
 
-No `state` release was available in the repository when this deployment phase began. To generate one, follow [SETUP.md](SETUP.md) to download the source tables, obtain the ACS population data, perform a live run, and package/upload `state.tar.gz` to the release tagged `state`.
+## Hourly forecasts and existing prebuilt deployments
 
-If the original working app has a state archive elsewhere, restore that archive rather than retraining the included models. The code repository alone does not contain its runtime state. The recent IBWC export remains a separate manual source-data dependency; keep the water evaluation provisional until a new evaluation is completed.
+A GitHub push rebuilds code, not hourly weather data. Keep the `hourly-pipeline` workflow enabled once its `state` release is available. It restores state, fetches sources, performs inference/logging/scoring, exports API JSON, builds/tests the site, and publishes the snapshot to the **same Vercel project**.
 
-Once state exists, run **deploy-vercel** with `allow_unavailable` disabled. It refreshes sources, persists the forecast log, exports JSON, tests/builds the frontend, prepares Vercel output, deploys, and checks the hosted result. Switch the target to `production` when publishing the live snapshot.
+The CLI packager now emits the web service under `.vercel/output/services/web/` with a top-level service route, matching the Git integration. The deployment guard reads service build metadata and still rejects test reporting builds. Manual `deploy-vercel` and hourly workflows remain supported without deploying Python as a server.
 
-## 5. Hourly updates
+For code-triggered production builds, set `OUTLOOK_STATE_URL` to the latest accessible state and `OUTLOOK_REQUIRE_LIVE_FORECASTS=1` after bootstrapping. This prevents a code push without usable state from replacing a live forecast deployment with unavailable data. Keep the Vercel production branch aligned with the workflow checkout branch.
 
-The existing `hourly-pipeline` workflow uses the same prebuilt package and deployment check. It requires saved state and refuses an export with no recent forecasts. Manual and hourly deployments share a concurrency group so they cannot overwrite the state archive concurrently.
+## Verification and local commands
 
-API responses use `Cache-Control: no-store`; versioned Next assets use long caching. The basemap is a static PMTiles file whose HTTP range support is checked after deployment. Unknown page paths return the static 404 page rather than falling back to the home page.
-
-## Local equivalents
+Run from the repository root, with web dependencies installed:
 
 ```bash
-make build
+bash scripts/vercel-git-build.sh
 cd web
 npm run typecheck
 npm run test:unit
-npx playwright install --with-deps chromium firefox webkit
-npm run test:e2e
 cd ..
-node scripts/prepare-vercel.mjs
-scripts/deploy-vercel.sh preview
-python scripts/check_deployment.py https://YOUR-DEPLOYMENT.vercel.app
+node scripts/prepare-vercel.mjs --allow-unavailable
 ```
 
-For an explicit first launch, append `--allow-unavailable` to both packaging and deployment checking. Set the three Vercel environment variables locally before deploying; do not commit tokens or paste them into documentation.
+`--allow-unavailable` is only for an intentional first launch; omit it for a live prebuilt release. For actual CLI publishing, set its three deployment credentials and use `scripts/deploy-vercel.sh preview`. A preview for a new project may become its initial production deployment, so verify the target in the Vercel dashboard.
+
+After deploying through GitHub, run the read-only hosted check:
+
+```bash
+python scripts/check_deployment.py https://YOUR-DEPLOYMENT.vercel.app --allow-unavailable
+```
+
+Omit `--allow-unavailable` for the real forecast launch. The check verifies pages, JSON, snapshot freshness, 110 neighborhoods, and a 16-byte PMTiles range response. Then test a real report against the configured Supabase project.
+
+## Remaining operational requirements
+
+The repository's runtime archive, forecast database, source credentials and hosted Supabase schema are not supplied by `vercel.json`. Configure those before claiming live forecasts/reporting. No hosted Vercel deployment or dashboard setting was changed during this implementation. The local build and packaging checks do not establish that a hosted project has the right credentials or archive access.

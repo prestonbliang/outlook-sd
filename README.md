@@ -108,7 +108,7 @@ Needs Python 3.12 with [uv](https://docs.astral.sh/uv/), and Node 22.
 
 For a fresh clone, use the complete [setup and deployment guide](docs/SETUP.md). Run `make doctor` to see which dependencies, source tables, and service settings are missing. Run `make init` after dependency installation to explore the app with explicit missing-data states before restoring source data. Existing deployments should restore the `state` release rather than download and retrain everything.
 
-For Vercel, follow the [Vercel launch guide](docs/VERCEL.md). The manual `deploy-vercel` workflow supports an explicit first launch before forecast state exists. Both deployment workflows validate and package `.vercel/output` for `vercel deploy --prebuilt`, then check the hosted pages, API, and map byte-range support.
+For Vercel's GitHub integration, keep the project Root Directory at the repository root and use the committed `vercel.json`. It explicitly defines the static Next.js web service and generates its API JSON during the build. Follow the [Vercel launch guide](docs/VERCEL.md) for service settings and optional runtime-state restoration. The existing manual/hourly workflows remain supported and package the same web service for prebuilt deployment, with hosted page/API/map-range checks.
 
 ```bash
 cp .env.example .env          # add AIRNOW_API_KEY, FIRMS_MAP_KEY (free) and the Supabase URL + anon key
