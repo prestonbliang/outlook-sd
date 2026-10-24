@@ -6,6 +6,9 @@ import LevelBadge from "@/components/LevelBadge";
 import MapBoundary from "@/components/MapBoundary";
 import PlacePicker from "@/components/PlacePicker";
 import ReportBox from "@/components/ReportBox";
+import Watchlist from "@/components/Watchlist";
+import ForecastStatus from "@/components/ForecastStatus";
+import { dateLabel, localDate } from "@/lib/forecast";
 import { AQI_HEX, LEVEL_HEX, LEVEL_WORD, TILE_NAME, TILE_ORDER, Outlook, TileName, dayName, get } from "@/lib/api";
 import { COVERAGE_LABEL, coverageFor, reportAge } from "@/lib/community";
 import { useCommunity } from "@/lib/useCommunity";
@@ -23,11 +26,14 @@ const NOTES: Record<TileName, string> = {
 };
 
 export default function MapPage() {
-  const { places, place, placeId, choose, error: placeError } = usePlace();
+  const { places, place, placeId, choose, error: placeError, retry } = usePlace();
   const [tile, setTile] = useState<TileName>("water");
   const [dates, setDates] = useState<string[]>([]);
   const [date, setDate] = useState<string>();
   const [dateError, setDateError] = useState(false);
+  const [dateAttempt, setDateAttempt] = useState(0);
+  const [shareMessage, setShareMessage] = useState<string | null>(null);
+  const [shareURL, setShareURL] = useState<string | null>(null);
   const [hours, setHours] = useState(24);
   const [showReports, setShowReports] = useState(true);
   const [showCoverage, setShowCoverage] = useState(false);
@@ -35,13 +41,38 @@ export default function MapPage() {
   const [search, setSearch] = useState("");
   const [outlook, setOutlook] = useState<Outlook | null>(null);
   const [outlookError, setOutlookError] = useState<string | null>(null);
+  const [outlookAttempt, setOutlookAttempt] = useState(0);
   const community = useCommunity(hours);
   useEffect(() => {
-    get<{ dates: string[] }>("map/dates.json").then((d) => { setDates(d.dates); setDate(d.dates[0]); })
-      .catch(() => setDateError(true));
-    const selected = new URLSearchParams(window.location.search).get("hazard");
-    if (TILE_ORDER.includes(selected as TileName)) setTile(selected as TileName);
-  }, []);
+    const controller = new AbortController();
+    setDateError(false);
+    function sync(validDates: string[]) {
+      const params = new URLSearchParams(window.location.search);
+      const selected = params.get("hazard") as TileName;
+      setTile(TILE_ORDER.includes(selected) ? selected : "water");
+      const requested = params.get("date");
+      setDate(requested && validDates.includes(requested) ? requested : validDates.includes(localDate()) ? localDate() : validDates[0]);
+      setHours(params.get("reports") === "168" ? 168 : 24);
+    }
+    get<{ dates: string[] }>("map/dates.json", controller.signal).then(d => {
+      if (!d.dates?.length || d.dates.some(date => !/^\d{4}-\d{2}-\d{2}$/.test(date))) throw new Error("Invalid map dates");
+      setDates(d.dates); sync(d.dates);
+    }).catch(() => { if (!controller.signal.aborted) setDateError(true); });
+    return () => controller.abort();
+  }, [dateAttempt]);
+  // Back/forward must restore hazard/day controls as well as the selected neighborhood.
+  useEffect(() => {
+    function restore() {
+      const params = new URLSearchParams(window.location.search);
+      const hazard = params.get("hazard") as TileName;
+      setTile(TILE_ORDER.includes(hazard) ? hazard : "water");
+      const requested = params.get("date");
+      setDate(requested && dates.includes(requested) ? requested : dates.includes(localDate()) ? localDate() : dates[0]);
+      setHours(params.get("reports") === "168" ? 168 : 24);
+    }
+    window.addEventListener("popstate", restore);
+    return () => window.removeEventListener("popstate", restore);
+  }, [dates]);
   useEffect(() => {
     if (!placeId) return;
     const controller = new AbortController();
@@ -49,11 +80,24 @@ export default function MapPage() {
     get<Outlook>(`outlook/${placeId}.json`, controller.signal).then(setOutlook)
       .catch((e) => { if (!controller.signal.aborted) setOutlookError(e.message); });
     return () => controller.abort();
-  }, [placeId]);
+  }, [placeId, outlookAttempt]);
   function selectTile(t: TileName) {
     setTile(t);
     const url = new URL(window.location.href); url.searchParams.set("hazard", t);
-    window.history.replaceState(null, "", url);
+    window.history.pushState(null, "", url);
+  }
+  function selectDate(value: string) {
+    setDate(value); const url = new URL(window.location.href); url.searchParams.set("date", value);
+    window.history.pushState(null, "", url);
+  }
+  async function share() {
+    const url = new URL("/map/", window.location.origin);
+    url.searchParams.set("place", placeId ?? "downtown"); url.searchParams.set("hazard", tile);
+    if (date) url.searchParams.set("date", date);
+    url.searchParams.set("reports", String(hours));
+    setShareURL(url.href);
+    try { await navigator.clipboard.writeText(url.href); setShareMessage("Link copied with this neighborhood, hazard, and forecast day."); }
+    catch { setShareMessage("Copy this link to share the current view."); }
   }
   const eligible = useMemo(() => places.filter((p) => tile !== "water" || p.coastal), [places, tile]);
   const byPlace = useMemo(() => new Map(community.data?.filter((s) => s.hazard === tile).map((s) => [s.place_id, s])), [community.data, tile]);
@@ -61,7 +105,7 @@ export default function MapPage() {
   const shown = eligible.filter((p) => (!onlyGaps || !community.data || coverageFor(byPlace.get(p.id)) !== "reported") &&
     (!search.trim() || `${p.name} ${p.zip}`.toLowerCase().includes(search.trim().toLowerCase())));
   const current = outlook?.tiles.find((t) => t.tile === tile);
-  const forecast = current?.days.find((d) => d.date === date);
+  const forecast = current?.days.find((d) => d.date === date && d.value !== null);
   const legend = tile === "air" ? AQI_HEX : LEVEL_HEX;
   const windowLabel = hours === 24 ? "24 hours" : "7 days";
   return (
@@ -69,9 +113,11 @@ export default function MapPage() {
       <header className="explorer-header">
         <div><p className="eyebrow">Outlook SD · San Diego County</p><h1>Explore your neighborhood</h1>
           <p className="muted">Local forecasts and observations from people nearby.</p></div>
-        <nav aria-label="Main navigation"><Link href={`/?place=${placeId ?? "downtown"}`}>Today</Link>
-          <Link href="/track-record/">Track record</Link><Link href="/data/">Data</Link></nav>
+        <button className="secondary-button" onClick={share} disabled={!placeId}>Share this view ↗</button>
       </header>
+      {shareMessage && <div className="share-panel"><p role="status" className="small">{shareMessage}</p>
+        <label className="sr-only" htmlFor="share-url">Link to this map view</label><input id="share-url" readOnly value={shareURL ?? ""} onFocus={event => event.target.select()} /></div>}
+      {dates.length > 0 && dates[0] !== localDate() && <p className="notice" role="status">This map uses an older forecast snapshot. Check the date and official sources before making plans.</p>}
       <fieldset className="hazard-switcher">
         <legend className="sr-only">Choose a hazard</legend>
         {TILE_ORDER.map((t) => <label key={t} className={tile === t ? "hazard-option selected" : "hazard-option"}>
@@ -82,13 +128,14 @@ export default function MapPage() {
           <div className="explorer-panel">
             <h2>Find a place</h2>
             <PlacePicker places={places} onPick={(p) => choose(p.id)} />
-            {placeError && <p role="alert">Neighborhoods could not load: {placeError}</p>}
+            {place && <Watchlist places={places} selected={place} onPick={choose} />}
+            {placeError && <p role="alert">Neighborhoods could not load: {placeError} <button className="button-link" onClick={retry}>Try again</button></p>}
             <fieldset className="day-switcher"><legend>Forecast day</legend>
-              {dates.map((d, i) => <label key={d} className={date === d ? "day-option selected" : "day-option"}>
-                <input type="radio" name="forecast-day" checked={date === d} onChange={() => setDate(d)} />
-                {i === 0 ? "Today" : dayName(d)}</label>)}
+              {dates.map(d => <label key={d} className={date === d ? "day-option selected" : "day-option"}>
+                <input type="radio" name="forecast-day" checked={date === d} onChange={() => selectDate(d)} />
+                {dateLabel(d)}</label>)}
             </fieldset>
-            {dateError && <p role="status" className="small">Day selection is unavailable. Showing today's map.</p>}
+            {dateError && <p role="status" className="small">Forecast dates are unavailable. Check the layer's update time. <button className="button-link" onClick={() => setDateAttempt(x => x + 1)}>Try again</button></p>}
             <p className="small muted">{NOTES[tile]}</p>
           </div>
           <div className="explorer-panel">
@@ -96,7 +143,10 @@ export default function MapPage() {
             <p className="small">A blind spot means we need more observations here. It does not mean the area has lower risk.</p>
             {!community.enabled ? <p className="notice small">Community reporting is not connected yet. Coverage is unknown.</p> : <>
               <label className="small field-label" htmlFor="report-window">Observations from the past</label>
-              <select id="report-window" value={hours} onChange={(e) => setHours(Number(e.target.value))}>
+              <select id="report-window" value={hours} onChange={e => {
+                setHours(Number(e.target.value)); const url = new URL(window.location.href); url.searchParams.set("reports", e.target.value);
+                window.history.pushState(null, "", url);
+              }}>
                 <option value={24}>24 hours</option><option value={168}>7 days</option>
               </select>
               {community.error ? <p role="status" className="small">{community.error} <button className="button-link" onClick={community.refresh}>Retry</button></p> :
@@ -113,7 +163,7 @@ export default function MapPage() {
         </aside>
         <div className="explorer-main">
           <div className="explorer-map">
-            <MapBoundary><HazardMap tile={tile} date={date} center={place ?? undefined} places={places} onPlacePick={(p) => choose(p.id)}
+            <MapBoundary><HazardMap tile={tile} date={date} center={place ?? undefined} places={places} observationsOnPage onPlacePick={(p) => choose(p.id)}
               summaries={community.data} showReports={showReports} showCoverage={showCoverage} /></MapBoundary>
           </div>
           <ul aria-label="Map legend" className="map-legend">
@@ -123,10 +173,11 @@ export default function MapPage() {
             {community.data && showReports && <li>Community circles: dark = more problem reports; white = equal or more clear observations. Tap for counts.</li>}
           </ul>
           <p className="small muted">Tap a station, shaded area, or neighborhood circle to inspect it. You can also select a neighborhood below.</p>
-          {place && <section className="selected-neighborhood" id="map-report" aria-label="Selected neighborhood">
+          {place && <section className="selected-neighborhood" id="map-report" tabIndex={-1} aria-label="Selected neighborhood">
             <div className="selected-heading"><div><p className="eyebrow">Selected neighborhood · ZIP {place.zip}</p><h2>{place.name}</h2></div>
               <Link href={`/hazard/${tile}/?place=${place.id}`}>Full {TILE_NAME[tile].toLowerCase()} forecast →</Link></div>
-            {outlookError ? <p role="status">The neighborhood forecast could not load.</p> : !outlook ? <p role="status">Loading neighborhood forecast…</p> :
+            {current && <ForecastStatus tile={current} date={date} />}
+            {outlookError ? <p role="status">The neighborhood forecast could not load. <button className="button-link" onClick={() => setOutlookAttempt(x => x + 1)}>Try again</button></p> : !outlook ? <p role="status">Loading neighborhood forecast…</p> :
               forecast ? <p>{date && dayName(date, "long")}: <LevelBadge tile={tile} level={forecast.level} /> {forecast.verdict}</p> :
                 <p>{current?.reason ?? "No forecast available for this place and day."}</p>}
             {tile === "water" && !place.coastal ? <p className="notice">Choose a coastal neighborhood to report beach conditions.</p> :

@@ -2,11 +2,18 @@
 import json
 import math
 import sqlite3
+from contextlib import closing
+from copy import deepcopy
+from functools import lru_cache
 from datetime import timedelta
 from pathlib import Path
 
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Query
+from api.quality import quality
+from api.values import coordinates, finite_number
+from pipeline.constants import SOURCE_STALE_HOURS as STALE_HOURS
+from pipeline.security import official_link, redact
 
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "models" / "artifacts"
@@ -26,10 +33,8 @@ SOURCES = {
     "air": ["AirNow (EPA)"],
     "fire": ["CAL FIRE incidents", "NASA FIRMS", "NWS San Diego"],
 }
-STATUS_KEYS = {"water": ["ibwc", "cdip", "openmeteo"], "heat": ["openmeteo", "sd_fire_ems", "calheatscore"],
-               "flood": ["noaa_tides", "cdip", "openmeteo"], "air": ["airnow"], "fire": ["calfire", "firms", "nws"]}
-STALE_HOURS = {"ibwc": 3, "noaa_tides": 2, "airnow": 3, "cdip": 6, "calheatscore": 26, "beachwatch": 240,
-               "sd_fire_ems": 72, "firms": 24, "openmeteo": 3, "nws": 3, "calfire": 24}
+STATUS_KEYS = {"water": ["ibwc", "cdip", "openmeteo"], "heat": ["openmeteo", "sd_fire_ems"],
+               "flood": ["noaa_tides", "cdip", "openmeteo"], "air": ["airnow", "openmeteo"], "fire": ["openmeteo"]}
 OFFICIAL = {"water": "https://www.sdbeachinfo.com/", "heat": "https://calheatscore.calepa.ca.gov/",
             "flood": "https://tidesandcurrents.noaa.gov/stationhome.html?id=9410170",
             "air": "https://www.airnow.gov/?city=San%20Diego&state=CA&country=USA",
@@ -45,7 +50,7 @@ def query(sql, params=()):
     # A fresh checkout can serve an honest empty state before the first live run.
     from pipeline.db import SCHEMA
     exists = DB.exists()
-    with sqlite3.connect(f"file:{DB}?mode=ro" if exists else ":memory:", uri=True) as con:
+    with closing(sqlite3.connect(f"file:{DB}?mode=ro" if exists else ":memory:", uri=True)) as con:
         if not exists:
             con.executescript(SCHEMA)
         return pd.read_sql(sql, con, params=params)
@@ -58,7 +63,13 @@ def latest(tile):
 
 def artifact(tile, name):
     p = ART / tile / name
-    return json.loads(p.read_text()) if p.exists() else None
+    return deepcopy(cached_json(str(p), p.stat().st_mtime_ns)) if p.exists() else None
+
+
+@lru_cache(maxsize=64)
+def cached_json(path, modified):
+    """Cache only unchanged artifact files; callers receive independent objects."""
+    return json.loads(Path(path).read_text())
 
 
 def read_parquet(name):
@@ -70,7 +81,7 @@ def haversine_km(lat1, lon1, lat2, lon2):
     r = math.pi / 180
     a = (math.sin((lat2 - lat1) * r / 2) ** 2
          + math.cos(lat1 * r) * math.cos(lat2 * r) * math.sin((lon2 - lon1) * r / 2) ** 2)
-    return 12742 * math.asin(math.sqrt(a))
+    return 12742 * math.asin(math.sqrt(min(1, max(0, a))))
 
 
 def nearest_place(lat, lon):
@@ -95,7 +106,7 @@ def source_status():
         ref = newest if pd.notna(newest) and r.source not in {"nws", "calfire", "firms", "reports"} else \
             pd.to_datetime(r.last_success, utc=True, errors="coerce")
         age = (now - ref).total_seconds() / 3600 if pd.notna(ref) else None
-        out[r.source] = {"last_success": r.last_success, "newest_data": r.newest_data, "error": r.error,
+        out[r.source] = {"last_success": r.last_success, "newest_data": r.newest_data, "error": redact(r.error) if r.error else None,
                          "age_hours": None if age is None else round(age, 1),
                          "stale": age is None or age > STALE_HOURS.get(r.source, 24)}
     return out
@@ -200,7 +211,8 @@ def heat_tile(place, status):
     days = [{"date": str(r.target_date), "level": chs_level(r.chs), "value": None if pd.isna(r.chs) else int(r.chs),
              "verdict": verdict("heat", chs_level(r.chs))} for r in c.itertuples()]
     return {"tile": "heat", "unit": {"id": place["zip"], "name": f"ZIP {place['zip']}"}, "days": days, "factors": [],
-            "reason": "Outside the City of San Diego Fire-Rescue area: showing the state CalHeatScore.",
+            "run_ts": pd.Timestamp(c.issued.max()).tz_localize(TZ).isoformat(),
+            "reason": "Showing the state CalHeatScore because a local model forecast is unavailable.",
             "model": "calheatscore", "official_advisory": {"active": None, "url": OFFICIAL["heat"]},
             "sources": ["CalHeatScore (CalEPA/OEHHA)"],
             "stale_inputs": [SOURCE_NAMES[k] for k in ["calheatscore"] if status.get(k, {"stale": True})["stale"]]}
@@ -215,26 +227,35 @@ def nws_alerts(events):
     return a[a.event.isin(events)].to_dict("records")
 
 
+def alert_status(alerts, status):
+    fresh = not status.get("nws", {"stale": True})["stale"]
+    return {"active": bool(alerts) if fresh else None,
+            "headline": alerts[0]["headline"] if alerts else None,
+            "url": "https://www.weather.gov/sgx/"}
+
+
 def flood_tile(place, status):
     if not place.get("coastal"):
         t = empty_tile("flood", f"{place['name']} is inland, away from the ocean and bay shore.", status)
         t["status"] = "not_applicable"
         t["verdict"] = verdict("flood", None)
         return t
+    alerts = nws_alerts(["Coastal Flood Warning", "Coastal Flood Advisory", "Coastal Flood Statement",
+                         "High Surf Advisory", "High Surf Warning"])
+    advisory = alert_status(alerts, status)
     d = latest("flood")
     if d.empty:
-        return empty_tile("flood", "No flood forecast available.", status)
+        t = empty_tile("flood", "No flood forecast available.", status)
+        t["official_advisory"] = advisory
+        return t
     f0 = json.loads(d.iloc[0].factors_json)
     days = days_from(d, "flood", lambda v: round(v - MLLW, 2))
     for day, e in zip(days, (json.loads(x) for x in d.extra_json)):
         day.update({"high_end": round(e["high_end_ft"] - MLLW, 2), "peak_time": e["peak_time"],
                     "tide_only": round(e["tide_only_ft"] - MLLW, 2)})
-    alerts = nws_alerts(["Coastal Flood Warning", "Coastal Flood Advisory", "Coastal Flood Statement",
-                         "High Surf Advisory", "High Surf Warning"])
     return {"tile": "flood", "unit": {"id": "9410170", "name": "San Diego Bay tide gauge"}, "days": days,
             "units": "ft above MLLW (tide-table feet)", "factors": f0, "reason": reason(d.iloc[0].level, f0),
-            "official_advisory": {"active": bool(alerts), "headline": alerts[0]["headline"] if alerts else None,
-                                  "url": OFFICIAL["flood"]},
+            "official_advisory": advisory,
             "sources": SOURCES["flood"], "stale_inputs": stale_inputs("flood", status), "run_ts": d.iloc[0].run_ts}
 
 
@@ -280,15 +301,17 @@ def air_tile(place, status):
     if obs is None or obs.empty:
         return t
     o = obs[obs.ts_utc == obs.ts_utc.max()].copy()
-    o["km"] = [haversine_km(place["lat"], place["lon"], a, b) for a, b in zip(o.Latitude, o.Longitude)]
-    o = o[(o.AQI >= 0) & (o.km <= AIR_RADIUS_KM)].sort_values("km")
+    o["AQI"] = pd.to_numeric(o.AQI, errors="coerce")
+    o["km"] = [haversine_km(place["lat"], place["lon"], *point) if (point := coordinates(a, b)) else float("inf")
+               for a, b in zip(o.Latitude, o.Longitude)]
+    o = o[o.AQI.ge(0) & o.AQI.le(10000) & (o.km <= AIR_RADIUS_KM)].sort_values("km")
     if o.empty:
         return t
     worst = o[o.SiteName == o.iloc[0].SiteName].sort_values("AQI").iloc[-1]
     level = aqi_category(worst.AQI)
     t.update({"current": {"aqi": int(worst.AQI), "parameter": worst.Parameter, "site": worst.SiteName,
                           "time": str(worst.ts_utc), "level": level, "verdict": verdict("air", level)},
-              "reason": f"Forecast coming soon. Now: AQI {int(worst.AQI)} ({worst.Parameter}) at {worst.SiteName}.",
+              "reason": f"No forecast available. Last recorded AQI {int(worst.AQI)} ({worst.Parameter}) at {worst.SiteName}.",
               "status": "live_only"})
     return t
 
@@ -298,21 +321,26 @@ def fire_tile(place, status):
     near = []
     if fires is not None and len(fires):
         for r in fires.itertuples():
-            km = haversine_km(place["lat"], place["lon"], r.Latitude, r.Longitude)
+            point = coordinates(r.Latitude, r.Longitude)
+            if point is None:
+                continue
+            km = haversine_km(place["lat"], place["lon"], *point)
             if km <= 50:
-                near.append({"name": r.Name, "acres": r.AcresBurned, "contained_pct": r.PercentContained,
-                             "km": round(km, 1), "url": r.Url})
+                near.append({"name": r.Name, "acres": finite_number(r.AcresBurned), "contained_pct": finite_number(r.PercentContained),
+                             "km": round(km, 1), "url": official_link(r.Url, OFFICIAL["fire"])})
     red = nws_alerts(["Red Flag Warning", "Fire Weather Watch"])
+    advisory = alert_status(red, status)
     available = fires is not None and not status.get("calfire", {"stale": True})["stale"]
-    live = {"active_fires": near, "active_fires_available": available, "red_flag": [a["headline"] for a in red]}
-    note = ("Red Flag Warning in effect. " if red else "") + \
+    live = {"active_fires": near, "active_fires_available": available,
+            "red_flag": [a["headline"] for a in red] if advisory["active"] else []}
+    note = (("NWS: " + red[0]["headline"] + ". ") if advisory["active"] else "") + \
            ("Active-fire data is unavailable or not current. Check CAL FIRE." if not available else
             f"{len(near)} active fire(s) within 50 km." if near else "No active CAL FIRE incidents within 50 km.")
     fc = latest("fire")
     d = fc[fc.unit_id == place["id"]] if len(fc) else fc
     if not len(d):
-        t = empty_tile("fire", "Fire-start forecast coming soon. " + note, status)
-        t.update({**live, "status": "live_only"})
+        t = empty_tile("fire", "No fire-start forecast available. " + note, status)
+        t.update({**live, "status": "live_only", "official_advisory": advisory})
         return t
     f0 = json.loads(d.iloc[0].factors_json)
     county = fc[fc.unit_id == "county"]
@@ -322,7 +350,7 @@ def fire_tile(place, status):
         day["county_expected_fires"] = round(float(c.value.iloc[0]), 2) if len(c) else None
     return {"tile": "fire", "unit": {"id": place["id"], "name": f"Riskiest 2 km area within 5 km of {place['name']}"},
             "days": days, "factors": f0, "reason": reason(d.iloc[0].level, f0) or (note if near or red else None),
-            "official_advisory": {"active": bool(red), "headline": red[0]["headline"] if red else None, "url": OFFICIAL["fire"]},
+            "official_advisory": advisory,
             "sources": SOURCES["fire"], "stale_inputs": stale_inputs("fire", status), "run_ts": d.iloc[0].run_ts, **live}
 
 
@@ -332,9 +360,11 @@ BUILDERS = {"water": water_tile, "air": air_tile, "heat": heat_tile, "flood": fl
 def outlook_for(place):
     status = source_status()
     tiles = [BUILDERS[t](place, status) for t in TILES]
+    for tile in tiles:
+        tile["quality"] = quality(tile)
     runs = [t.get("run_ts") for t in tiles if t.get("run_ts")]
     return {"place": {"id": place["id"], "name": place["name"], "zip": place["zip"], "coastal": place["coastal"]},
-            "updated_at": max(runs) if runs else None, "tiles": tiles}
+            "updated_at": max(runs) if runs else None, "forecast_date": str(pd.Timestamp.now(tz=TZ).date()), "tiles": tiles}
 
 
 # ------------------------------------------------------------------ endpoints
@@ -377,16 +407,18 @@ def series_heat(place):
     today = pd.Timestamp.now(tz=TZ).normalize().tz_localize(None)
     f = lambda c: round(c * 9 / 5 + 32)
     hot = thr["hot_tmax_p95_c"].get(pid)
-    return {"units": "°F, daily high", "threshold": None if hot is None else {"value": f(hot), "label": "Hot for this area"},
+    return {"units": "°F, daily high", "observed_label": "Recent weather estimates", "threshold": None if hot is None else {"value": f(hot), "label": "Hot for this area"},
             "observed": [{"t": str(r.date.date()), "v": f(r.tmax)} for r in w[(w.date < today) & (w.date >= today - pd.Timedelta(days=7))].itertuples()],
             "forecast": [{"t": str(r.date.date()), "v": f(r.tmax)} for r in w[(w.date >= today) & (w.date < today + pd.Timedelta(days=4))].itertuples()]}
 
 
 def series_water(unit_id):
+    today = pd.Timestamp.now(tz=TZ).date()
     past = query("SELECT f.target_date, f.value FROM forecasts f WHERE f.tile='water' AND f.unit_id=? AND f.lead_days=0 "
-                 "AND f.target_date >= date('now','-7 day') AND f.target_date < date('now','localtime') "
+                 "AND f.target_date >= ? AND f.target_date < ? "
                  "AND f.run_ts = (SELECT MAX(g.run_ts) FROM forecasts g WHERE g.tile='water' AND g.unit_id=f.unit_id "
-                 "AND g.target_date=f.target_date AND g.lead_days=0) ORDER BY f.target_date", (unit_id,))
+                 "AND g.target_date=f.target_date AND g.lead_days=0) ORDER BY f.target_date",
+                 (unit_id, (today - timedelta(days=7)).isoformat(), today.isoformat()))
     fc = latest("water")
     fc = fc[fc.unit_id == unit_id]
     return {"units": "chance bacteria exceed the state standard", "threshold": {"value": 0.5, "label": "Don't swim"},
@@ -401,7 +433,7 @@ def window(days):
         return None
     v, last = days[0]["verdict"], days[0]["date"]
     for d in days[1:]:
-        if d["verdict"] != v:
+        if d["verdict"] != v or pd.Timestamp(d["date"]) - pd.Timestamp(last) != pd.Timedelta(days=1):
             break
         last = d["date"]
     return {"verdict": v, "through": last}
@@ -413,6 +445,7 @@ def hazard(tile: str, place_id: str):
         raise HTTPException(404, f"unknown tile {tile}")
     place = place_by_id(place_id)
     t = BUILDERS[tile](place, source_status())
+    t["quality"] = quality(t)
     level = t["days"][0]["level"] if t.get("days") else None
     series = None
     if tile == "flood" and t.get("days"):
@@ -442,6 +475,8 @@ def map_layer(tile: str, date: str | None = None):
     if date not in map_dates()["dates"]:
         raise HTTPException(422, "Map date must be today or one of the next three days (Pacific time)")
     feats = []
+    status = source_status()
+    context_notice = None
     fc = latest(tile)
     fc = fc[fc.target_date == date]
     mode = "forecast"
@@ -480,10 +515,16 @@ def map_layer(tile: str, date: str | None = None):
         cells = PROCESSED / f"map_fire_cells-{date}.geojson"
         if cells.exists():
             feats += json.loads(cells.read_text())["features"]
-        fires = read_parquet("calfire_active") if date == today else None
+        current_incidents = not status.get("calfire", {"stale": True})["stale"]
+        fires = read_parquet("calfire_active") if date == today and current_incidents else None
+        if date == today and not current_incidents:
+            context_notice = "Current active-fire records are unavailable. Check CAL FIRE; older incident markers are hidden."
         for r in ([] if fires is None else fires.itertuples()):
-            feats.append({"type": "Feature", "geometry": {"type": "Point", "coordinates": [r.Longitude, r.Latitude]},
-                          "properties": {"name": r.Name, "acres": r.AcresBurned, "contained_pct": r.PercentContained,
+            point = coordinates(r.Latitude, r.Longitude)
+            if point is None:
+                continue
+            feats.append({"type": "Feature", "geometry": {"type": "Point", "coordinates": [point[1], point[0]]},
+                          "properties": {"name": r.Name, "acres": finite_number(r.AcresBurned), "contained_pct": finite_number(r.PercentContained),
                                          "active_fire": True}})
     elif tile == "air":
         # The worse pollutant per monitor, using the same forecast as the detail page.
@@ -501,15 +542,21 @@ def map_layer(tile: str, date: str | None = None):
             mode = "observation"
             observed_at = str(obs.ts_utc.max())
             o = obs[obs.ts_utc == obs.ts_utc.max()]
-            o = o[pd.to_datetime(o.ts_utc, utc=True).dt.tz_convert(TZ).dt.strftime("%Y-%m-%d") == today]
+            o = o[pd.to_datetime(o.ts_utc, utc=True, errors="coerce").dt.tz_convert(TZ).dt.strftime("%Y-%m-%d") == today]
+            o = o.assign(AQI=pd.to_numeric(o.AQI, errors="coerce"))
+            o = o[o.AQI.ge(0) & o.AQI.le(10000)]
             o = o.sort_values("AQI").groupby("SiteName").tail(1)
             for r in o.itertuples():
+                point = coordinates(r.Latitude, r.Longitude)
+                if point is None:
+                    continue
                 lvl = aqi_category(r.AQI) if r.AQI >= 0 else None
-                feats.append({"type": "Feature", "geometry": {"type": "Point", "coordinates": [r.Longitude, r.Latitude]},
+                feats.append({"type": "Feature", "geometry": {"type": "Point", "coordinates": [point[1], point[0]]},
                               "properties": {"name": r.SiteName, "aqi": int(r.AQI), "parameter": r.Parameter,
                                              "level": lvl, "label": verdict("air", lvl)}})
     return {"type": "FeatureCollection", "features": feats, "date": date, "mode": mode,
-            "run_ts": observed_at if fc.empty else fc.run_ts.max(), "stale_inputs": stale_inputs(tile, source_status())}
+            "run_ts": observed_at if fc.empty else fc.run_ts.max(), "stale_inputs": stale_inputs(tile, status),
+            "context_notice": context_notice}
 
 
 LEVEL_WORDS = {"low": "Low", "moderate": "Moderate", "high": "High", "very_high": "Very high"}

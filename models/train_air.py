@@ -5,7 +5,6 @@ compared on live days (historical AirNow forecasts are logged from the day the k
 """
 import lightgbm as lgb
 import numpy as np
-import pandas as pd
 
 from models.common import block_bootstrap, save, split
 from pipeline.features import air

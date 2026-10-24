@@ -79,11 +79,13 @@ cd ..
 make build
 cd web
 npm run typecheck
-npx playwright install chromium
+npx playwright install --with-deps chromium firefox webkit
 npm run test:e2e
 ```
 
 Core API and leakage tests use isolated fixtures and require no source downloads. Processed-data schema tests run when their datasets exist and otherwise skip with an explanation. Build before running type checks so Next generates its route declarations. Browser tests need a completed static build. Community browser tests need a build with reporting enabled and `E2E_REPORTS_ENABLED=1` when running Playwright; CI uses a dummy public endpoint intercepted by Playwright, with no actual submissions.
+
+The complete fixture-build commands are in [RELEASE.md](RELEASE.md). The browser suite runs in Chromium, Firefox and WebKit and includes automated WCAG A/AA checks. Linux browser dependencies must match a supported Playwright host (CI uses Ubuntu). `npm run assets` copies self-hosted fonts and the MapLibre module worker; both `dev` and `build` run it automatically.
 
 To serve the built app: `cd web && npx http-server out`. `make web` starts Next development mode using the exported JSON. `make api` separately exposes the FastAPI endpoints for inspection; the frontend reads exported JSON from `web/public/api` in both modes.
 

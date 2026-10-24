@@ -82,10 +82,12 @@ jobs:
         working-directory: web
       - run: npm run typecheck
         working-directory: web
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium firefox webkit
         working-directory: web
       - run: npm run test:e2e
         working-directory: web
+        env:
+          E2E_REPORTS_ENABLED: ${{ env.NEXT_PUBLIC_SUPABASE_URL != '' && env.NEXT_PUBLIC_SUPABASE_ANON_KEY != '' && '1' || '' }}
       - name: Package tested site for Vercel
         run: |
           flags=()

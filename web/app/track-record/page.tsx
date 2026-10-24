@@ -24,29 +24,37 @@ export default function TrackRecord() {
   const { placeId } = usePlace();
   const [tr, setTr] = useState<TR | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  useEffect(() => { get<TR>("track-record.json").then(setTr).catch((e) => setErr(e.message)); }, []);
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    const controller = new AbortController(); setErr(null);
+    get<TR>("track-record.json", controller.signal).then(setTr).catch(e => { if (!controller.signal.aborted) setErr(e.message); });
+    return () => controller.abort();
+  }, [attempt]);
   return (
     <main className="wrap">
       <p className="small"><Link href={`/?place=${placeId ?? ""}`}>← Today</Link></p>
       <h1>Track record</h1>
       <p>Each model is scored on data it never saw during training, against a simple alternative. Every live forecast is also logged and scored when the real outcome arrives.</p>
-      {err && <p role="alert">Could not load: {err}</p>}
+      {err && <div className="error-panel" role="alert"><p>{err}</p><button className="secondary-button" onClick={() => setAttempt(x => x + 1)}>Try again</button></div>}
+      {!tr && !err && <p role="status">Loading the forecast track record…</p>}
       {tr && TILE_ORDER.map((t) => {
         const s = tr.tiles[t].held_out, live = tr.tiles[t].live, community = tr.tiles[t].community;
+        const baselines = [...new Set(s?.table.flatMap(row => Object.keys(row.baselines)) ?? [])];
         return (
           <section key={t} style={{ borderTop: "1px solid var(--rule)", padding: "16px 0" }}>
             <h2>{TILE_NAME[t]}</h2>
             {!s ? <p className="muted">No model released yet. The tile shows live official data only.</p> : <>
               <p style={{ fontWeight: 600 }}>{s.headline}</p>
               <p className="small muted">Test period {s.period}. {s.inputs}.{s.provisional ? " Provisional: border-flow history for recent years is not loaded yet." : ""}</p>
-              <table>
-                <thead><tr><th>Measure</th><th className="num">Outlook SD</th>{Object.keys(s.table[0].baselines).map((b) => <th key={b} className="num">{b}</th>)}</tr></thead>
+              <div className="table-scroll"><table>
+                <caption className="sr-only">{TILE_NAME[t]} model performance and baselines</caption>
+                <thead><tr><th scope="col">Measure</th><th scope="col" className="num">Outlook SD</th>{baselines.map((b) => <th scope="col" key={b} className="num">{b}</th>)}</tr></thead>
                 <tbody>{s.table.map((r) => (
                   <tr key={r.metric}><td>{r.metric}</td>
                     <td className="num">{fmt(r.model)}{r.model_ci95 ? <span className="muted"> ({fmt(r.model_ci95[0])}–{fmt(r.model_ci95[1])})</span> : null}</td>
-                    {Object.keys(s.table[0].baselines).map((b) => <td key={b} className="num">{fmt(r.baselines[b])}</td>)}</tr>))}
+                    {baselines.map((b) => <td key={b} className="num">{fmt(r.baselines[b])}</td>)}</tr>))}
                 </tbody>
-              </table>
+              </table></div>
               {s.note && <p className="small">{s.note}</p>}
               {s.replays?.map((rp) => (
                 <div key={rp.name} style={{ marginTop: 12 }}>

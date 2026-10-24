@@ -5,13 +5,16 @@ import ForecastChart from "@/components/ForecastChart";
 import LevelBadge from "@/components/LevelBadge";
 import ReportBox from "@/components/ReportBox";
 import SourceLine from "@/components/SourceLine";
+import ForecastStatus from "@/components/ForecastStatus";
+import { dateLabel, observationIsCurrent } from "@/lib/forecast";
+import { usePlace } from "@/lib/usePlace";
 import { Hazard, TILE_NAME, TileName, dayName, get } from "@/lib/api";
 
 function windowText(h: Hazard) {
   const w = h.window;
   if (!w) return h.verdict ?? "";
-  const today = h.days[0]?.date;
-  return w.through === today ? `${w.verdict} today` : `${w.verdict} through ${dayName(w.through, "long")}`;
+  const first = h.days[0]?.date;
+  return w.through === first ? `${w.verdict} · ${dateLabel(first)}` : `${w.verdict} through ${dateLabel(w.through)}`;
 }
 
 // Fire levels are ranks: cut-offs at the 75th, 90th and 98th percentiles of all 2023 area-days
@@ -21,35 +24,39 @@ const FIRE_RANK: Record<string, string> = { low: "A typical day", moderate: "Amo
 function valueText(tile: TileName, d: Hazard["days"][number]) {
   if (d.value === null || d.value === undefined) return "";
   if (tile === "water") return `${Math.round(d.value * 100)}% chance above the state standard`;
-  if (tile === "flood") return `Peak ${d.value.toFixed(1)} ft${d.high_end ? ` (high end ${(d.high_end as number).toFixed(1)} ft)` : ""}`;
-  if (tile === "heat" && d.expected_calls !== undefined)
+  if (tile === "flood") return `Peak ${d.value.toFixed(1)} ft${typeof d.high_end === "number" ? ` (high end ${d.high_end.toFixed(1)} ft)` : ""}`;
+  if (tile === "heat" && typeof d.expected_calls === "number" && typeof d.normal_calls === "number")
     return `${(d.expected_calls as number).toFixed(0)} calls expected vs ${(d.normal_calls as number).toFixed(0)} normal${d.high_f ? `; high ${d.high_f}°F` : ""}`;
   if (tile === "heat") return `CalHeatScore ${d.value} of 4`;
-  if (tile === "air") return `AQI ${Math.round(d.value)} (${d.pollutant})${d.high_end ? `, could reach ${Math.round(d.high_end as number)}` : ""}`;
-  if (tile === "fire") return `${FIRE_RANK[d.level ?? "low"]} for a new large fire (10+ acres) nearby` +
+  if (tile === "air") return `AQI ${Math.round(d.value)} (${d.pollutant})${typeof d.high_end === "number" ? `, high-end forecast ${Math.round(d.high_end)}` : ""}`;
+  if (tile === "fire") return `${d.level ? FIRE_RANK[d.level] : "No risk rank available"} for a new large fire (10+ acres) nearby` +
     (d.county_expected_fires !== null && d.county_expected_fires !== undefined ? `; county-wide, ${d.county_expected_fires} such fires expected` : "");
   return String(d.value);
 }
 
 export default function HazardDetail({ tile }: { tile: TileName }) {
+  const { placeId, error: placeError, retry } = usePlace();
   const [h, setH] = useState<Hazard | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
+    if (!placeId) return;
     const controller = new AbortController();
-    const place = new URLSearchParams(window.location.search).get("place") || "downtown";
     setH(null); setErr(null);
-    get<Hazard>(`hazard/${tile}/${place}.json`, controller.signal).then(setH)
+    get<Hazard>(`hazard/${tile}/${placeId}.json`, controller.signal).then(setH)
       .catch((e) => { if (!controller.signal.aborted) setErr(e.message); });
     return () => controller.abort();
-  }, [tile]);
+  }, [tile, placeId, attempt]);
 
-  if (err) return <main className="wrap"><p role="alert">Could not load this forecast: {err}</p><Link href="/">Back</Link></main>;
-  if (!h) return <main className="wrap"><p>Loading…</p></main>;
+  if (err || placeError) return <main className="wrap"><h1>{TILE_NAME[tile]} forecast</h1><div className="error-panel" role="alert"><p>{err ?? placeError}</p>
+    <button className="secondary-button" onClick={() => { retry(); setAttempt(x => x + 1); }}>Try again</button></div><Link href="/">Back to today</Link></main>;
+  if (!h) return <main className="wrap" aria-busy="true"><h1>{TILE_NAME[tile]} forecast</h1><p role="status">Loading neighborhood details…</p></main>;
   const d0 = h.days[0];
   return (
     <main className="wrap">
       <p className="small"><Link href={`/?place=${h.place.id}`}>← {h.place.name}</Link></p>
       <h1>{TILE_NAME[tile]} · {h.place.name}</h1>
+      <ForecastStatus tile={h} />
       <p style={{ fontSize: 20, fontWeight: 600, margin: "8px 0 4px" }}>{windowText(h)}</p>
       {d0 && <p style={{ margin: 0 }}><LevelBadge tile={tile} level={d0.level} /> <span className="muted">· {valueText(tile, d0)}</span></p>}
       {h.unit && <p className="small muted" style={{ margin: "4px 0 0" }}>
@@ -59,30 +66,33 @@ export default function HazardDetail({ tile }: { tile: TileName }) {
       {h.official_advisory.active && h.official_advisory.headline && (
         <p role="note" style={{ borderLeft: "6px solid var(--lvl-high)", paddingLeft: 10 }}>NWS: {h.official_advisory.headline}</p>
       )}
+      {(tile === "flood" || tile === "fire") && h.official_advisory.active === null && <p className="notice small">Official alert status could not be confirmed. <a href={h.official_advisory.url}>Check the official source</a>.</p>}
 
       {h.factors.length > 0 && <>
         <h2 style={{ marginTop: 20 }}>Why</h2>
         <ul>{h.factors.map((f) => <li key={f.label}>{f.label}{f.value ? `: ${f.value}` : ""}</li>)}</ul>
       </>}
 
-      {tile === "air" && h.current && <p>Now: AQI {h.current.aqi} ({h.current.parameter}) at {h.current.site} — {h.current.verdict}.</p>}
+      {tile === "air" && h.current && <p>{observationIsCurrent(h.current.time) ? "Recent observation" : "Last recorded observation"}: AQI {h.current.aqi} ({h.current.parameter}) at {h.current.site} — {h.current.verdict}. <span className="small muted">{new Date(h.current.time).toLocaleString("en-US", { timeZone: "America/Los_Angeles" })} PT.</span></p>}
       {tile === "fire" && <>
         {h.red_flag && h.red_flag.length > 0 && h.red_flag.map((r) => <p key={r}>{r}</p>)}
+        {!h.active_fires_available && <p className="notice small">Current incident data could not be confirmed. Any listed records may be outdated. <a href="https://www.fire.ca.gov/incidents">Check CAL FIRE</a>.</p>}
         {h.active_fires && h.active_fires.length > 0
-          ? <ul>{h.active_fires.map((f) => <li key={f.name}><a href={f.url}>{f.name}</a>: {f.acres} acres, {f.km} km away</li>)}</ul>
-          : <p>{h.active_fires_available ? "No active CAL FIRE incidents within 50 km." : "Active-fire data is unavailable or not current. Check the official source below."}</p>}
+          ? <ul>{h.active_fires.map((f) => <li key={f.name}><a href={f.url}>{f.name}</a>: {f.acres ?? "unknown"} acres, {f.km} km away</li>)}</ul>
+          : h.active_fires_available && <p>No active CAL FIRE incidents within 50 km.</p>}
       </>}
 
       {h.series && <><h2 style={{ marginTop: 20 }}>Past 7 days and forecast</h2><ForecastChart series={h.series} /></>}
 
       {h.days.length > 0 && <>
         <h2 style={{ marginTop: 20 }}>Next days</h2>
-        <table>
-          <thead><tr><th>Day</th><th>Level</th><th>Detail</th></tr></thead>
+        <div className="table-scroll"><table>
+          <caption className="sr-only">{TILE_NAME[tile]} forecast by day for {h.place.name}</caption>
+          <thead><tr><th scope="col">Day</th><th scope="col">Level</th><th scope="col">Detail</th></tr></thead>
           <tbody>{h.days.map((d) => (
             <tr key={d.date}><td>{dayName(d.date, "long")}</td><td><LevelBadge tile={tile} level={d.level} /></td>
               <td>{valueText(tile, d)}</td></tr>))}</tbody>
-        </table>
+        </table></div>
       </>}
 
       <h2 style={{ marginTop: 20 }}>What to do</h2>

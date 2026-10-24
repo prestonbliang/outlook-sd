@@ -34,9 +34,11 @@ Water exceedance standards: 104 MPN or CFU per 100 mL for culture methods (Calif
 
 Python: pandas 3.1 (BSD-3), NumPy 2.5 (BSD-3), PyArrow 26 (Apache-2.0), requests 2.34 (Apache-2.0), LightGBM 4.7 (MIT), scikit-learn 1.9 (BSD-3), GeoPandas 1.2 (BSD-3), Shapely 2.2 (BSD-3), pyogrio 0.13 (MIT), pyproj 3.8 (MIT), FastAPI 0.162 (MIT), Uvicorn 0.54 (BSD-3), HTTPX 0.28 (BSD-3), python-dotenv 1.2 (BSD-3), pytest 9.1 (MIT).
 
-Web: Next.js 16.4 (MIT), React 19.3 (MIT), U.S. Web Design System 3.14 (CC0 / Apache-2.0; Public Sans font under SIL OFL 1.1), MapLibre GL JS 5.24 (BSD-3), react-map-gl 8.1 (MIT), PMTiles 4.5 (BSD-3), Protomaps basemaps 5.7 (BSD-3), Observable Plot 0.6 (ISC), TypeScript 5.9 (Apache-2.0), Playwright 1.64 (Apache-2.0).
+Web: Next.js 16.4 (MIT), React 19.3 (MIT), U.S. Web Design System 3.14 (CC0 / Apache-2.0; Public Sans font under SIL OFL 1.1), MapLibre GL JS 6.4.1 (BSD-3), react-map-gl 8.1 (MIT), PMTiles 4.5 (BSD-3), Protomaps basemaps 5.7 (BSD-3), Observable Plot 0.6 (ISC), TypeScript 5.9 (Apache-2.0), Playwright 1.64 (Apache-2.0), axe-core/Playwright 4.14 (MPL-2.0, development tests only).
 
-Tools: go-pmtiles 1.31 (BSD-3) to cut the San Diego basemap; uv (Astral) for Python environments; GitHub Actions; Vercel; Supabase (Postgres + PostgREST) for community reports; Docker images postgres:16 and postgrest/postgrest v12.2.3 for local testing only.
+Self-hosted map glyphs and sprites come from [Protomaps basemaps-assets](https://github.com/protomaps/basemaps-assets/tree/028c18f713baecad011301ff7a69acc39bcc2ae7). Noto Sans glyphs use the SIL Open Font License; sprites derive from MIT-licensed Tangram icons. Source provenance and licenses are included in `web/public/map-assets/`. The MapLibre worker and shared module are copied from the installed package at build time with its BSD license.
+
+Tools: go-pmtiles 1.31 (BSD-3) to cut the San Diego basemap; uv (Astral) for Python environments; GitHub Actions; Vercel; Supabase (Postgres + PostgREST) for community reports; PostgreSQL 17 container for isolated database tests. Earlier local tests also used postgres:16 and postgrest/postgrest v12.2.3.
 
 ## AI tools
 
@@ -53,6 +55,6 @@ No AI model produces the forecasts or the text shown in the app. Forecasts come 
 
 ### Student contributions
 
-**Codex (OpenAI)** was used to audit fresh-clone behavior, improve missing-data and forecast-date handling, extend the interactive map and community reporting/coverage features, and write regression tests, setup diagnostics, and documentation. These changes still require the validation and service configuration described in `docs/SETUP.md` before a live deployment.
+**Codex (OpenAI)** was used to audit fresh-clone behavior, improve missing-data and forecast-date handling, extend the interactive map and community reporting/coverage features, refine navigation and saved places, fix production map-worker initialization, harden release configuration, and write/run regression, browser, accessibility and database checks. Validation results and remaining service configuration are recorded in `docs/STATUS.md`.
 
-_To be written by the student: what you designed, decided, checked, changed or wrote yourself._
+The student proposed crowdsourced condition reports and an interactive San Diego map, defined reporting blind spots as part of crowdsourcing, selected Vercel for deployment, and directed iterative development and quality assurance. The implementation assistance is described above.

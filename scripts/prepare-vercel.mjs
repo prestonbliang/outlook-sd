@@ -2,17 +2,19 @@
 import { cp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { assertReleaseBuild } from './public-config.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const TILES = ['water', 'air', 'heat', 'flood', 'fire'];
 const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const json = async (path) => JSON.parse(await readFile(path, 'utf8'));
 
-export async function validateExport(source, { allowUnavailable = false, now = new Date() } = {}) {
+export async function validateExport(source, { allowUnavailable = false, allowTestReporting = false, now = new Date() } = {}) {
   for (const page of ['index.html', '404.html', 'map/index.html', 'data/index.html', 'track-record/index.html',
     ...TILES.map(t => `hazard/${t}/index.html`)]) {
     if (!(await readFile(join(source, page), 'utf8')).trim()) throw new Error(`Missing exported page: ${page}`);
   }
+  assertReleaseBuild(await json(join(source, 'app-build.json')), { allowTestReporting });
   const manifest = await json(join(source, 'api/build.json'));
   if (manifest.schema_version !== 1) throw new Error('Unsupported snapshot manifest');
   const age = now.getTime() - Date.parse(manifest.generated_at);
@@ -66,7 +68,11 @@ export async function prepare({ source = join(ROOT, 'web/out'), output = join(RO
     { src: '/api/.*', headers: { 'Cache-Control': 'no-store' }, continue: true },
     { src: '/_next/static/.*', headers: { 'Cache-Control': 'public, max-age=31536000, immutable' }, continue: true },
     { src: '/tiles/.*', headers: { 'Cache-Control': 'public, max-age=86400' }, continue: true },
-    { src: '/.*', headers: { 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'strict-origin-when-cross-origin' }, continue: true },
+    { src: '/.*', headers: {
+      'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'strict-origin-when-cross-origin',
+      'X-Frame-Options': 'DENY', 'Content-Security-Policy': "frame-ancestors 'none'; base-uri 'self'; object-src 'none'",
+      'Permissions-Policy': 'camera=(), microphone=(), geolocation=(self)',
+    }, continue: true },
     { handle: 'filesystem' },
   ];
   for (const page of await pagesUnder(source)) {
@@ -85,9 +91,9 @@ export async function prepare({ source = join(ROOT, 'web/out'), output = join(RO
 
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
   try {
-    const unknown = process.argv.slice(2).filter(a => a !== '--allow-unavailable');
+    const unknown = process.argv.slice(2).filter(a => !['--allow-unavailable', '--allow-test-reporting'].includes(a));
     if (unknown.length) throw new Error(`Unknown arguments: ${unknown.join(' ')}`);
-    const manifest = await prepare({ allowUnavailable: process.argv.includes('--allow-unavailable') });
+    const manifest = await prepare({ allowUnavailable: process.argv.includes('--allow-unavailable'), allowTestReporting: process.argv.includes('--allow-test-reporting') });
     process.stdout.write(`Vercel package ready: ${manifest.places} neighborhoods; forecasts ${manifest.forecast_status}\n`);
   } catch (error) { process.stderr.write(`${error.message}\n`); process.exitCode = 1; }
 }

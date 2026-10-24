@@ -26,7 +26,7 @@ export default function ReportBox({ tile, placeId, placeName }: { tile: TileName
       <p className="eyebrow">Community observations</p>
       <h2 id={id}>What do you see in {placeName}?</h2>
       {tile === "fire" && <p className="notice">If you see a new fire, call 911 first. This form does not contact emergency services.</p>}
-      {!enabled ? <p className="small muted">Community reporting is not connected yet. Forecasts are still available.</p> : <>
+      {!enabled ? <p className="small muted">Community reporting is not connected yet. You can still explore the map and official sources.</p> : <>
         {error ? <p role="status" className="small">{error} <button className="button-link" onClick={refresh}>Retry</button></p> :
           data === null ? <p className="small muted" role="status">Loading recent observations…</p> :
           <div className={`coverage-note coverage-${coverageFor(summary)}`}>

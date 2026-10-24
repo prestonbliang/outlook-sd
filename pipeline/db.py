@@ -19,15 +19,16 @@ CREATE TABLE IF NOT EXISTS place_levels (
   PRIMARY KEY (run_ts, place_id, hazard, target_date));
 CREATE TABLE IF NOT EXISTS source_status (
   source TEXT PRIMARY KEY, last_attempt TEXT, last_success TEXT, newest_data TEXT, error TEXT);
+CREATE INDEX IF NOT EXISTS forecasts_tile_run ON forecasts(tile, run_ts, target_date);
+CREATE INDEX IF NOT EXISTS place_levels_lookup ON place_levels(place_id, hazard, target_date, run_ts);
 """
-# Brief §7: a source is stale when its newest data is older than this (hours)
-STALE_HOURS = {"ibwc": 3, "noaa_tides": 2, "airnow": 3, "cdip": 6, "calheatscore": 26, "beachwatch": 240,
-               "sd_fire_ems": 72, "firms": 24, "openmeteo": 3, "nws": 3, "calfire": 24}
 
 
 def connect():
     DB.parent.mkdir(parents=True, exist_ok=True)
     con = sqlite3.connect(DB)
+    con.execute("PRAGMA foreign_keys=ON")
+    con.execute("PRAGMA busy_timeout=10000")
     con.executescript(SCHEMA)
     return con
 

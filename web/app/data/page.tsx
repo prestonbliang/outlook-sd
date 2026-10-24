@@ -52,13 +52,22 @@ const SOURCES: { key?: string; name: string; url: string; license: string; use: 
 export default function DataPage() {
   const { placeId } = usePlace();
   const [health, setHealth] = useState<Health | null>(null);
-  useEffect(() => { get<Health>("health.json").then(setHealth).catch(() => setHealth(null)); }, []);
+  const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    const controller = new AbortController(); setError(null);
+    get<Health>("health.json", controller.signal).then(setHealth).catch(e => { if (!controller.signal.aborted) { setHealth(null); setError(e.message); } });
+    return () => controller.abort();
+  }, [attempt]);
   return (
     <main className="wrap">
       <p className="small"><Link href={`/?place=${placeId ?? ""}`}>← Today</Link></p>
       <h1>Data</h1>
       <p>Every forecast in Outlook SD comes from a model trained on these public datasets. The app checks the live sources every hour.</p>
-      <table>
+      {error && <p className="notice" role="status">Source update times could not load. The source links below are still available. <button className="button-link" onClick={() => setAttempt(x => x + 1)}>Try again</button></p>}
+      {!health && !error && <p className="small muted" role="status">Loading source update times…</p>}
+      <div className="table-scroll"><table>
+        <caption className="sr-only">Public data sources, use, licenses, and update times</caption>
         <thead><tr><th>Source</th><th>Used for</th><th>License</th><th>Last update</th></tr></thead>
         <tbody>
           {SOURCES.map((s) => {
@@ -72,7 +81,7 @@ export default function DataPage() {
             );
           })}
         </tbody>
-      </table>
+      </table></div>
       <h2 id="community" style={{ marginTop: 24 }}>Community reports</h2>
       <p>Anyone can report conditions on a hazard page or from the map. We store the neighborhood, hazard, report type, time, and a random browser code to limit repeat reports. We do not store names, emails, exact locations or free text. Only aggregate counts, reporting-browser counts, and the latest report time are published; raw reports and browser codes are not readable by public users. Reports are unverified, never change the forecasts, and are compared with them on the Track record page.</p>
       <p>The map can highlight reporting blind spots: neighborhoods with observations from fewer than three browsers for a hazard over the past 24 hours or 7 days. This is a participation goal, not a measure of safety or model confidence. A browser code does not establish a unique person. Missing reports never mean missing hazards. Observations about water appearance cannot establish bacteria levels.</p>

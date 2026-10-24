@@ -1,11 +1,13 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { Place, haversineKm } from "@/lib/api";
 
 /** Search the named places (Census places + City of San Diego communities), or use the device location. */
 export default function PlacePicker({ places, onPick }: { places: Place[]; onPick: (p: Place) => void }) {
   const [q, setQ] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
+  const id = useId();
+  const [locating, setLocating] = useState(false);
   const matches = useMemo(() => {
     const s = q.trim().toLowerCase();
     return s ? places.filter((p) => p.name.toLowerCase().includes(s) || p.zip.startsWith(s)).slice(0, 8) : [];
@@ -15,31 +17,34 @@ export default function PlacePicker({ places, onPick }: { places: Place[]; onPic
     if (!places.length) { setMsg("Neighborhoods are still loading. Please try again shortly."); return; }
     if (!navigator.geolocation) { setMsg("Location is not available in this browser."); return; }
     setMsg("Finding your location…");
+    setLocating(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        setLocating(false);
         const here = { lat: pos.coords.latitude, lon: pos.coords.longitude };
         const best = places.reduce((a, b) => (haversineKm(here, a) <= haversineKm(here, b) ? a : b));
         if (haversineKm(here, best) > 30) { setMsg("You appear to be outside San Diego County. Pick a place instead."); return; }
         setMsg(null); onPick(best);
       },
-      () => setMsg("Location permission was not given. Pick a place instead."),
+      (error) => { setLocating(false); setMsg(error.code === 1 ? "Location permission was not given. Pick a place instead." : "Could not find your location. Search for a neighborhood instead."); },
       { timeout: 10000, maximumAge: 60000, enableHighAccuracy: false },
     );
   }
 
   return (
     <div style={{ padding: "8px 0 12px" }}>
-      <label htmlFor="place-search" className="small" style={{ display: "block", fontWeight: 600 }}>Neighborhood or ZIP</label>
+      <label htmlFor={id} className="small" style={{ display: "block", fontWeight: 600 }}>Neighborhood or ZIP</label>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        <input id="place-search" value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off"
+        <input id={id} type="search" value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" aria-controls={matches.length ? `${id}-results` : undefined}
+               onKeyDown={event => { if (event.key === "Enter" && matches.length === 1) { event.preventDefault(); onPick(matches[0]); setQ(""); } }}
                placeholder="e.g. Imperial Beach or 92109"
                style={{ flex: "1 1 200px", font: "inherit", padding: "8px 10px", border: "1px solid var(--slate)", borderRadius: 2 }} />
-        <button onClick={locate} style={{ padding: "8px 12px", border: "1px solid var(--signal)", background: "var(--paper)",
-                color: "var(--signal)", borderRadius: 2, cursor: "pointer" }}>Use my location</button>
+        <button onClick={locate} disabled={locating || !places.length} className="secondary-button">{locating ? "Locating…" : "Use my location"}</button>
       </div>
       {msg && <p className="small muted" role="status">{msg}</p>}
+      {q.trim() && <p className="sr-only" role="status">{matches.length} matching neighborhoods shown. Tab to a result to choose it.</p>}
       {matches.length > 0 && (
-        <ul style={{ listStyle: "none", margin: "4px 0 0", padding: 0, border: "1px solid var(--rule)" }}>
+        <ul id={`${id}-results`} aria-label="Matching neighborhoods" style={{ listStyle: "none", margin: "4px 0 0", padding: 0, border: "1px solid var(--rule)" }}>
           {matches.map((p) => (
             <li key={p.id}>
               <button onClick={() => { onPick(p); setQ(""); }} className="button-link"

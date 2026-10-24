@@ -76,6 +76,16 @@ Full metrics: `models/artifacts/<tile>/metrics.json`.
 
 ## How it works
 
+### Using the app
+
+- **Today:** five hazard cards, visible forecast freshness, official warnings, and links into the matching map and detail view. Missing or stale forecasts remain explicit; tomorrow's outlook is never labelled as today's.
+- **Your places:** save up to eight neighborhoods on your device and switch between them from Today or the map.
+- **Map & reports:** explore hazards and forecast days, inspect layers, search neighborhoods, share a link with the selected place/day/hazard/reporting window, and use browser back/forward to restore selections.
+- **Community coverage:** see recent aggregate observations and areas needing more reports. Blind spots describe participation, not safety. Failed reads never become zero-report claims, and reports never alter model forecasts.
+- **Details and track record:** inspect source freshness, exact chart values in accessible tables, model performance against baselines, and official sources.
+
+See the [engineering audit](docs/AUDIT.md) for the improvement scope, validation evidence, and remaining release requirements.
+
 ```
 GitHub Actions (hourly)
   restore state (GitHub release asset "state")

@@ -27,9 +27,11 @@ Keep Vercel's project Root Directory at the repository root for this CLI deploym
 
 ## 2. Run repository checks
 
-The `checks` workflow runs Python regressions, generates API files without historical data, builds the frontend, checks TypeScript, validates the Vercel package, and runs Playwright with a mocked reporting endpoint. It does not deploy its test build.
+The `checks` workflow runs Python regressions, verifies the reporting schema/permissions/limits against an isolated PostgreSQL service, generates API files without historical data, builds the frontend, checks TypeScript, validates Vercel packaging, and runs Playwright in Chromium, Firefox and WebKit with a mocked reporting endpoint. It does not deploy its test build.
 
 Merge a validated code change before starting the hourly production job. A static prebuilt deployment is the exact output of the tested build, so public environment values must be present before `npm run build`.
+
+Each build writes credential-free configuration metadata. Packaging rejects reserved test reporting endpoints unless `--allow-test-reporting` is explicitly used for QA. The deployment script always rejects test reporting builds, including prepackaged output. Rebuild with real public settings before deployment; `--allow-unavailable` does not bypass this protection.
 
 ## 3. First launch before forecast state exists
 
@@ -63,7 +65,7 @@ make build
 cd web
 npm run typecheck
 npm run test:unit
-npx playwright install chromium
+npx playwright install --with-deps chromium firefox webkit
 npm run test:e2e
 cd ..
 node scripts/prepare-vercel.mjs

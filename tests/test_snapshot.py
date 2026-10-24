@@ -51,6 +51,22 @@ class SnapshotTests(unittest.TestCase):
         self.assertTrue(result["reporting_configured"])
         self.assertNotIn("not-a-real-key", json.dumps(result))
 
+    def test_stale_required_sources_cannot_mark_a_snapshot_ready(self):
+        self.snapshot(self.now.isoformat())
+        path = self.root / "outlook/test.json"
+        payload = json.loads(path.read_text())
+        payload["tiles"][0]["stale_inputs"] = ["Weather"]
+        path.write_text(json.dumps(payload))
+        self.assertEqual(manifest(self.root, self.now)["forecast_status"], "unavailable")
+
+    def test_daily_state_scores_use_their_daily_freshness_budget(self):
+        self.snapshot((self.now - timedelta(hours=24)).isoformat())
+        path = self.root / "outlook/test.json"
+        payload = json.loads(path.read_text())
+        payload["tiles"][0]["model"] = "calheatscore"
+        path.write_text(json.dumps(payload))
+        self.assertEqual(manifest(self.root, self.now)["forecast_status"], "ready")
+
 
 if __name__ == "__main__":
     unittest.main()

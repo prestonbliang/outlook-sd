@@ -30,7 +30,7 @@
     "unhealthy": "Unhealthy",
     "very_unhealthy": "Very unhealthy",
     "hazardous": "Hazardous",
-    "none": "Coming soon",
+    "none": "No air-quality rating",
     "unavailable": "Air forecast unavailable"
   },
   "fire": {
@@ -38,7 +38,7 @@
     "moderate": "Moderate",
     "high": "High",
     "very_high": "Very high",
-    "none": "Coming soon",
+    "none": "No fire-risk rating",
     "unavailable": "Fire forecast unavailable"
   }
 }

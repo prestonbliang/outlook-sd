@@ -1,4 +1,6 @@
-export const API = process.env.NEXT_PUBLIC_API_URL || "/api";
+import { fetchJSON } from "./request";
+
+export const API = (process.env.NEXT_PUBLIC_API_URL || "/api").replace(/\/$/, "");
 export const PMTILES = process.env.NEXT_PUBLIC_PMTILES_URL || "/tiles/sandiego.pmtiles";
 export const TZ = "America/Los_Angeles";
 
@@ -14,7 +16,7 @@ export interface Tile {
   verdict?: string; status?: string; unit?: { id: string; name: string }; units?: string; model?: string; run_ts?: string;
   official_advisory: { active: boolean | null; url: string; headline?: string | null };
   current?: { aqi: number; parameter: string; site: string; time: string; level: string; verdict: string };
-  active_fires?: { name: string; acres: number; km: number; url: string }[]; red_flag?: string[];
+  active_fires?: { name: string; acres: number | null; km: number; url: string }[]; red_flag?: string[];
   active_fires_available?: boolean;
 }
 export interface Outlook { place: { id: string; name: string; zip: string; coastal?: boolean }; updated_at: string | null; tiles: Tile[] }
@@ -30,9 +32,7 @@ export interface TrackSummary { headline: string; period: string; inputs: string
   days?: { date: string; observed: number; lvl_q50: number; lvl_q90: number; lvl_tide: number }[] }[] }
 
 export async function get<T>(path: string, signal?: AbortSignal): Promise<T> {
-  const r = await fetch(`${API}/${path}`, { cache: "no-store", signal });
-  if (!r.ok) throw new Error(`Could not load ${path} (HTTP ${r.status})`);
-  return r.json();
+  return fetchJSON<T>(`${API}/${path}`, { signal });
 }
 
 export const LEVEL_WORD: Record<string, string> = {
@@ -46,21 +46,23 @@ export function levelColor(tile: TileName, level: string | null | undefined): st
 }
 
 export const dayName = (date: string, style: "short" | "long" = "short") =>
-  new Date(`${date}T12:00:00`).toLocaleDateString("en-US", { weekday: style });
+  new Date(`${date}T12:00:00Z`).toLocaleDateString("en-US", { weekday: style, timeZone: TZ });
 
 export function updatedText(iso: string | null): string {
   if (!iso) return "Not updated yet";
   const d = new Date(iso);
+  if (!Number.isFinite(d.getTime())) return "Update time unavailable";
   const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: TZ }).toLowerCase();
   const day = d.toLocaleDateString("en-US", { weekday: "long", timeZone: TZ });
-  return `Updated ${time} ${day}`;
+  const date = d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: TZ });
+  return `Updated ${day}, ${date}, ${time} PT`;
 }
 
 export function haversineKm(a: { lat: number; lon: number }, b: { lat: number; lon: number }) {
   const r = Math.PI / 180;
   const h = Math.sin(((b.lat - a.lat) * r) / 2) ** 2 +
     Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(((b.lon - a.lon) * r) / 2) ** 2;
-  return 12742 * Math.asin(Math.sqrt(h));
+  return 12742 * Math.asin(Math.sqrt(Math.min(1, Math.max(0, h))));
 }
 
 /** Same values as styles/tokens.css — MapLibre paint expressions cannot read CSS variables. */
