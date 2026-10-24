@@ -88,7 +88,8 @@ test.describe("community reporting", () => {
       : route.fulfill({ json: [] }));
     await page.goto("/map/?place=imperial-beach");
     await page.getByRole("button", { name: "Sewage smell or brown water", exact: true }).click();
-    await expect(page.getByRole("alert")).toContainText("You already sent this report");
+    const reportBox = page.getByRole("region", { name: "What do you see in Imperial Beach?", exact: true });
+    await expect(reportBox.getByRole("alert")).toContainText("You already sent this report");
     await expect(page.getByText(/Your observation .* was saved/)).toHaveCount(0);
   });
 });
