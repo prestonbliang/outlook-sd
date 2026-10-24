@@ -71,6 +71,7 @@ class GitBuildTests(unittest.TestCase):
         config = json.loads((root / "vercel.json").read_text())
         self.assertEqual(set(config["services"]), {"web"})
         self.assertEqual(config["services"]["web"]["root"], "web")
+        self.assertEqual(config["services"]["web"]["bindings"], [])
         self.assertNotIn("functions", config)
         self.assertNotIn("builds", config)
         self.assertEqual(config["rewrites"], [{"source": "/(.*)", "destination": {"service": "web"}}])
