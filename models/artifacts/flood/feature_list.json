@@ -1,0 +1,18 @@
+[
+  "lead_h",
+  "tide_pred",
+  "resid_now",
+  "resid_mean_24h",
+  "resid_mean_7d",
+  "pressure",
+  "pressure_change",
+  "wind_speed_10m",
+  "wind_gusts_10m",
+  "u10",
+  "v10",
+  "hs_now",
+  "tp_now",
+  "sst_anom",
+  "doy_sin",
+  "doy_cos"
+]

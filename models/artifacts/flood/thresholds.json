@@ -1,0 +1,26 @@
+{
+  "units": "ft STND (NOAA 9410170)",
+  "minor": 11.38,
+  "moderate": 12.31,
+  "major": 13.58,
+  "mhhw": 9.52,
+  "navd88_offset": 4.22,
+  "levels": {
+    "low": [
+      null,
+      10.52
+    ],
+    "moderate": [
+      10.52,
+      11.38
+    ],
+    "high": [
+      11.38,
+      12.31
+    ],
+    "very_high": [
+      12.31,
+      null
+    ]
+  }
+}

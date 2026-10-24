@@ -1,0 +1,12 @@
+:root {
+  --paper: #FFFFFF;      /* main background */
+  --fog: #F1F4F6;        /* side panel, map background */
+  --ink: #16324F;        /* text and headings */
+  --slate: #566573;      /* secondary text, timestamps, sources */
+  --rule: #D5DCE3;       /* row dividers */
+  --signal: #005EA2;     /* links, selection, focus ring */
+  --lvl-low: #2E8540; --lvl-moderate: #E5A000; --lvl-high: #D54309; --lvl-very-high: #8B1A3A;
+  --aqi-good: #00E400; --aqi-moderate: #FFFF00; --aqi-usg: #FF7E00;
+  --aqi-unhealthy: #FF0000; --aqi-very-unhealthy: #8F3F97; --aqi-hazardous: #7E0023;
+  --font: "Public Sans", system-ui, sans-serif;  /* from @uswds/uswds dist/fonts */
+}

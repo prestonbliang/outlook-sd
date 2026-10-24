@@ -1,0 +1,14 @@
+{
+  "fhsz_very_high": "Share of area in a Very High fire hazard zone",
+  "fhsz_high": "Share of area in a High fire hazard zone",
+  "fires_1990_2013": "Past large fires here (1990–2013)",
+  "dist_road_km": "Distance to a major road",
+  "tmax": "High temperature",
+  "rh_min": "Lowest humidity",
+  "wind_max": "Strongest gusts",
+  "wind_mean": "Wind",
+  "offshore_hours": "Offshore (Santa Ana) wind hours",
+  "days_since_rain": "Days since 0.1 in of rain",
+  "precip": "Rain",
+  "month": "Time of year"
+}

@@ -1,0 +1,124 @@
+{
+  "pm25": {
+    "period": {
+      "train": "2014 \u2192 2023",
+      "val": "2024",
+      "test": "2025-01 \u2192 2026-04-29"
+    },
+    "mae_ci": {
+      "q50": {
+        "value": 8.555727795234233,
+        "ci95": [
+          7.825950726408573,
+          9.342422412512555
+        ]
+      },
+      "persist": {
+        "value": 12.364264864034414,
+        "ci95": [
+          11.188432376875646,
+          13.46657826431444
+        ]
+      }
+    },
+    "model": {
+      "mae": 8.555727795234233,
+      "category_hit_rate": 0.7935166692272239,
+      "usg_days": 48,
+      "usg_hits": 0,
+      "usg_hit_rate": 0.0,
+      "usg_false_alarms": 0
+    },
+    "model_high_end": {
+      "mae": 12.910377766995573,
+      "category_hit_rate": 0.6507912121677677,
+      "usg_days": 48,
+      "usg_hits": 11,
+      "usg_hit_rate": 0.22916666666666666,
+      "usg_false_alarms": 35
+    },
+    "persistence": {
+      "mae": 12.364264864034414,
+      "category_hit_rate": 0.6953449070517744,
+      "usg_days": 48,
+      "usg_hits": 6,
+      "usg_hit_rate": 0.125,
+      "usg_false_alarms": 46
+    },
+    "by_lead": {
+      "0": 7.021101492961453,
+      "1": 8.656107554536463,
+      "2": 9.134293372412063,
+      "3": 9.415099073065623
+    },
+    "persistence_by_lead": {
+      "0": 8.476058931860036,
+      "1": 12.362068965517242,
+      "2": 13.973211567732116,
+      "3": 14.654167957855593
+    },
+    "beats_baseline": true
+  },
+  "ozone": {
+    "period": {
+      "train": "2014 \u2192 2023",
+      "val": "2024",
+      "test": "2025-01 \u2192 2025-12-31"
+    },
+    "mae_ci": {
+      "q50": {
+        "value": 5.017140586306614,
+        "ci95": [
+          4.504699453487336,
+          5.612645258290951
+        ]
+      },
+      "persist": {
+        "value": 7.181162068335465,
+        "ci95": [
+          6.344031963775531,
+          8.087347104117777
+        ]
+      }
+    },
+    "model": {
+      "mae": 5.017140586306614,
+      "category_hit_rate": 0.9239904988123515,
+      "usg_days": 80,
+      "usg_hits": 0,
+      "usg_hit_rate": 0.0,
+      "usg_false_alarms": 2
+    },
+    "model_high_end": {
+      "mae": 10.215155181573774,
+      "category_hit_rate": 0.7767220902612827,
+      "usg_days": 80,
+      "usg_hits": 57,
+      "usg_hit_rate": 0.7125,
+      "usg_false_alarms": 181
+    },
+    "persistence": {
+      "mae": 7.181162068335465,
+      "category_hit_rate": 0.8899141238808698,
+      "usg_days": 80,
+      "usg_hits": 10,
+      "usg_hit_rate": 0.125,
+      "usg_false_alarms": 70
+    },
+    "by_lead": {
+      "0": 4.733013586184753,
+      "1": 5.001949834723861,
+      "2": 5.123526383563572,
+      "3": 5.2103564079229265
+    },
+    "persistence_by_lead": {
+      "0": 5.467494521548575,
+      "1": 7.034709535988308,
+      "2": 7.902412280701754,
+      "3": 8.321755027422304
+    },
+    "beats_baseline": true
+  },
+  "inputs": "Scored with actual (ERA5) weather, an upper bound on live accuracy",
+  "beats_baseline": true
+}

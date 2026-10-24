@@ -1,0 +1,57 @@
+name: hourly-pipeline
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write   # read/replace the "state" release asset; the job never commits
+
+concurrency:
+  group: pipeline
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      AIRNOW_API_KEY: ${{ secrets.AIRNOW_API_KEY }}
+      FIRMS_MAP_KEY: ${{ secrets.FIRMS_MAP_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+        working-directory: web
+
+      - name: Restore state
+        run: gh release download state -p state.tar.gz && scripts/state.sh unpack
+
+      - name: Fetch, forecast, log, score
+        run: uv run python -m pipeline.run_all
+
+      - name: Save state
+        run: scripts/state.sh pack && gh release upload state state.tar.gz --clobber
+
+      - name: Export API to static JSON
+        run: uv run python -m api.export
+
+      - name: Build site
+        run: npm run build
+        working-directory: web
+
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: npx --yes vercel@65.2.0 deploy web/out --prod --yes --token "$VERCEL_TOKEN"

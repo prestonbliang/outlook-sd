@@ -1,0 +1,18 @@
+{
+  "lead_h": "Hours ahead",
+  "tide_pred": "Predicted tide",
+  "resid_now": "Water above/below tide now",
+  "resid_mean_24h": "Water above tide, last 24 hours",
+  "resid_mean_7d": "Water above tide, last 7 days",
+  "pressure": "Air pressure",
+  "pressure_change": "Air pressure change",
+  "wind_speed_10m": "Wind speed",
+  "wind_gusts_10m": "Wind gusts",
+  "u10": "West–east wind",
+  "v10": "South–north wind",
+  "hs_now": "Wave height now (Point Loma buoy)",
+  "tp_now": "Wave period now",
+  "sst_anom": "Ocean temperature vs normal",
+  "doy_sin": "Season",
+  "doy_cos": "Season"
+}

@@ -1,0 +1,17 @@
+{
+  "site": "This monitor's usual levels",
+  "lead_k": "Days ahead",
+  "aqi_prev": "AQI the day before",
+  "aqi_prev_mean7": "AQI, last 7 days",
+  "tmax": "High temperature",
+  "tmin": "Low temperature",
+  "rh_mean": "Humidity",
+  "sw_sum": "Sunshine",
+  "wind_mean": "Wind",
+  "wind_max": "Wind gusts",
+  "blh_max": "Mixing height (how high air can mix)",
+  "precip": "Rain",
+  "offshore_hours": "Offshore (Santa Ana) wind hours",
+  "dow": "Day of week",
+  "month": "Time of year"
+}

@@ -1,0 +1,13 @@
+{
+  "zip_code": "Neighborhood (ZIP)",
+  "dow": "Day of week",
+  "month": "Time of year",
+  "holiday": "Holiday",
+  "level_365d": "Usual call volume",
+  "tmax": "High temperature",
+  "tmin": "Overnight low",
+  "heat_index_max": "Heat index",
+  "rh_mean": "Humidity",
+  "tmax_lag1": "Yesterday's high",
+  "hot_streak": "Hot days in a row"
+}

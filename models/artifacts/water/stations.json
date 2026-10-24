@@ -1,0 +1,2242 @@
+[
+  {
+    "station": "1036",
+    "name": "IB-069",
+    "beach": "Silver Strand State Beach",
+    "lat": 32.631769,
+    "lon": -117.141885,
+    "dist_mouth_km": 8.47290845513197,
+    "south_bay": true,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1037",
+    "name": "IB-068",
+    "beach": "Silver Strand State Beach",
+    "lat": 32.626401,
+    "lon": -117.139424,
+    "dist_mouth_km": 7.848553825915775,
+    "south_bay": true,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1038",
+    "name": "IB-079",
+    "beach": "Coronado City beaches",
+    "lat": 32.674066,
+    "lon": -117.1723,
+    "dist_mouth_km": 13.721074886309538,
+    "south_bay": true,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1090",
+    "name": "EH-109-0",
+    "beach": "Torrey Pines State Beach",
+    "lat": 32.94242777777,
+    "lon": -117.262725,
+    "dist_mouth_km": 44.72985977891175,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "1091",
+    "name": "EH-109-300L",
+    "beach": "Torrey Pines State Beach",
+    "lat": 32.940484,
+    "lon": -117.262618,
+    "dist_mouth_km": 44.51974567801403,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "1092",
+    "name": "EH-109-300R",
+    "beach": "Torrey Pines State Beach",
+    "lat": 32.9426274,
+    "lon": -117.263291,
+    "dist_mouth_km": 44.7661052553279,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "1093",
+    "name": "EH-109-1300L",
+    "beach": "Torrey Pines State Beach",
+    "lat": 32.936602,
+    "lon": -117.261575,
+    "dist_mouth_km": 44.07822203998176,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "1097",
+    "name": "EH-395",
+    "beach": "Solana Beach City Beaches",
+    "lat": 32.98210361,
+    "lon": -117.27319855,
+    "dist_mouth_km": 49.2388442573061,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "1098",
+    "name": "EH-421",
+    "beach": "Moonlight Beach",
+    "lat": 33.0483,
+    "lon": -117.299,
+    "dist_mouth_km": 56.97852874207714,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "1099",
+    "name": "EH-420B",
+    "beach": "Moonlight Beach",
+    "lat": 33.048,
+    "lon": -117.299,
+    "dist_mouth_km": 56.94652103200874,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "1100",
+    "name": "EH-420A",
+    "beach": "Moonlight Beach",
+    "lat": 33.0485,
+    "lon": -117.299,
+    "dist_mouth_km": 56.99986807600606,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "1103",
+    "name": "PL-082",
+    "beach": "Ocean Beach",
+    "lat": 32.739448,
+    "lon": -117.254989,
+    "dist_mouth_km": 23.571990773187057,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1107",
+    "name": "MB-125",
+    "beach": "Mission Bay",
+    "lat": 32.788806,
+    "lon": -117.251967,
+    "dist_mouth_km": 28.325354629858882,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1108",
+    "name": "MB-226",
+    "beach": "Mission Bay",
+    "lat": 32.760746,
+    "lon": -117.247827,
+    "dist_mouth_km": 25.338703732146353,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1113",
+    "name": "IB-045",
+    "beach": "Imperial Beach municipal beach, other",
+    "lat": 32.569389,
+    "lon": -117.133023,
+    "dist_mouth_km": 1.5144710879553906,
+    "south_bay": true,
+    "point_id": "g32.50_-117.25"
+  },
+  {
+    "station": "1116",
+    "name": "IB-067",
+    "beach": "Silver Strand State Beach",
+    "lat": 32.588219,
+    "lon": -117.13256,
+    "dist_mouth_km": 3.5550838249364776,
+    "south_bay": true,
+    "point_id": "g32.50_-117.25"
+  },
+  {
+    "station": "1117",
+    "name": "EH-063",
+    "beach": "Coronado north beach",
+    "lat": 32.700209,
+    "lon": -117.172758,
+    "dist_mouth_km": 16.52503285062826,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1121",
+    "name": "MB-115",
+    "beach": "Mission Beach",
+    "lat": 32.75968,
+    "lon": -117.254057,
+    "dist_mouth_km": 25.49761221100247,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1126",
+    "name": "EH-530",
+    "beach": "San Diego Bay",
+    "lat": 32.695862,
+    "lon": -117.1506976,
+    "dist_mouth_km": 15.64400728650909,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1127",
+    "name": "EH-535",
+    "beach": "San Diego Bay",
+    "lat": 32.724301,
+    "lon": -117.187792,
+    "dist_mouth_km": 19.485843948606192,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1128",
+    "name": "EH-540",
+    "beach": "San Diego Bay",
+    "lat": 32.7083867,
+    "lon": -117.1702694,
+    "dist_mouth_km": 17.35094768039564,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1129",
+    "name": "EH-545",
+    "beach": "San Diego Bay",
+    "lat": 32.7113073,
+    "lon": -117.1729191,
+    "dist_mouth_km": 17.724700530100264,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1130",
+    "name": "EH-550",
+    "beach": "San Diego Bay",
+    "lat": 32.7110613,
+    "lon": -117.1728091,
+    "dist_mouth_km": 17.695681475668664,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1131",
+    "name": "EH-555",
+    "beach": "San Diego Bay",
+    "lat": 32.7115217,
+    "lon": -117.1729848,
+    "dist_mouth_km": 17.749318807799668,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1132",
+    "name": "EH-560",
+    "beach": "San Diego Bay",
+    "lat": 32.7182352,
+    "lon": -117.1734783,
+    "dist_mouth_km": 18.485762921152983,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1133",
+    "name": "EH-565",
+    "beach": "San Diego Bay",
+    "lat": 32.7168445,
+    "lon": -117.1734599,
+    "dist_mouth_km": 18.334961243580068,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1134",
+    "name": "MB-047",
+    "beach": "Mission Bay",
+    "lat": 32.776368,
+    "lon": -117.210759,
+    "dist_mouth_km": 25.65186452202826,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1135",
+    "name": "MB-045",
+    "beach": "Mission Bay",
+    "lat": 32.782904,
+    "lon": -117.216885,
+    "dist_mouth_km": 26.52004098680065,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1136",
+    "name": "MB-046",
+    "beach": "Mission Bay",
+    "lat": 32.784041,
+    "lon": -117.211284,
+    "dist_mouth_km": 26.48065078112551,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1137",
+    "name": "EH-566",
+    "beach": "San Diego Bay",
+    "lat": 32.656041,
+    "lon": -117.0900565,
+    "dist_mouth_km": 11.619377303324667,
+    "south_bay": true,
+    "point_id": "g32.75_-117.00"
+  },
+  {
+    "station": "1138",
+    "name": "EH-567",
+    "beach": "San Diego Bay",
+    "lat": 32.6509621,
+    "lon": -117.1018784,
+    "dist_mouth_km": 10.780710348397655,
+    "south_bay": true,
+    "point_id": "g32.75_-117.00"
+  },
+  {
+    "station": "1139",
+    "name": "EH-568",
+    "beach": "San Diego Bay",
+    "lat": 32.6390999,
+    "lon": -117.1144868,
+    "dist_mouth_km": 9.268977495960646,
+    "south_bay": true,
+    "point_id": "g32.75_-117.00"
+  },
+  {
+    "station": "1140",
+    "name": "EH-569",
+    "beach": "San Diego Bay",
+    "lat": 32.6478557,
+    "lon": -117.1194895,
+    "dist_mouth_km": 10.188075991629347,
+    "south_bay": true,
+    "point_id": "g32.75_-117.00"
+  },
+  {
+    "station": "1142",
+    "name": "EH-253A",
+    "beach": "Pacific Beach",
+    "lat": 32.800137,
+    "lon": -117.258937,
+    "dist_mouth_km": 29.741824355237448,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1143",
+    "name": "EH-253B",
+    "beach": "Pacific Beach",
+    "lat": 32.799262,
+    "lon": -117.258532,
+    "dist_mouth_km": 29.637582538973643,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1144",
+    "name": "EH-570",
+    "beach": "Pacific Beach",
+    "lat": 32.798919,
+    "lon": -117.258353,
+    "dist_mouth_km": 29.595937839283543,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1145",
+    "name": "EH-571",
+    "beach": "Pacific Beach",
+    "lat": 32.801575,
+    "lon": -117.259625,
+    "dist_mouth_km": 29.91400542462765,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1146",
+    "name": "EH-572",
+    "beach": "Pacific Beach",
+    "lat": 32.795339,
+    "lon": -117.256673,
+    "dist_mouth_km": 29.16856080052346,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1147",
+    "name": "EH-573",
+    "beach": "Pacific Beach",
+    "lat": 32.804155,
+    "lon": -117.26144,
+    "dist_mouth_km": 30.245360852369647,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1150",
+    "name": "EH-254",
+    "beach": "Pacific Beach",
+    "lat": 32.801389,
+    "lon": -117.259444,
+    "dist_mouth_km": 29.88818333301332,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1151",
+    "name": "EH-574",
+    "beach": "La Jolla Shores Beach",
+    "lat": 32.85056,
+    "lon": -117.26362,
+    "dist_mouth_km": 35.080774858241455,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1152",
+    "name": "EH-575",
+    "beach": "Coronado Cays (NR)",
+    "lat": 32.628128,
+    "lon": -117.136215,
+    "dist_mouth_km": 8.00359135605499,
+    "south_bay": true,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1153",
+    "name": "EH-576",
+    "beach": "Coronado Cays (NR)",
+    "lat": 32.630989,
+    "lon": -117.135924,
+    "dist_mouth_km": 8.317692033610513,
+    "south_bay": true,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1154",
+    "name": "MB-043",
+    "beach": "Mission Bay",
+    "lat": 32.769535,
+    "lon": -117.21122,
+    "dist_mouth_km": 24.942352278896337,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "1155",
+    "name": "MB-227",
+    "beach": "Mission Bay",
+    "lat": 32.78845,
+    "lon": -117.20963,
+    "dist_mouth_km": 26.904927563771807,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "179",
+    "name": "BC-010",
+    "beach": "Baja California, MEXICO",
+    "lat": 32.4191,
+    "lon": -117.0973,
+    "dist_mouth_km": 15.543696189118766,
+    "south_bay": false,
+    "point_id": "g32.50_-117.00"
+  },
+  {
+    "station": "180",
+    "name": "BC-020",
+    "beach": "Baja California, MEXICO",
+    "lat": 32.4987,
+    "lon": -117.123,
+    "dist_mouth_km": 6.442801874661456,
+    "south_bay": true,
+    "point_id": "g32.50_-117.00"
+  },
+  {
+    "station": "181",
+    "name": "BC-030",
+    "beach": "Baja California, MEXICO",
+    "lat": 32.5257,
+    "lon": -117.124,
+    "dist_mouth_km": 3.443277819993461,
+    "south_bay": true,
+    "point_id": "g32.50_-117.00"
+  },
+  {
+    "station": "319",
+    "name": "EH-010",
+    "beach": "Imperial Beach municipal beach, other",
+    "lat": 32.572665227,
+    "lon": -117.133201012,
+    "dist_mouth_km": 1.8673938960812344,
+    "south_bay": true,
+    "point_id": "g32.50_-117.25"
+  },
+  {
+    "station": "322",
+    "name": "EH-030",
+    "beach": "Imperial Beach pier area",
+    "lat": 32.57875,
+    "lon": -117.133186,
+    "dist_mouth_km": 2.5250451242072294,
+    "south_bay": true,
+    "point_id": "g32.50_-117.25"
+  },
+  {
+    "station": "323",
+    "name": "EH-033",
+    "beach": "Imperial Beach pier area",
+    "lat": 32.581041,
+    "lon": -117.133452,
+    "dist_mouth_km": 2.7797591991814494,
+    "south_bay": true,
+    "point_id": "g32.50_-117.25"
+  },
+  {
+    "station": "324",
+    "name": "EH-041",
+    "beach": "north Imperial Beach",
+    "lat": 32.58765,
+    "lon": -117.13236,
+    "dist_mouth_km": 3.4899789543841484,
+    "south_bay": true,
+    "point_id": "g32.50_-117.25"
+  },
+  {
+    "station": "325",
+    "name": "EH-050",
+    "beach": "Coronado City beaches",
+    "lat": 32.68184,
+    "lon": -117.18526,
+    "dist_mouth_km": 14.940054771703418,
+    "south_bay": true,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "326",
+    "name": "EH-053",
+    "beach": "Coronado City beaches",
+    "lat": 32.682447,
+    "lon": -117.188144,
+    "dist_mouth_km": 15.102021553174625,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "327",
+    "name": "EH-056",
+    "beach": "Coronado City beaches",
+    "lat": 32.683654,
+    "lon": -117.191172,
+    "dist_mouth_km": 15.33406925487737,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "328",
+    "name": "EH-060",
+    "beach": "Coronado north beach",
+    "lat": 32.685586,
+    "lon": -117.194319,
+    "dist_mouth_km": 15.647341459168493,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "329",
+    "name": "EH-062",
+    "beach": "Coronado north beach",
+    "lat": 32.68578,
+    "lon": -117.204638,
+    "dist_mouth_km": 16.075884955042508,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "330",
+    "name": "EH-070",
+    "beach": "San Diego Bay",
+    "lat": 32.69012298,
+    "lon": -117.164403749,
+    "dist_mouth_km": 15.248518432688485,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "331",
+    "name": "EH-080",
+    "beach": "San Diego Bay",
+    "lat": 32.675214456,
+    "lon": -117.16818134,
+    "dist_mouth_km": 13.731573110280484,
+    "south_bay": true,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "332",
+    "name": "EH-090",
+    "beach": "San Diego Bay",
+    "lat": 32.63631,
+    "lon": -117.1411,
+    "dist_mouth_km": 8.961503693996388,
+    "south_bay": true,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "333",
+    "name": "EH-100",
+    "beach": "San Diego Bay",
+    "lat": 32.629798,
+    "lon": -117.136906,
+    "dist_mouth_km": 8.194889362165473,
+    "south_bay": true,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "335",
+    "name": "EH-120",
+    "beach": "San Diego Bay",
+    "lat": 32.628801978,
+    "lon": -117.108093878,
+    "dist_mouth_km": 8.248857528322176,
+    "south_bay": true,
+    "point_id": "g32.75_-117.00"
+  },
+  {
+    "station": "336",
+    "name": "EH-130",
+    "beach": "San Diego Bay",
+    "lat": 32.651176,
+    "lon": -117.105712,
+    "dist_mouth_km": 10.728885009562491,
+    "south_bay": true,
+    "point_id": "g32.75_-117.00"
+  },
+  {
+    "station": "337",
+    "name": "EH-140",
+    "beach": "San Diego Bay",
+    "lat": 32.672289,
+    "lon": -117.117436,
+    "dist_mouth_km": 12.911690110998913,
+    "south_bay": true,
+    "point_id": "g32.75_-117.00"
+  },
+  {
+    "station": "338",
+    "name": "EH-150",
+    "beach": "San Diego Bay",
+    "lat": 32.7179,
+    "lon": -117.1735,
+    "dist_mouth_km": 18.449976859153995,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "339",
+    "name": "EH-160",
+    "beach": "Spanish Landing Park",
+    "lat": 32.728338648,
+    "lon": -117.20994367,
+    "dist_mouth_km": 20.597464182822154,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "340",
+    "name": "EH-170",
+    "beach": "San Diego Bay",
+    "lat": 32.7282,
+    "lon": -117.2138,
+    "dist_mouth_km": 20.720795073154953,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "342",
+    "name": "EH-190",
+    "beach": "San Diego Bay",
+    "lat": 32.7108,
+    "lon": -117.231,
+    "dist_mouth_km": 19.691724357797522,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "343",
+    "name": "EH-200",
+    "beach": "San Diego Bay",
+    "lat": 32.714767645,
+    "lon": -117.224159725,
+    "dist_mouth_km": 19.776867145102884,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "344",
+    "name": "EH-205",
+    "beach": "San Diego Bay",
+    "lat": 32.7182,
+    "lon": -117.233,
+    "dist_mouth_km": 20.50179153392841,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "345",
+    "name": "EH-210",
+    "beach": "San Diego Bay",
+    "lat": 32.70921,
+    "lon": -117.23678,
+    "dist_mouth_km": 19.811213248301456,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "346",
+    "name": "EH-211",
+    "beach": "San Diego Bay",
+    "lat": 32.709209,
+    "lon": -117.236837,
+    "dist_mouth_km": 19.813868000280575,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "348",
+    "name": "EH-227",
+    "beach": "Mission Bay, De Anza Cove",
+    "lat": 32.7951,
+    "lon": -117.21634,
+    "dist_mouth_km": 27.79523972421662,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "349",
+    "name": "EH-230",
+    "beach": "Mission Beach",
+    "lat": 32.76353,
+    "lon": -117.25326,
+    "dist_mouth_km": 25.84359000011772,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "350",
+    "name": "EH-240",
+    "beach": "Mission Beach",
+    "lat": 32.7824,
+    "lon": -117.2537,
+    "dist_mouth_km": 27.745988061271838,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "351",
+    "name": "EH-250",
+    "beach": "Pacific Beach",
+    "lat": 32.7945,
+    "lon": -117.2562,
+    "dist_mouth_km": 29.06533476284789,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "352",
+    "name": "EH-253",
+    "beach": "Pacific Beach",
+    "lat": 32.7999829,
+    "lon": -117.258732,
+    "dist_mouth_km": 29.718304609143097,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "354",
+    "name": "EH-255",
+    "beach": "Tourmaline Surfing Park",
+    "lat": 32.807707,
+    "lon": -117.266187,
+    "dist_mouth_km": 30.789534684948876,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "355",
+    "name": "EH-260",
+    "beach": "WindanSea Beach",
+    "lat": 32.8263,
+    "lon": -117.2795,
+    "dist_mouth_km": 33.18967721570968,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "356",
+    "name": "EH-270",
+    "beach": "WindanSea Beach",
+    "lat": 32.827263,
+    "lon": -117.280649,
+    "dist_mouth_km": 33.33246575712602,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "357",
+    "name": "EH-280",
+    "beach": "WindanSea Beach",
+    "lat": 32.8294,
+    "lon": -117.2805,
+    "dist_mouth_km": 33.54123787098308,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "358",
+    "name": "EH-290",
+    "beach": "Marine Street Beach",
+    "lat": 32.8341,
+    "lon": -117.2815,
+    "dist_mouth_km": 34.05404037734072,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "360",
+    "name": "EH-300",
+    "beach": "Whispering Sands  Nicholson Pt.",
+    "lat": 32.839387,
+    "lon": -117.281998,
+    "dist_mouth_km": 34.607037851119465,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "361",
+    "name": "EH-303",
+    "beach": "Whispering Sands  Nicholson Pt.",
+    "lat": 32.8439,
+    "lon": -117.2791,
+    "dist_mouth_km": 34.95292540831151,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "362",
+    "name": "EH-305",
+    "beach": "South Casa Beach S.D.",
+    "lat": 32.8467,
+    "lon": -117.278863,
+    "dist_mouth_km": 35.228821100023744,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "363",
+    "name": "EH-310",
+    "beach": "South Casa Beach S.D.",
+    "lat": 32.8475,
+    "lon": -117.2782,
+    "dist_mouth_km": 35.28550753985129,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "364",
+    "name": "EH-312",
+    "beach": "Shell Beach",
+    "lat": 32.8498592,
+    "lon": -117.2749324,
+    "dist_mouth_km": 35.40615375270416,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "365",
+    "name": "EH-320",
+    "beach": "La Jolla Shores Beach",
+    "lat": 32.8556,
+    "lon": -117.2581,
+    "dist_mouth_km": 35.4225202534165,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "366",
+    "name": "EH-330",
+    "beach": "La Jolla Shores Beach",
+    "lat": 32.859,
+    "lon": -117.256,
+    "dist_mouth_km": 35.71116848330156,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "367",
+    "name": "EH-340",
+    "beach": "La Jolla Shores Beach",
+    "lat": 32.863,
+    "lon": -117.2547,
+    "dist_mouth_km": 36.09013100095628,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "368",
+    "name": "EH-350",
+    "beach": "La Jolla Shores Beach",
+    "lat": 32.86585,
+    "lon": -117.25526,
+    "dist_mouth_km": 36.40661190171835,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "369",
+    "name": "EH-353",
+    "beach": "Torrey Pines State Beach",
+    "lat": 32.9421,
+    "lon": -117.2623,
+    "dist_mouth_km": 44.68369591919021,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "370",
+    "name": "EH-355",
+    "beach": "Del Mar City Beach",
+    "lat": 32.9556,
+    "lon": -117.26785,
+    "dist_mouth_km": 46.27001087349634,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "371",
+    "name": "EH-356",
+    "beach": "Del Mar City Beach",
+    "lat": 32.956622,
+    "lon": -117.268647,
+    "dist_mouth_km": 46.40009515646941,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "373",
+    "name": "EH-360",
+    "beach": "Powerhouse Park 15th Street",
+    "lat": 32.96,
+    "lon": -117.268555777,
+    "dist_mouth_km": 46.757910482655696,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "374",
+    "name": "EH-370",
+    "beach": "Powerhouse Park 15th Street",
+    "lat": 32.9624,
+    "lon": -117.26873,
+    "dist_mouth_km": 47.01856058181464,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "375",
+    "name": "EH-380",
+    "beach": "San Dieguito River Beach",
+    "lat": 32.9753,
+    "lon": -117.270605452,
+    "dist_mouth_km": 48.44493112573023,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "376",
+    "name": "EH-390",
+    "beach": "Seascape Beach Park",
+    "lat": 32.9855,
+    "lon": -117.273640785,
+    "dist_mouth_km": 49.613212311095936,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "377",
+    "name": "EH-400",
+    "beach": "San Elijo State Beach",
+    "lat": 33.0283,
+    "lon": -117.2889,
+    "dist_mouth_km": 54.580223904491774,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "378",
+    "name": "EH-403",
+    "beach": "San Elijo State Beach",
+    "lat": 33.02597,
+    "lon": -117.28679,
+    "dist_mouth_km": 54.27696190625052,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "379",
+    "name": "EH-405",
+    "beach": "San Elijo State Beach",
+    "lat": 33.0295,
+    "lon": -117.2886,
+    "dist_mouth_km": 54.70075107870361,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "380",
+    "name": "EH-410",
+    "beach": "Swami's Park",
+    "lat": 33.0344,
+    "lon": -117.2931,
+    "dist_mouth_km": 55.34068022439782,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "381",
+    "name": "EH-420",
+    "beach": "Moonlight Beach",
+    "lat": 33.0481,
+    "lon": -117.2989,
+    "dist_mouth_km": 56.95456512904053,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "382",
+    "name": "EH-430",
+    "beach": "Leucadia",
+    "lat": 33.0644,
+    "lon": -117.305,
+    "dist_mouth_km": 58.85379392117831,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "383",
+    "name": "EH-435",
+    "beach": "Leucadia",
+    "lat": 33.076405,
+    "lon": -117.310332,
+    "dist_mouth_km": 60.274726127450805,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "384",
+    "name": "EH-440",
+    "beach": "South Carlsbad State Beach",
+    "lat": 33.0866,
+    "lon": -117.313433196,
+    "dist_mouth_km": 61.44376229366774,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "385",
+    "name": "EH-450",
+    "beach": "Agua Hedionda Lagoon",
+    "lat": 33.145,
+    "lon": -117.3409,
+    "dist_mouth_km": 68.39894802708982,
+    "south_bay": false,
+    "point_id": "g33.25_-117.25"
+  },
+  {
+    "station": "386",
+    "name": "EH-452",
+    "beach": "Agua Hedionda Lagoon",
+    "lat": 33.144618,
+    "lon": -117.33729,
+    "dist_mouth_km": 68.26088651216293,
+    "south_bay": false,
+    "point_id": "g33.25_-117.25"
+  },
+  {
+    "station": "387",
+    "name": "EH-455",
+    "beach": "Carlsbad State Beach",
+    "lat": 33.138,
+    "lon": -117.3398,
+    "dist_mouth_km": 67.62472324184603,
+    "south_bay": false,
+    "point_id": "g33.25_-117.25"
+  },
+  {
+    "station": "388",
+    "name": "EH-460",
+    "beach": "Carlsbad State Beach",
+    "lat": 33.1454,
+    "lon": -117.3451,
+    "dist_mouth_km": 68.55662557031879,
+    "south_bay": false,
+    "point_id": "g33.25_-117.25"
+  },
+  {
+    "station": "389",
+    "name": "EH-470",
+    "beach": "Carlsbad municipal beach",
+    "lat": 33.1554,
+    "lon": -117.3514,
+    "dist_mouth_km": 69.79299556267188,
+    "south_bay": false,
+    "point_id": "g33.25_-117.25"
+  },
+  {
+    "station": "390",
+    "name": "EH-475",
+    "beach": "Carlsbad municipal beach",
+    "lat": 33.1571,
+    "lon": -117.35312,
+    "dist_mouth_km": 70.02144813794563,
+    "south_bay": false,
+    "point_id": "g33.25_-117.25"
+  },
+  {
+    "station": "391",
+    "name": "EH-476",
+    "beach": "Carlsbad municipal beach",
+    "lat": 33.15868,
+    "lon": -117.3546,
+    "dist_mouth_km": 70.23055041201553,
+    "south_bay": false,
+    "point_id": "g33.25_-117.25"
+  },
+  {
+    "station": "392",
+    "name": "EH-477",
+    "beach": "Carlsbad municipal beach",
+    "lat": 33.160217,
+    "lon": -117.355683,
+    "dist_mouth_km": 70.4239679310758,
+    "south_bay": false,
+    "point_id": "g33.25_-117.25"
+  },
+  {
+    "station": "394",
+    "name": "EH-480",
+    "beach": "Carlsbad municipal beach",
+    "lat": 33.1644,
+    "lon": -117.3591,
+    "dist_mouth_km": 70.9638402594598,
+    "south_bay": false,
+    "point_id": "g33.25_-117.25"
+  },
+  {
+    "station": "395",
+    "name": "EH-490",
+    "beach": "Oceanside municipal beach, other",
+    "lat": 33.18618,
+    "lon": -117.37744,
+    "dist_mouth_km": 73.79671490359735,
+    "south_bay": false,
+    "point_id": "g33.25_-117.50"
+  },
+  {
+    "station": "396",
+    "name": "EH-500",
+    "beach": "USMC Camp Pendleton",
+    "lat": 33.21835,
+    "lon": -117.40617,
+    "dist_mouth_km": 78.04956371725783,
+    "south_bay": false,
+    "point_id": "g33.25_-117.50"
+  },
+  {
+    "station": "397",
+    "name": "EH-505",
+    "beach": "USMC Camp Pendleton",
+    "lat": 33.237929,
+    "lon": -117.417569,
+    "dist_mouth_km": 80.45630649024359,
+    "south_bay": false,
+    "point_id": "g33.25_-117.50"
+  },
+  {
+    "station": "398",
+    "name": "EH-510",
+    "beach": "USMC Camp Pendleton",
+    "lat": 33.3805,
+    "lon": -117.5785,
+    "dist_mouth_km": 100.8108042880872,
+    "south_bay": false,
+    "point_id": "g33.50_-117.50"
+  },
+  {
+    "station": "399",
+    "name": "EH-520",
+    "beach": "San Onofre State Beach",
+    "lat": 33.3855,
+    "lon": -117.5952,
+    "dist_mouth_km": 101.97220186943915,
+    "south_bay": false,
+    "point_id": "g33.50_-117.50"
+  },
+  {
+    "station": "400",
+    "name": "EN-010",
+    "beach": "South Carlsbad State Beach",
+    "lat": 33.10061,
+    "lon": -117.3194,
+    "dist_mouth_km": 63.09530823317878,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "401",
+    "name": "EN-020",
+    "beach": "South Carlsbad State Beach",
+    "lat": 33.106306,
+    "lon": -117.321583,
+    "dist_mouth_km": 63.760354646252104,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "402",
+    "name": "EN-030",
+    "beach": "South Carlsbad State Beach",
+    "lat": 33.11572,
+    "lon": -117.3255,
+    "dist_mouth_km": 64.86771855947711,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "403",
+    "name": "EN-040",
+    "beach": "South Carlsbad State Beach",
+    "lat": 33.119222,
+    "lon": -117.327111,
+    "dist_mouth_km": 65.28376391476051,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "404",
+    "name": "EN-050",
+    "beach": "South Carlsbad State Beach",
+    "lat": 33.1285,
+    "lon": -117.333806,
+    "dist_mouth_km": 66.45138967794112,
+    "south_bay": false,
+    "point_id": "g33.25_-117.25"
+  },
+  {
+    "station": "409",
+    "name": "FM-010",
+    "beach": "Dog Beach, O.B.",
+    "lat": 32.7561,
+    "lon": -117.253576204,
+    "dist_mouth_km": 25.12455110124294,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "410",
+    "name": "FM-020",
+    "beach": "Pacific Beach",
+    "lat": 32.7961,
+    "lon": -117.2573,
+    "dist_mouth_km": 29.26985838797993,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "411",
+    "name": "FM-030",
+    "beach": "Tourmaline Surfing Park",
+    "lat": 32.805,
+    "lon": -117.2628,
+    "dist_mouth_km": 30.38362015481942,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "412",
+    "name": "FM-040",
+    "beach": "La Jolla Shores Beach",
+    "lat": 32.8167,
+    "lon": -117.2732,
+    "dist_mouth_km": 31.973014935950253,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "413",
+    "name": "FM-050",
+    "beach": "WindanSea Beach",
+    "lat": 32.8299,
+    "lon": -117.2807,
+    "dist_mouth_km": 33.59949446632074,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "414",
+    "name": "FM-060",
+    "beach": "Whispering Sands  Nicholson Pt.",
+    "lat": 32.8395,
+    "lon": -117.2825,
+    "dist_mouth_km": 34.63806014966586,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "415",
+    "name": "FM-070",
+    "beach": "La Jolla Cove",
+    "lat": 32.85045,
+    "lon": -117.2727,
+    "dist_mouth_km": 35.38611346181123,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "416",
+    "name": "FM-080",
+    "beach": "La Jolla Shores Beach",
+    "lat": 32.8548,
+    "lon": -117.2598,
+    "dist_mouth_km": 35.39422058809492,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "417",
+    "name": "FM-090",
+    "beach": "Torrey Pines City Beach",
+    "lat": 32.8778,
+    "lon": -117.2514,
+    "dist_mouth_km": 37.55158195647074,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "418",
+    "name": "FM-100",
+    "beach": "Torrey Pines State Beach",
+    "lat": 32.9345,
+    "lon": -117.261955166,
+    "dist_mouth_km": 43.864351997114056,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "455",
+    "name": "IB-010",
+    "beach": "Border Field State Park",
+    "lat": 32.53595,
+    "lon": -117.1243,
+    "dist_mouth_km": 2.3084856161728746,
+    "south_bay": true,
+    "point_id": "g32.50_-117.00"
+  },
+  {
+    "station": "456",
+    "name": "IB-020",
+    "beach": "Border Field State Park",
+    "lat": 32.543409572,
+    "lon": -117.125227806,
+    "dist_mouth_km": 1.4754197742656499,
+    "south_bay": true,
+    "point_id": "g32.50_-117.25"
+  },
+  {
+    "station": "457",
+    "name": "IB-030",
+    "beach": "Tijuana Slough National Wildlife Refuge",
+    "lat": 32.555139,
+    "lon": -117.129323,
+    "dist_mouth_km": 0.20803183573338768,
+    "south_bay": true,
+    "point_id": "g32.50_-117.25"
+  },
+  {
+    "station": "458",
+    "name": "IB-040",
+    "beach": "Tijuana Slough National Wildlife Refuge",
+    "lat": 32.562869026,
+    "lon": -117.132590456,
+    "dist_mouth_km": 0.8385179224914792,
+    "south_bay": true,
+    "point_id": "g32.50_-117.25"
+  },
+  {
+    "station": "459",
+    "name": "IB-050",
+    "beach": "Imperial Beach municipal beach, other",
+    "lat": 32.566577296,
+    "lon": -117.133205028,
+    "dist_mouth_km": 1.2297166562734103,
+    "south_bay": true,
+    "point_id": "g32.50_-117.25"
+  },
+  {
+    "station": "460",
+    "name": "IB-060",
+    "beach": "north Imperial Beach",
+    "lat": 32.585678574,
+    "lon": -117.133049366,
+    "dist_mouth_km": 3.281586096467704,
+    "south_bay": true,
+    "point_id": "g32.50_-117.25"
+  },
+  {
+    "station": "461",
+    "name": "IB-070",
+    "beach": "Silver Strand State Beach",
+    "lat": 32.6358,
+    "lon": -117.14317,
+    "dist_mouth_km": 8.934543721198802,
+    "south_bay": true,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "462",
+    "name": "IB-080",
+    "beach": "Coronado City beaches",
+    "lat": 32.6775,
+    "lon": -117.17727,
+    "dist_mouth_km": 14.23001331372653,
+    "south_bay": true,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "480",
+    "name": "MB-010",
+    "beach": "Mission Bay",
+    "lat": 32.7688,
+    "lon": -117.2109,
+    "dist_mouth_km": 24.855364537531603,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "481",
+    "name": "MB-015",
+    "beach": "Mission Bay",
+    "lat": 32.777266,
+    "lon": -117.216636,
+    "dist_mouth_km": 25.918267151480645,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "482",
+    "name": "MB-020",
+    "beach": "Mission Bay",
+    "lat": 32.7724,
+    "lon": -117.222,
+    "dist_mouth_km": 25.575215187521824,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "483",
+    "name": "MB-030",
+    "beach": "Mission Bay",
+    "lat": 32.7706,
+    "lon": -117.2097,
+    "dist_mouth_km": 25.01085260597822,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "484",
+    "name": "MB-031",
+    "beach": "Mission Bay",
+    "lat": 32.7713,
+    "lon": -117.2098,
+    "dist_mouth_km": 25.087806701462565,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "485",
+    "name": "MB-040",
+    "beach": "Tecolote Shores",
+    "lat": 32.7765,
+    "lon": -117.2111,
+    "dist_mouth_km": 25.675527955249162,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "486",
+    "name": "MB-041",
+    "beach": "Tecolote Shores",
+    "lat": 32.7732,
+    "lon": -117.21,
+    "dist_mouth_km": 25.29469178407681,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "488",
+    "name": "MB-050",
+    "beach": "Mission Bay, Leisure Lagoon",
+    "lat": 32.7826,
+    "lon": -117.2104,
+    "dist_mouth_km": 26.30317429970888,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "489",
+    "name": "MB-051",
+    "beach": "Mission Bay, Leisure Lagoon",
+    "lat": 32.7826,
+    "lon": -117.2099,
+    "dist_mouth_km": 26.289455285430293,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "490",
+    "name": "MB-053",
+    "beach": "Mission Bay, Leisure Lagoon",
+    "lat": 32.784102,
+    "lon": -117.209331,
+    "dist_mouth_km": 26.433775883336622,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "491",
+    "name": "MB-058",
+    "beach": "Mission Bay",
+    "lat": 32.788086,
+    "lon": -117.209866,
+    "dist_mouth_km": 26.87244026782625,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "492",
+    "name": "MB-060",
+    "beach": "Mission Bay, Visitor's Center",
+    "lat": 32.7884,
+    "lon": -117.2096,
+    "dist_mouth_km": 26.898799113078933,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "493",
+    "name": "MB-061",
+    "beach": "Mission Bay, Visitor's Center",
+    "lat": 32.7892,
+    "lon": -117.21111,
+    "dist_mouth_km": 27.02452006990258,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "494",
+    "name": "MB-070",
+    "beach": "Mission Bay, De Anza Cove",
+    "lat": 32.7969,
+    "lon": -117.2119,
+    "dist_mouth_km": 27.86610097733285,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "495",
+    "name": "MB-071",
+    "beach": "Mission Bay, De Anza Cove",
+    "lat": 32.79668,
+    "lon": -117.213117,
+    "dist_mouth_km": 27.875054734456132,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "496",
+    "name": "MB-080",
+    "beach": "Mission Bay, Campland On The Bay",
+    "lat": 32.7949,
+    "lon": -117.2213,
+    "dist_mouth_km": 27.91605061874191,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "497",
+    "name": "MB-085",
+    "beach": "Mission Bay",
+    "lat": 32.78847,
+    "lon": -117.217833,
+    "dist_mouth_km": 27.135605367778414,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "498",
+    "name": "MB-090",
+    "beach": "Mission Bay, Crown Point Shores",
+    "lat": 32.7883,
+    "lon": -117.2314,
+    "dist_mouth_km": 27.53873376906187,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "499",
+    "name": "MB-091",
+    "beach": "Mission Bay, Crown Point Shores",
+    "lat": 32.78921,
+    "lon": -117.23107,
+    "dist_mouth_km": 27.62262219863982,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "500",
+    "name": "MB-100",
+    "beach": "Mission Bay",
+    "lat": 32.7823,
+    "lon": -117.2325,
+    "dist_mouth_km": 26.95270465948714,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "501",
+    "name": "MB-101",
+    "beach": "Mission Bay",
+    "lat": 32.779087,
+    "lon": -117.23524,
+    "dist_mouth_km": 26.715761215101434,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "503",
+    "name": "MB-110",
+    "beach": "Mission Bay, Riviera Shores",
+    "lat": 32.7816,
+    "lon": -117.2398,
+    "dist_mouth_km": 27.13681515103958,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "504",
+    "name": "MB-111",
+    "beach": "Mission Bay, Riviera Shores",
+    "lat": 32.785328,
+    "lon": -117.240997,
+    "dist_mouth_km": 27.56242520564026,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "506",
+    "name": "MB-120",
+    "beach": "Mission Bay, Fanuel Park",
+    "lat": 32.7908,
+    "lon": -117.2443,
+    "dist_mouth_km": 28.24289665053152,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "508",
+    "name": "MB-130",
+    "beach": "Mission Bay, Sail Bay",
+    "lat": 32.7893,
+    "lon": -117.2514,
+    "dist_mouth_km": 28.353748369753152,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "509",
+    "name": "MB-131",
+    "beach": "Mission Bay, Sail Bay",
+    "lat": 32.7832,
+    "lon": -117.251,
+    "dist_mouth_km": 27.720438630633122,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "510",
+    "name": "MB-132",
+    "beach": "Mission Bay, Sail Bay",
+    "lat": 32.787397,
+    "lon": -117.252215,
+    "dist_mouth_km": 28.192168319406996,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "511",
+    "name": "MB-135",
+    "beach": "Mission Bay, Sail Bay",
+    "lat": 32.7826,
+    "lon": -117.2492,
+    "dist_mouth_km": 27.589978490834277,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "513",
+    "name": "MB-140",
+    "beach": "Mission Bay, San Juan Cove",
+    "lat": 32.7797,
+    "lon": -117.2508,
+    "dist_mouth_km": 27.359222203107027,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "514",
+    "name": "MB-150",
+    "beach": "Mission Bay, Santa Barbara Cove",
+    "lat": 32.7731,
+    "lon": -117.2489,
+    "dist_mouth_km": 26.619226691361217,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "515",
+    "name": "MB-151",
+    "beach": "Mission Bay, Santa Barbara Cove",
+    "lat": 32.777014,
+    "lon": -117.247557,
+    "dist_mouth_km": 26.9610263507747,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "516",
+    "name": "MB-160",
+    "beach": "Mission Bay, Bahia Point",
+    "lat": 32.7755,
+    "lon": -117.2454,
+    "dist_mouth_km": 26.724248224946475,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "517",
+    "name": "MB-161",
+    "beach": "Mission Bay, Bahia Point",
+    "lat": 32.7755,
+    "lon": -117.2452,
+    "dist_mouth_km": 26.716541963886375,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "518",
+    "name": "MB-170",
+    "beach": "Mission Bay, Mariners Basin",
+    "lat": 32.7692,
+    "lon": -117.2489,
+    "dist_mouth_km": 26.22761242515314,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "519",
+    "name": "MB-173",
+    "beach": "Mission Bay, Mariners Basin",
+    "lat": 32.7695,
+    "lon": -117.2475,
+    "dist_mouth_km": 26.201376261644246,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "520",
+    "name": "MB-180",
+    "beach": "Mission Bay, Quivera Basin",
+    "lat": 32.7607,
+    "lon": -117.2403,
+    "dist_mouth_km": 25.02956354552841,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "521",
+    "name": "MB-190",
+    "beach": "Mission Bay, Sea World",
+    "lat": 32.7672,
+    "lon": -117.2319,
+    "dist_mouth_km": 25.374626633635465,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "522",
+    "name": "MB-191",
+    "beach": "Mission Bay, Sea World",
+    "lat": 32.767075,
+    "lon": -117.229313,
+    "dist_mouth_km": 25.269733198416343,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "523",
+    "name": "MB-192",
+    "beach": "Mission Bay, Sea World",
+    "lat": 32.766503,
+    "lon": -117.224988,
+    "dist_mouth_km": 25.061016994945803,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "524",
+    "name": "MB-193",
+    "beach": "Mission Bay, Sea World",
+    "lat": 32.7652,
+    "lon": -117.2165,
+    "dist_mouth_km": 24.64717545835872,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "526",
+    "name": "MB-203",
+    "beach": "Mission Bay, Vacation Isle",
+    "lat": 32.7741,
+    "lon": -117.2327,
+    "dist_mouth_km": 26.11262703288606,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "527",
+    "name": "MB-223",
+    "beach": "Mission Bay, Ventura Cove",
+    "lat": 32.77088,
+    "lon": -117.24468,
+    "dist_mouth_km": 26.228921530751677,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "528",
+    "name": "MB-225",
+    "beach": "Mission Bay, Mariners Basin",
+    "lat": 32.7625,
+    "lon": -117.2493,
+    "dist_mouth_km": 25.57464068723026,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "581",
+    "name": "OC-010",
+    "beach": "Oceanside municipal beach, other",
+    "lat": 33.165614,
+    "lon": -117.359991,
+    "dist_mouth_km": 71.11772350914289,
+    "south_bay": false,
+    "point_id": "g33.25_-117.25"
+  },
+  {
+    "station": "582",
+    "name": "OC-020",
+    "beach": "Oceanside municipal beach, other",
+    "lat": 33.172928508,
+    "lon": -117.366051164,
+    "dist_mouth_km": 72.06523046529053,
+    "south_bay": false,
+    "point_id": "g33.25_-117.25"
+  },
+  {
+    "station": "583",
+    "name": "OC-022",
+    "beach": "Buccaneer Beach",
+    "lat": 33.1765,
+    "lon": -117.3696,
+    "dist_mouth_km": 72.54541446328464,
+    "south_bay": false,
+    "point_id": "g33.25_-117.25"
+  },
+  {
+    "station": "584",
+    "name": "OC-030",
+    "beach": "Buccaneer Beach",
+    "lat": 33.177814074,
+    "lon": -117.3708564,
+    "dist_mouth_km": 72.72077796794048,
+    "south_bay": false,
+    "point_id": "g33.25_-117.25"
+  },
+  {
+    "station": "585",
+    "name": "OC-035",
+    "beach": "Oceanside municipal beach, other",
+    "lat": 33.179485,
+    "lon": -117.373522,
+    "dist_mouth_km": 72.97515465063024,
+    "south_bay": false,
+    "point_id": "g33.25_-117.25"
+  },
+  {
+    "station": "586",
+    "name": "OC-040",
+    "beach": "Oceanside municipal beach, other",
+    "lat": 33.182386087,
+    "lon": -117.374571149,
+    "dist_mouth_km": 73.3120694552097,
+    "south_bay": false,
+    "point_id": "g33.25_-117.25"
+  },
+  {
+    "station": "587",
+    "name": "OC-050",
+    "beach": "Oceanside municipal beach, other",
+    "lat": 33.190325855,
+    "lon": -117.381868469,
+    "dist_mouth_km": 74.36499243819618,
+    "south_bay": false,
+    "point_id": "g33.25_-117.50"
+  },
+  {
+    "station": "588",
+    "name": "OC-080",
+    "beach": "Oceanside municipal beach, other",
+    "lat": 33.1937,
+    "lon": -117.3843,
+    "dist_mouth_km": 74.7929361844142,
+    "south_bay": false,
+    "point_id": "g33.25_-117.50"
+  },
+  {
+    "station": "589",
+    "name": "OC-090",
+    "beach": "Oceanside municipal beach, other",
+    "lat": 33.1966,
+    "lon": -117.3869,
+    "dist_mouth_km": 75.17615734288847,
+    "south_bay": false,
+    "point_id": "g33.25_-117.50"
+  },
+  {
+    "station": "590",
+    "name": "OC-100",
+    "beach": "Harbor Beach",
+    "lat": 33.201559515,
+    "lon": -117.392202744,
+    "dist_mouth_km": 75.85800159723796,
+    "south_bay": false,
+    "point_id": "g33.25_-117.50"
+  },
+  {
+    "station": "591",
+    "name": "OC-110",
+    "beach": "Harbor Beach",
+    "lat": 33.2044,
+    "lon": -117.3941,
+    "dist_mouth_km": 76.21421315260017,
+    "south_bay": false,
+    "point_id": "g33.25_-117.50"
+  },
+  {
+    "station": "637",
+    "name": "PL-010",
+    "beach": "Imperial Beach municipal beach, other",
+    "lat": 32.5847,
+    "lon": -117.133,
+    "dist_mouth_km": 3.173331741225176,
+    "south_bay": true,
+    "point_id": "g32.50_-117.25"
+  },
+  {
+    "station": "638",
+    "name": "PL-040",
+    "beach": "non-accessible or restricted access shoreline on Pt. Loma",
+    "lat": 32.6653,
+    "lon": -117.2432,
+    "dist_mouth_km": 16.223285672893383,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "639",
+    "name": "PL-050",
+    "beach": "non-accessible or restricted access shoreline on Pt. Loma",
+    "lat": 32.680475616,
+    "lon": -117.2488,
+    "dist_mouth_km": 17.84557430668813,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "640",
+    "name": "PL-060",
+    "beach": "non-accessible or restricted access shoreline on Pt. Loma",
+    "lat": 32.693364,
+    "lon": -117.260691,
+    "dist_mouth_km": 19.659356359008587,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "641",
+    "name": "PL-070",
+    "beach": "Sunset Cliffs Park",
+    "lat": 32.719325627,
+    "lon": -117.256944364,
+    "dist_mouth_km": 21.772393830745003,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "642",
+    "name": "PL-080",
+    "beach": "Ocean Beach",
+    "lat": 32.737,
+    "lon": -117.25533,
+    "dist_mouth_km": 23.35387054919292,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "643",
+    "name": "PL-090",
+    "beach": "Ocean Beach",
+    "lat": 32.746736106,
+    "lon": -117.254942461,
+    "dist_mouth_km": 24.272452358554986,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "644",
+    "name": "PL-100",
+    "beach": "Ocean Beach",
+    "lat": 32.7491121,
+    "lon": -117.253271417,
+    "dist_mouth_km": 24.427349144640772,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "645",
+    "name": "PL-110",
+    "beach": "Ocean Beach",
+    "lat": 32.753911912,
+    "lon": -117.25301431,
+    "dist_mouth_km": 24.88512767315175,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "646",
+    "name": "PL-120",
+    "beach": "Mission Beach",
+    "lat": 32.771314863,
+    "lon": -117.253558792,
+    "dist_mouth_km": 26.62970724886487,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "697",
+    "name": "SC-010",
+    "beach": "San Onofre State Beach",
+    "lat": 33.379,
+    "lon": -117.5725,
+    "dist_mouth_km": 100.42687697260408,
+    "south_bay": false,
+    "point_id": "g33.50_-117.50"
+  },
+  {
+    "station": "698",
+    "name": "SC-020",
+    "beach": "San Onofre State Beach",
+    "lat": 33.383,
+    "lon": -117.576,
+    "dist_mouth_km": 100.96647907301015,
+    "south_bay": false,
+    "point_id": "g33.50_-117.50"
+  },
+  {
+    "station": "703",
+    "name": "SE-010",
+    "beach": "Solana Beach City Beaches",
+    "lat": 32.991319,
+    "lon": -117.274819,
+    "dist_mouth_km": 50.2655422117864,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "704",
+    "name": "SE-020",
+    "beach": "Solana Beach City Beaches",
+    "lat": 32.996569,
+    "lon": -117.276194,
+    "dist_mouth_km": 50.8621192182517,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "705",
+    "name": "SE-030",
+    "beach": "Cardiff State Beach",
+    "lat": 33.001319,
+    "lon": -117.278388,
+    "dist_mouth_km": 51.42614067230822,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "706",
+    "name": "SE-040",
+    "beach": "Cardiff State Beach",
+    "lat": 33.005833,
+    "lon": -117.278472,
+    "dist_mouth_km": 51.91111507655579,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "707",
+    "name": "SE-050",
+    "beach": "Cardiff State Beach",
+    "lat": 33.0118911,
+    "lon": -117.2803,
+    "dist_mouth_km": 52.6057137718534,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "708",
+    "name": "SE-060",
+    "beach": "Cardiff State Beach",
+    "lat": 33.0157,
+    "lon": -117.281912465,
+    "dist_mouth_km": 53.0541697708138,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "709",
+    "name": "SE-070",
+    "beach": "San Elijo State Beach",
+    "lat": 33.019055,
+    "lon": -117.2842,
+    "dist_mouth_km": 53.471304955438576,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "728",
+    "name": "TJ-020",
+    "beach": "Tijana River",
+    "lat": 32.553585,
+    "lon": -117.063212,
+    "dist_mouth_km": 6.062079333193373,
+    "south_bay": true,
+    "point_id": "g32.50_-117.00"
+  },
+  {
+    "station": "729",
+    "name": "TJ-030",
+    "beach": "Tijana River",
+    "lat": 32.55299,
+    "lon": -117.063212,
+    "dist_mouth_km": 6.065996702367469,
+    "south_bay": true,
+    "point_id": "g32.50_-117.00"
+  },
+  {
+    "station": "779",
+    "name": "MB-205",
+    "beach": "Mission Bay, Vacation Isle",
+    "lat": 32.77605,
+    "lon": -117.2382,
+    "dist_mouth_km": 26.510052342563696,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "815",
+    "name": "SI-010",
+    "beach": "La Jolla Shores Beach",
+    "lat": 32.86353,
+    "lon": -117.25508,
+    "dist_mouth_km": 36.15747130877102,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "816",
+    "name": "SI-020",
+    "beach": "La Jolla Shores Beach",
+    "lat": 32.86548,
+    "lon": -117.2546,
+    "dist_mouth_km": 36.34754896952415,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "817",
+    "name": "SI-030",
+    "beach": "La Jolla Shores Beach",
+    "lat": 32.86768,
+    "lon": -117.25413,
+    "dist_mouth_km": 36.56458292441254,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  },
+  {
+    "station": "911",
+    "name": "FM-090",
+    "beach": "Torrey Pines State Beach",
+    "lat": 32.8778,
+    "lon": -117.2514,
+    "dist_mouth_km": 37.55158195647074,
+    "south_bay": false,
+    "point_id": "g33.00_-117.25"
+  },
+  {
+    "station": "958",
+    "name": "MB-086",
+    "beach": "Mission Bay",
+    "lat": 32.7892,
+    "lon": -117.2134,
+    "dist_mouth_km": 27.08714568045136,
+    "south_bay": false,
+    "point_id": "g32.75_-117.25"
+  }
+]

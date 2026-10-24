@@ -1,0 +1,482 @@
+{
+  "g32.50_-117.00|1": {
+    "tmax": 16.948,
+    "tmin": 11.822,
+    "heat_index_max": 61.228,
+    "rh_mean": 69.055,
+    "tmax_lag1": 16.871,
+    "hot_streak": 0.0
+  },
+  "g32.50_-117.00|2": {
+    "tmax": 16.332,
+    "tmin": 11.176,
+    "heat_index_max": 60.007,
+    "rh_mean": 67.164,
+    "tmax_lag1": 16.387,
+    "hot_streak": 0.0
+  },
+  "g32.50_-117.00|3": {
+    "tmax": 16.505,
+    "tmin": 11.959,
+    "heat_index_max": 60.686,
+    "rh_mean": 74.57,
+    "tmax_lag1": 16.443,
+    "hot_streak": 0.0
+  },
+  "g32.50_-117.00|4": {
+    "tmax": 18.022,
+    "tmin": 13.565,
+    "heat_index_max": 63.656,
+    "rh_mean": 74.196,
+    "tmax_lag1": 17.999,
+    "hot_streak": 0.0
+  },
+  "g32.50_-117.00|5": {
+    "tmax": 18.313,
+    "tmin": 14.695,
+    "heat_index_max": 64.434,
+    "rh_mean": 76.768,
+    "tmax_lag1": 18.331,
+    "hot_streak": 0.0
+  },
+  "g32.50_-117.00|6": {
+    "tmax": 20.695,
+    "tmin": 16.705,
+    "heat_index_max": 69.072,
+    "rh_mean": 76.497,
+    "tmax_lag1": 20.596,
+    "hot_streak": 0.0
+  },
+  "g32.50_-117.00|7": {
+    "tmax": 23.243,
+    "tmin": 19.338,
+    "heat_index_max": 74.206,
+    "rh_mean": 77.518,
+    "tmax_lag1": 23.15,
+    "hot_streak": 0.0
+  },
+  "g32.50_-117.00|8": {
+    "tmax": 24.249,
+    "tmin": 20.297,
+    "heat_index_max": 76.36,
+    "rh_mean": 76.925,
+    "tmax_lag1": 24.247,
+    "hot_streak": 0.0
+  },
+  "g32.50_-117.00|9": {
+    "tmax": 23.796,
+    "tmin": 19.541,
+    "heat_index_max": 75.286,
+    "rh_mean": 75.02,
+    "tmax_lag1": 23.841,
+    "hot_streak": 0.0
+  },
+  "g32.50_-117.00|10": {
+    "tmax": 22.377,
+    "tmin": 17.314,
+    "heat_index_max": 71.892,
+    "rh_mean": 67.799,
+    "tmax_lag1": 22.453,
+    "hot_streak": 0.0
+  },
+  "g32.50_-117.00|11": {
+    "tmax": 20.059,
+    "tmin": 14.602,
+    "heat_index_max": 67.11,
+    "rh_mean": 62.12,
+    "tmax_lag1": 20.183,
+    "hot_streak": 0.0
+  },
+  "g32.50_-117.00|12": {
+    "tmax": 17.427,
+    "tmin": 12.306,
+    "heat_index_max": 62.082,
+    "rh_mean": 65.938,
+    "tmax_lag1": 17.488,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.00|1": {
+    "tmax": 19.02,
+    "tmin": 9.949,
+    "heat_index_max": 64.828,
+    "rh_mean": 65.415,
+    "tmax_lag1": 18.897,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.00|2": {
+    "tmax": 18.562,
+    "tmin": 9.405,
+    "heat_index_max": 63.853,
+    "rh_mean": 63.425,
+    "tmax_lag1": 18.624,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.00|3": {
+    "tmax": 18.937,
+    "tmin": 10.767,
+    "heat_index_max": 64.974,
+    "rh_mean": 70.656,
+    "tmax_lag1": 18.847,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.00|4": {
+    "tmax": 21.346,
+    "tmin": 12.916,
+    "heat_index_max": 69.437,
+    "rh_mean": 67.891,
+    "tmax_lag1": 21.304,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.00|5": {
+    "tmax": 21.394,
+    "tmin": 14.483,
+    "heat_index_max": 69.846,
+    "rh_mean": 71.1,
+    "tmax_lag1": 21.443,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.00|6": {
+    "tmax": 24.455,
+    "tmin": 16.576,
+    "heat_index_max": 75.697,
+    "rh_mean": 69.229,
+    "tmax_lag1": 24.314,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.00|7": {
+    "tmax": 27.457,
+    "tmin": 19.474,
+    "heat_index_max": 82.315,
+    "rh_mean": 69.067,
+    "tmax_lag1": 27.36,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.00|8": {
+    "tmax": 28.519,
+    "tmin": 20.4,
+    "heat_index_max": 84.711,
+    "rh_mean": 68.159,
+    "tmax_lag1": 28.51,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.00|9": {
+    "tmax": 27.809,
+    "tmin": 19.357,
+    "heat_index_max": 82.679,
+    "rh_mean": 66.537,
+    "tmax_lag1": 27.876,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.00|10": {
+    "tmax": 25.944,
+    "tmin": 16.191,
+    "heat_index_max": 77.693,
+    "rh_mean": 60.534,
+    "tmax_lag1": 26.047,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.00|11": {
+    "tmax": 23.054,
+    "tmin": 12.699,
+    "heat_index_max": 72.063,
+    "rh_mean": 56.275,
+    "tmax_lag1": 23.22,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.00|12": {
+    "tmax": 19.412,
+    "tmin": 10.2,
+    "heat_index_max": 65.501,
+    "rh_mean": 62.394,
+    "tmax_lag1": 19.5,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.25|1": {
+    "tmax": 17.662,
+    "tmin": 10.415,
+    "heat_index_max": 62.657,
+    "rh_mean": 71.998,
+    "tmax_lag1": 17.598,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.25|2": {
+    "tmax": 17.27,
+    "tmin": 10.074,
+    "heat_index_max": 61.715,
+    "rh_mean": 68.32,
+    "tmax_lag1": 17.312,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.25|3": {
+    "tmax": 17.571,
+    "tmin": 11.456,
+    "heat_index_max": 62.663,
+    "rh_mean": 74.283,
+    "tmax_lag1": 17.506,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.25|4": {
+    "tmax": 19.219,
+    "tmin": 13.342,
+    "heat_index_max": 65.872,
+    "rh_mean": 74.522,
+    "tmax_lag1": 19.189,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.25|5": {
+    "tmax": 19.439,
+    "tmin": 14.776,
+    "heat_index_max": 66.515,
+    "rh_mean": 76.436,
+    "tmax_lag1": 19.469,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.25|6": {
+    "tmax": 21.706,
+    "tmin": 16.497,
+    "heat_index_max": 70.957,
+    "rh_mean": 77.727,
+    "tmax_lag1": 21.601,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.25|7": {
+    "tmax": 24.441,
+    "tmin": 18.977,
+    "heat_index_max": 76.524,
+    "rh_mean": 78.002,
+    "tmax_lag1": 24.348,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.25|8": {
+    "tmax": 25.478,
+    "tmin": 20.007,
+    "heat_index_max": 78.911,
+    "rh_mean": 78.2,
+    "tmax_lag1": 25.465,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.25|9": {
+    "tmax": 25.17,
+    "tmin": 19.468,
+    "heat_index_max": 78.136,
+    "rh_mean": 75.999,
+    "tmax_lag1": 25.224,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.25|10": {
+    "tmax": 23.691,
+    "tmin": 16.687,
+    "heat_index_max": 74.304,
+    "rh_mean": 69.641,
+    "tmax_lag1": 23.775,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.25|11": {
+    "tmax": 21.162,
+    "tmin": 13.257,
+    "heat_index_max": 69.181,
+    "rh_mean": 65.686,
+    "tmax_lag1": 21.298,
+    "hot_streak": 0.0
+  },
+  "g32.75_-117.25|12": {
+    "tmax": 18.182,
+    "tmin": 10.922,
+    "heat_index_max": 63.522,
+    "rh_mean": 68.195,
+    "tmax_lag1": 18.238,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.00|1": {
+    "tmax": 17.731,
+    "tmin": 6.782,
+    "heat_index_max": 62.156,
+    "rh_mean": 63.442,
+    "tmax_lag1": 17.6,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.00|2": {
+    "tmax": 17.33,
+    "tmin": 6.313,
+    "heat_index_max": 61.302,
+    "rh_mean": 61.203,
+    "tmax_lag1": 17.412,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.00|3": {
+    "tmax": 17.803,
+    "tmin": 8.056,
+    "heat_index_max": 62.627,
+    "rh_mean": 69.644,
+    "tmax_lag1": 17.7,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.00|4": {
+    "tmax": 20.573,
+    "tmin": 10.527,
+    "heat_index_max": 67.801,
+    "rh_mean": 67.06,
+    "tmax_lag1": 20.513,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.00|5": {
+    "tmax": 20.808,
+    "tmin": 12.361,
+    "heat_index_max": 68.561,
+    "rh_mean": 70.903,
+    "tmax_lag1": 20.859,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.00|6": {
+    "tmax": 24.372,
+    "tmin": 14.778,
+    "heat_index_max": 75.292,
+    "rh_mean": 67.911,
+    "tmax_lag1": 24.21,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.00|7": {
+    "tmax": 27.724,
+    "tmin": 17.898,
+    "heat_index_max": 82.198,
+    "rh_mean": 66.079,
+    "tmax_lag1": 27.612,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.00|8": {
+    "tmax": 28.612,
+    "tmin": 18.745,
+    "heat_index_max": 84.015,
+    "rh_mean": 65.849,
+    "tmax_lag1": 28.604,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.00|9": {
+    "tmax": 27.568,
+    "tmin": 17.447,
+    "heat_index_max": 81.388,
+    "rh_mean": 64.133,
+    "tmax_lag1": 27.676,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.00|10": {
+    "tmax": 25.329,
+    "tmin": 13.535,
+    "heat_index_max": 76.192,
+    "rh_mean": 57.118,
+    "tmax_lag1": 25.44,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.00|11": {
+    "tmax": 22.088,
+    "tmin": 9.609,
+    "heat_index_max": 70.027,
+    "rh_mean": 52.153,
+    "tmax_lag1": 22.262,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.00|12": {
+    "tmax": 18.109,
+    "tmin": 7.035,
+    "heat_index_max": 62.783,
+    "rh_mean": 59.178,
+    "tmax_lag1": 18.2,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.25|1": {
+    "tmax": 17.312,
+    "tmin": 10.065,
+    "heat_index_max": 61.961,
+    "rh_mean": 71.933,
+    "tmax_lag1": 17.247,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.25|2": {
+    "tmax": 16.917,
+    "tmin": 9.724,
+    "heat_index_max": 61.01,
+    "rh_mean": 68.253,
+    "tmax_lag1": 16.96,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.25|3": {
+    "tmax": 17.216,
+    "tmin": 11.104,
+    "heat_index_max": 61.958,
+    "rh_mean": 74.225,
+    "tmax_lag1": 17.152,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.25|4": {
+    "tmax": 18.87,
+    "tmin": 12.994,
+    "heat_index_max": 65.178,
+    "rh_mean": 74.467,
+    "tmax_lag1": 18.839,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.25|5": {
+    "tmax": 19.091,
+    "tmin": 14.427,
+    "heat_index_max": 65.824,
+    "rh_mean": 76.377,
+    "tmax_lag1": 19.122,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.25|6": {
+    "tmax": 21.358,
+    "tmin": 16.145,
+    "heat_index_max": 70.268,
+    "rh_mean": 77.674,
+    "tmax_lag1": 21.253,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.25|7": {
+    "tmax": 24.093,
+    "tmin": 18.626,
+    "heat_index_max": 75.792,
+    "rh_mean": 77.945,
+    "tmax_lag1": 24.0,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.25|8": {
+    "tmax": 25.13,
+    "tmin": 19.657,
+    "heat_index_max": 78.083,
+    "rh_mean": 78.15,
+    "tmax_lag1": 25.116,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.25|9": {
+    "tmax": 24.825,
+    "tmin": 19.117,
+    "heat_index_max": 77.352,
+    "rh_mean": 75.946,
+    "tmax_lag1": 24.88,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.25|10": {
+    "tmax": 23.341,
+    "tmin": 16.333,
+    "heat_index_max": 73.618,
+    "rh_mean": 69.584,
+    "tmax_lag1": 23.423,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.25|11": {
+    "tmax": 20.81,
+    "tmin": 12.91,
+    "heat_index_max": 68.485,
+    "rh_mean": 65.613,
+    "tmax_lag1": 20.948,
+    "hot_streak": 0.0
+  },
+  "g33.00_-117.25|12": {
+    "tmax": 17.826,
+    "tmin": 10.57,
+    "heat_index_max": 62.811,
+    "rh_mean": 68.127,
+    "tmax_lag1": 17.881,
+    "hot_streak": 0.0
+  }
+}

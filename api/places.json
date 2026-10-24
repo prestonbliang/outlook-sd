@@ -1,0 +1,1102 @@
+[
+ {
+  "id": "alpine",
+  "name": "Alpine",
+  "kind": "census_place",
+  "zip": "91901",
+  "lat": 32.84385,
+  "lon": -116.76001,
+  "coastal": false,
+  "point_id": "g32.75_-116.75"
+ },
+ {
+  "id": "balboa-park",
+  "name": "Balboa Park",
+  "kind": "sd_community",
+  "zip": "92101",
+  "lat": 32.73026,
+  "lon": -117.14663,
+  "coastal": false,
+  "point_id": "g32.75_-117.25"
+ },
+ {
+  "id": "barrio-logan",
+  "name": "Barrio Logan",
+  "kind": "sd_community",
+  "zip": "92136",
+  "lat": 32.69209,
+  "lon": -117.13254,
+  "coastal": true,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "black-mountain-ranch",
+  "name": "Black Mountain Ranch",
+  "kind": "sd_community",
+  "zip": "92127",
+  "lat": 32.99973,
+  "lon": -117.14517,
+  "coastal": false,
+  "point_id": "g33.00_-117.00"
+ },
+ {
+  "id": "bonita",
+  "name": "Bonita",
+  "kind": "census_place",
+  "zip": "91902",
+  "lat": 32.66493,
+  "lon": -117.01697,
+  "coastal": false,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "bonsall",
+  "name": "Bonsall",
+  "kind": "census_place",
+  "zip": "92003",
+  "lat": 33.27511,
+  "lon": -117.19995,
+  "coastal": false,
+  "point_id": "g33.25_-117.25"
+ },
+ {
+  "id": "borrego-springs",
+  "name": "Borrego Springs",
+  "kind": "census_place",
+  "zip": "92004",
+  "lat": 33.25046,
+  "lon": -116.35677,
+  "coastal": false,
+  "point_id": "g33.25_-116.25"
+ },
+ {
+  "id": "bostonia",
+  "name": "Bostonia",
+  "kind": "census_place",
+  "zip": "92021",
+  "lat": 32.81896,
+  "lon": -116.93324,
+  "coastal": false,
+  "point_id": "g32.75_-116.75"
+ },
+ {
+  "id": "boulevard",
+  "name": "Boulevard",
+  "kind": "census_place",
+  "zip": "91905",
+  "lat": 32.66225,
+  "lon": -116.29059,
+  "coastal": false,
+  "point_id": "g32.75_-116.25"
+ },
+ {
+  "id": "camp-pendleton-mainside",
+  "name": "Camp Pendleton Mainside",
+  "kind": "census_place",
+  "zip": "92058",
+  "lat": 33.32155,
+  "lon": -117.31546,
+  "coastal": false,
+  "point_id": "g33.25_-117.25"
+ },
+ {
+  "id": "camp-pendleton-south",
+  "name": "Camp Pendleton South",
+  "kind": "census_place",
+  "zip": "92058",
+  "lat": 33.22792,
+  "lon": -117.38853,
+  "coastal": true,
+  "point_id": "g33.25_-117.25"
+ },
+ {
+  "id": "campo",
+  "name": "Campo",
+  "kind": "census_place",
+  "zip": "91906",
+  "lat": 32.65225,
+  "lon": -116.47164,
+  "coastal": false,
+  "point_id": "g32.75_-116.50"
+ },
+ {
+  "id": "carlsbad",
+  "name": "Carlsbad",
+  "kind": "census_place",
+  "zip": "92011",
+  "lat": 33.12167,
+  "lon": -117.27906,
+  "coastal": true,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "carmel-mountain-ranch",
+  "name": "Carmel Mountain Ranch",
+  "kind": "sd_community",
+  "zip": "92128",
+  "lat": 32.97903,
+  "lon": -117.07648,
+  "coastal": false,
+  "point_id": "g33.00_-117.00"
+ },
+ {
+  "id": "carmel-valley",
+  "name": "Carmel Valley",
+  "kind": "sd_community",
+  "zip": "92130",
+  "lat": 32.94339,
+  "lon": -117.22339,
+  "coastal": false,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "casa-de-oro-mount-helix",
+  "name": "Casa de Oro-Mount Helix",
+  "kind": "census_place",
+  "zip": "91941",
+  "lat": 32.76538,
+  "lon": -116.96444,
+  "coastal": false,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "chula-vista",
+  "name": "Chula Vista",
+  "kind": "census_place",
+  "zip": "91910",
+  "lat": 32.63124,
+  "lon": -117.02647,
+  "coastal": true,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "clairemont-mesa",
+  "name": "Clairemont Mesa",
+  "kind": "sd_community",
+  "zip": "92111",
+  "lat": 32.80879,
+  "lon": -117.18567,
+  "coastal": false,
+  "point_id": "g32.75_-117.25"
+ },
+ {
+  "id": "college-area",
+  "name": "College Area",
+  "kind": "sd_community",
+  "zip": "92115",
+  "lat": 32.76921,
+  "lon": -117.06374,
+  "coastal": false,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "coronado",
+  "name": "Coronado",
+  "kind": "census_place",
+  "zip": "92118",
+  "lat": 32.65597,
+  "lon": -117.14168,
+  "coastal": true,
+  "point_id": "g32.75_-117.25"
+ },
+ {
+  "id": "crest",
+  "name": "Crest",
+  "kind": "census_place",
+  "zip": "92021",
+  "lat": 32.80133,
+  "lon": -116.86891,
+  "coastal": false,
+  "point_id": "g32.75_-116.75"
+ },
+ {
+  "id": "del-mar",
+  "name": "Del Mar",
+  "kind": "census_place",
+  "zip": "92014",
+  "lat": 32.96078,
+  "lon": -117.26203,
+  "coastal": true,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "del-mar-mesa",
+  "name": "Del Mar Mesa",
+  "kind": "sd_community",
+  "zip": "92130",
+  "lat": 32.94136,
+  "lon": -117.18839,
+  "coastal": false,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "descanso",
+  "name": "Descanso",
+  "kind": "census_place",
+  "zip": "91916",
+  "lat": 32.86438,
+  "lon": -116.63011,
+  "coastal": false,
+  "point_id": "g33.00_-116.75"
+ },
+ {
+  "id": "downtown",
+  "name": "Downtown",
+  "kind": "sd_community",
+  "zip": "92101",
+  "lat": 32.71346,
+  "lon": -117.16033,
+  "coastal": true,
+  "point_id": "g32.75_-117.25"
+ },
+ {
+  "id": "east-elliott",
+  "name": "East Elliott",
+  "kind": "sd_community",
+  "zip": "92071",
+  "lat": 32.8573,
+  "lon": -117.03357,
+  "coastal": false,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "el-cajon",
+  "name": "El Cajon",
+  "kind": "census_place",
+  "zip": "92021",
+  "lat": 32.79903,
+  "lon": -116.95163,
+  "coastal": false,
+  "point_id": "g32.75_-116.75"
+ },
+ {
+  "id": "elfin-forest",
+  "name": "Elfin Forest",
+  "kind": "census_place",
+  "zip": "92029",
+  "lat": 33.08202,
+  "lon": -117.18026,
+  "coastal": false,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "encanto-neighborhoods",
+  "name": "Encanto Neighborhoods",
+  "kind": "sd_community",
+  "zip": "92114",
+  "lat": 32.71127,
+  "lon": -117.07672,
+  "coastal": false,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "encinitas",
+  "name": "Encinitas",
+  "kind": "census_place",
+  "zip": "92024",
+  "lat": 33.04362,
+  "lon": -117.26347,
+  "coastal": true,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "escondido",
+  "name": "Escondido",
+  "kind": "census_place",
+  "zip": "92027",
+  "lat": 33.13462,
+  "lon": -117.06036,
+  "coastal": false,
+  "point_id": "g33.25_-117.00"
+ },
+ {
+  "id": "eucalyptus-hills",
+  "name": "Eucalyptus Hills",
+  "kind": "census_place",
+  "zip": "92040",
+  "lat": 32.88323,
+  "lon": -116.94588,
+  "coastal": false,
+  "point_id": "g33.00_-117.00"
+ },
+ {
+  "id": "fairbanks-ranch",
+  "name": "Fairbanks Ranch",
+  "kind": "census_place",
+  "zip": "92067",
+  "lat": 32.99252,
+  "lon": -117.18819,
+  "coastal": false,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "fairbanks-ranch-country-club",
+  "name": "Fairbanks Ranch Country Club",
+  "kind": "sd_community",
+  "zip": "92067",
+  "lat": 32.9778,
+  "lon": -117.21692,
+  "coastal": false,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "fallbrook",
+  "name": "Fallbrook",
+  "kind": "census_place",
+  "zip": "92028",
+  "lat": 33.36478,
+  "lon": -117.22517,
+  "coastal": false,
+  "point_id": "g33.50_-117.25"
+ },
+ {
+  "id": "granite-hills",
+  "name": "Granite Hills",
+  "kind": "census_place",
+  "zip": "92021",
+  "lat": 32.80686,
+  "lon": -116.91018,
+  "coastal": false,
+  "point_id": "g32.75_-116.75"
+ },
+ {
+  "id": "greater-golden-hill",
+  "name": "Greater Golden Hill",
+  "kind": "sd_community",
+  "zip": "92102",
+  "lat": 32.72167,
+  "lon": -117.12679,
+  "coastal": false,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "harbison-canyon",
+  "name": "Harbison Canyon",
+  "kind": "census_place",
+  "zip": "92021",
+  "lat": 32.82403,
+  "lon": -116.83384,
+  "coastal": false,
+  "point_id": "g32.75_-116.75"
+ },
+ {
+  "id": "harmony-grove",
+  "name": "Harmony Grove",
+  "kind": "census_place",
+  "zip": "92029",
+  "lat": 33.0999,
+  "lon": -117.13758,
+  "coastal": false,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "hidden-meadows",
+  "name": "Hidden Meadows",
+  "kind": "census_place",
+  "zip": "92026",
+  "lat": 33.22473,
+  "lon": -117.11448,
+  "coastal": false,
+  "point_id": "g33.25_-117.00"
+ },
+ {
+  "id": "imperial-beach",
+  "name": "Imperial Beach",
+  "kind": "census_place",
+  "zip": "91932",
+  "lat": 32.56253,
+  "lon": -117.11639,
+  "coastal": true,
+  "point_id": "g32.50_-117.00"
+ },
+ {
+  "id": "jacumba",
+  "name": "Jacumba",
+  "kind": "census_place",
+  "zip": "91934",
+  "lat": 32.63049,
+  "lon": -116.17441,
+  "coastal": false,
+  "point_id": "g32.75_-116.25"
+ },
+ {
+  "id": "jamul",
+  "name": "Jamul",
+  "kind": "census_place",
+  "zip": "91935",
+  "lat": 32.71585,
+  "lon": -116.86814,
+  "coastal": false,
+  "point_id": "g32.75_-116.75"
+ },
+ {
+  "id": "julian",
+  "name": "Julian",
+  "kind": "census_place",
+  "zip": "92036",
+  "lat": 33.07377,
+  "lon": -116.58779,
+  "coastal": false,
+  "point_id": "g33.00_-116.50"
+ },
+ {
+  "id": "kearny-mesa",
+  "name": "Kearny Mesa",
+  "kind": "sd_community",
+  "zip": "92123",
+  "lat": 32.81764,
+  "lon": -117.13777,
+  "coastal": false,
+  "point_id": "g32.75_-117.25"
+ },
+ {
+  "id": "la-jolla",
+  "name": "La Jolla",
+  "kind": "sd_community",
+  "zip": "92037",
+  "lat": 32.84585,
+  "lon": -117.25757,
+  "coastal": true,
+  "point_id": "g32.75_-117.25"
+ },
+ {
+  "id": "la-mesa",
+  "name": "La Mesa",
+  "kind": "census_place",
+  "zip": "91942",
+  "lat": 32.76937,
+  "lon": -117.01815,
+  "coastal": false,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "la-presa",
+  "name": "La Presa",
+  "kind": "census_place",
+  "zip": "91977",
+  "lat": 32.70536,
+  "lon": -117.00065,
+  "coastal": false,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "lake-san-marcos",
+  "name": "Lake San Marcos",
+  "kind": "census_place",
+  "zip": "92078",
+  "lat": 33.12004,
+  "lon": -117.20576,
+  "coastal": false,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "lakeside",
+  "name": "Lakeside",
+  "kind": "census_place",
+  "zip": "92040",
+  "lat": 32.85013,
+  "lon": -116.89599,
+  "coastal": false,
+  "point_id": "g33.00_-117.00"
+ },
+ {
+  "id": "lemon-grove",
+  "name": "Lemon Grove",
+  "kind": "census_place",
+  "zip": "91945",
+  "lat": 32.73302,
+  "lon": -117.03289,
+  "coastal": false,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "linda-vista",
+  "name": "Linda Vista",
+  "kind": "sd_community",
+  "zip": "92111",
+  "lat": 32.78595,
+  "lon": -117.17357,
+  "coastal": false,
+  "point_id": "g32.75_-117.25"
+ },
+ {
+  "id": "los-penasquitos-canyon",
+  "name": "Los Penasquitos Canyon",
+  "kind": "sd_community",
+  "zip": "92130",
+  "lat": 32.92552,
+  "lon": -117.18902,
+  "coastal": false,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "mid-city-city-heights",
+  "name": "Mid-City:City Heights",
+  "kind": "sd_community",
+  "zip": "92105",
+  "lat": 32.73747,
+  "lon": -117.10068,
+  "coastal": false,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "mid-city-eastern-area",
+  "name": "Mid-City:Eastern Area",
+  "kind": "sd_community",
+  "zip": "92115",
+  "lat": 32.74326,
+  "lon": -117.06555,
+  "coastal": false,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "mid-city-kensington-talmadge",
+  "name": "Mid-City:Kensington-Talmadge",
+  "kind": "sd_community",
+  "zip": "92116",
+  "lat": 32.76623,
+  "lon": -117.09767,
+  "coastal": false,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "mid-city-normal-heights",
+  "name": "Mid-City:Normal Heights",
+  "kind": "sd_community",
+  "zip": "92116",
+  "lat": 32.7659,
+  "lon": -117.11923,
+  "coastal": false,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "midway-pacific-highway",
+  "name": "Midway-Pacific Highway",
+  "kind": "sd_community",
+  "zip": "92140",
+  "lat": 32.74473,
+  "lon": -117.19969,
+  "coastal": true,
+  "point_id": "g32.75_-117.25"
+ },
+ {
+  "id": "military-facilities",
+  "name": "Military Facilities",
+  "kind": "sd_community",
+  "zip": "92131",
+  "lat": 32.87877,
+  "lon": -117.08174,
+  "coastal": false,
+  "point_id": "g33.00_-117.00"
+ },
+ {
+  "id": "mira-mesa",
+  "name": "Mira Mesa",
+  "kind": "sd_community",
+  "zip": "92126",
+  "lat": 32.91069,
+  "lon": -117.16023,
+  "coastal": false,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "miramar-ranch-north",
+  "name": "Miramar Ranch North",
+  "kind": "sd_community",
+  "zip": "92131",
+  "lat": 32.93221,
+  "lon": -117.09399,
+  "coastal": false,
+  "point_id": "g33.00_-117.00"
+ },
+ {
+  "id": "mission-bay-park",
+  "name": "Mission Bay Park",
+  "kind": "sd_community",
+  "zip": "92109",
+  "lat": 32.77675,
+  "lon": -117.22996,
+  "coastal": true,
+  "point_id": "g32.75_-117.25"
+ },
+ {
+  "id": "mission-beach",
+  "name": "Mission Beach",
+  "kind": "sd_community",
+  "zip": "92109",
+  "lat": 32.77485,
+  "lon": -117.25194,
+  "coastal": true,
+  "point_id": "g32.75_-117.25"
+ },
+ {
+  "id": "mission-valley",
+  "name": "Mission Valley",
+  "kind": "sd_community",
+  "zip": "92108",
+  "lat": 32.77347,
+  "lon": -117.14226,
+  "coastal": false,
+  "point_id": "g32.75_-117.25"
+ },
+ {
+  "id": "mount-laguna",
+  "name": "Mount Laguna",
+  "kind": "census_place",
+  "zip": "91948",
+  "lat": 32.87111,
+  "lon": -116.42421,
+  "coastal": false,
+  "point_id": "g33.00_-116.50"
+ },
+ {
+  "id": "national-city",
+  "name": "National City",
+  "kind": "census_place",
+  "zip": "91950",
+  "lat": 32.64783,
+  "lon": -117.12079,
+  "coastal": true,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "navajo",
+  "name": "Navajo",
+  "kind": "sd_community",
+  "zip": "92119",
+  "lat": 32.80815,
+  "lon": -117.04347,
+  "coastal": false,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "north-park",
+  "name": "North Park",
+  "kind": "sd_community",
+  "zip": "92104",
+  "lat": 32.74519,
+  "lon": -117.13349,
+  "coastal": false,
+  "point_id": "g32.75_-117.25"
+ },
+ {
+  "id": "ocean-beach",
+  "name": "Ocean Beach",
+  "kind": "sd_community",
+  "zip": "92107",
+  "lat": 32.74533,
+  "lon": -117.24851,
+  "coastal": true,
+  "point_id": "g32.75_-117.25"
+ },
+ {
+  "id": "oceanside",
+  "name": "Oceanside",
+  "kind": "census_place",
+  "zip": "92057",
+  "lat": 33.22588,
+  "lon": -117.31296,
+  "coastal": true,
+  "point_id": "g33.25_-117.25"
+ },
+ {
+  "id": "old-town-san-diego",
+  "name": "Old Town San Diego",
+  "kind": "sd_community",
+  "zip": "92110",
+  "lat": 32.75382,
+  "lon": -117.19602,
+  "coastal": false,
+  "point_id": "g32.75_-117.25"
+ },
+ {
+  "id": "otay-mesa",
+  "name": "Otay Mesa",
+  "kind": "sd_community",
+  "zip": "92154",
+  "lat": 32.56678,
+  "lon": -116.98868,
+  "coastal": false,
+  "point_id": "g32.50_-117.00"
+ },
+ {
+  "id": "otay-mesa-nestor",
+  "name": "Otay Mesa-Nestor",
+  "kind": "sd_community",
+  "zip": "92154",
+  "lat": 32.58099,
+  "lon": -117.07077,
+  "coastal": true,
+  "point_id": "g32.50_-117.00"
+ },
+ {
+  "id": "pacific-beach",
+  "name": "Pacific Beach",
+  "kind": "sd_community",
+  "zip": "92109",
+  "lat": 32.79966,
+  "lon": -117.24031,
+  "coastal": true,
+  "point_id": "g32.75_-117.25"
+ },
+ {
+  "id": "pacific-highlands-ranch",
+  "name": "Pacific Highlands Ranch",
+  "kind": "sd_community",
+  "zip": "92130",
+  "lat": 32.9603,
+  "lon": -117.18704,
+  "coastal": false,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "pala",
+  "name": "Pala",
+  "kind": "census_place",
+  "zip": "92059",
+  "lat": 33.36554,
+  "lon": -117.06617,
+  "coastal": false,
+  "point_id": "g33.50_-117.00"
+ },
+ {
+  "id": "peninsula",
+  "name": "Peninsula",
+  "kind": "sd_community",
+  "zip": "92106",
+  "lat": 32.71122,
+  "lon": -117.24642,
+  "coastal": true,
+  "point_id": "g32.75_-117.25"
+ },
+ {
+  "id": "pine-valley",
+  "name": "Pine Valley",
+  "kind": "census_place",
+  "zip": "91962",
+  "lat": 32.84161,
+  "lon": -116.51514,
+  "coastal": false,
+  "point_id": "g32.75_-116.50"
+ },
+ {
+  "id": "potrero",
+  "name": "Potrero",
+  "kind": "census_place",
+  "zip": "91963",
+  "lat": 32.61719,
+  "lon": -116.60426,
+  "coastal": false,
+  "point_id": "g32.75_-116.50"
+ },
+ {
+  "id": "poway",
+  "name": "Poway",
+  "kind": "census_place",
+  "zip": "92064",
+  "lat": 32.9966,
+  "lon": -117.01078,
+  "coastal": false,
+  "point_id": "g33.00_-117.00"
+ },
+ {
+  "id": "rainbow",
+  "name": "Rainbow",
+  "kind": "census_place",
+  "zip": "92028",
+  "lat": 33.40081,
+  "lon": -117.14216,
+  "coastal": false,
+  "point_id": "g33.50_-117.25"
+ },
+ {
+  "id": "ramona",
+  "name": "Ramona",
+  "kind": "census_place",
+  "zip": "92065",
+  "lat": 33.04752,
+  "lon": -116.87774,
+  "coastal": false,
+  "point_id": "g33.00_-116.75"
+ },
+ {
+  "id": "rancho-bernardo",
+  "name": "Rancho Bernardo",
+  "kind": "sd_community",
+  "zip": "92128",
+  "lat": 33.02572,
+  "lon": -117.07355,
+  "coastal": false,
+  "point_id": "g33.00_-117.00"
+ },
+ {
+  "id": "rancho-encantada",
+  "name": "Rancho Encantada",
+  "kind": "sd_community",
+  "zip": "92131",
+  "lat": 32.93204,
+  "lon": -117.00773,
+  "coastal": false,
+  "point_id": "g33.00_-117.00"
+ },
+ {
+  "id": "rancho-penasquitos",
+  "name": "Rancho Penasquitos",
+  "kind": "sd_community",
+  "zip": "92129",
+  "lat": 32.96615,
+  "lon": -117.11928,
+  "coastal": false,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "rancho-san-diego",
+  "name": "Rancho San Diego",
+  "kind": "census_place",
+  "zip": "92019",
+  "lat": 32.76124,
+  "lon": -116.92611,
+  "coastal": false,
+  "point_id": "g32.75_-116.75"
+ },
+ {
+  "id": "rancho-santa-fe",
+  "name": "Rancho Santa Fe",
+  "kind": "census_place",
+  "zip": "92067",
+  "lat": 33.02424,
+  "lon": -117.19794,
+  "coastal": false,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "sabre-springs",
+  "name": "Sabre Springs",
+  "kind": "sd_community",
+  "zip": "92128",
+  "lat": 32.95079,
+  "lon": -117.094,
+  "coastal": false,
+  "point_id": "g33.00_-117.00"
+ },
+ {
+  "id": "san-diego-country-estates",
+  "name": "San Diego Country Estates",
+  "kind": "census_place",
+  "zip": "92065",
+  "lat": 33.01014,
+  "lon": -116.78484,
+  "coastal": false,
+  "point_id": "g33.00_-116.75"
+ },
+ {
+  "id": "san-marcos",
+  "name": "San Marcos",
+  "kind": "census_place",
+  "zip": "92078",
+  "lat": 33.13438,
+  "lon": -117.17499,
+  "coastal": false,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "san-pasqual",
+  "name": "San Pasqual",
+  "kind": "sd_community",
+  "zip": "92027",
+  "lat": 33.07816,
+  "lon": -117.00331,
+  "coastal": false,
+  "point_id": "g33.25_-117.00"
+ },
+ {
+  "id": "san-ysidro",
+  "name": "San Ysidro",
+  "kind": "sd_community",
+  "zip": "92173",
+  "lat": 32.55567,
+  "lon": -117.04801,
+  "coastal": false,
+  "point_id": "g32.50_-117.00"
+ },
+ {
+  "id": "santee",
+  "name": "Santee",
+  "kind": "census_place",
+  "zip": "92071",
+  "lat": 32.86042,
+  "lon": -116.9876,
+  "coastal": false,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "scripps-miramar-ranch",
+  "name": "Scripps Miramar Ranch",
+  "kind": "sd_community",
+  "zip": "92131",
+  "lat": 32.91101,
+  "lon": -117.08885,
+  "coastal": false,
+  "point_id": "g33.00_-117.00"
+ },
+ {
+  "id": "serra-mesa",
+  "name": "Serra Mesa",
+  "kind": "sd_community",
+  "zip": "92123",
+  "lat": 32.79505,
+  "lon": -117.14031,
+  "coastal": false,
+  "point_id": "g32.75_-117.25"
+ },
+ {
+  "id": "skyline-paradise-hills",
+  "name": "Skyline-Paradise Hills",
+  "kind": "sd_community",
+  "zip": "92114",
+  "lat": 32.69207,
+  "lon": -117.04405,
+  "coastal": false,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "solana-beach",
+  "name": "Solana Beach",
+  "kind": "census_place",
+  "zip": "92075",
+  "lat": 32.99426,
+  "lon": -117.2573,
+  "coastal": true,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "southeastern-san-diego",
+  "name": "Southeastern San Diego",
+  "kind": "sd_community",
+  "zip": "92113",
+  "lat": 32.70053,
+  "lon": -117.11829,
+  "coastal": false,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "spring-valley",
+  "name": "Spring Valley",
+  "kind": "census_place",
+  "zip": "91978",
+  "lat": 32.72951,
+  "lon": -116.967,
+  "coastal": false,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "tierrasanta",
+  "name": "Tierrasanta",
+  "kind": "sd_community",
+  "zip": "92124",
+  "lat": 32.82099,
+  "lon": -117.09147,
+  "coastal": false,
+  "point_id": "g32.75_-117.00"
+ },
+ {
+  "id": "tijuana-river-valley",
+  "name": "Tijuana River Valley",
+  "kind": "sd_community",
+  "zip": "92154",
+  "lat": 32.54801,
+  "lon": -117.0869,
+  "coastal": false,
+  "point_id": "g32.50_-117.00"
+ },
+ {
+  "id": "torrey-highlands",
+  "name": "Torrey Highlands",
+  "kind": "sd_community",
+  "zip": "92129",
+  "lat": 32.96422,
+  "lon": -117.15593,
+  "coastal": false,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "torrey-hills",
+  "name": "Torrey Hills",
+  "kind": "sd_community",
+  "zip": "92130",
+  "lat": 32.91918,
+  "lon": -117.22288,
+  "coastal": false,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "torrey-pines",
+  "name": "Torrey Pines",
+  "kind": "sd_community",
+  "zip": "92014",
+  "lat": 32.93406,
+  "lon": -117.25127,
+  "coastal": true,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "university",
+  "name": "University",
+  "kind": "sd_community",
+  "zip": "92121",
+  "lat": 32.88348,
+  "lon": -117.2104,
+  "coastal": true,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "uptown",
+  "name": "Uptown",
+  "kind": "sd_community",
+  "zip": "92103",
+  "lat": 32.74446,
+  "lon": -117.16712,
+  "coastal": false,
+  "point_id": "g32.75_-117.25"
+ },
+ {
+  "id": "valley-center",
+  "name": "Valley Center",
+  "kind": "census_place",
+  "zip": "92082",
+  "lat": 33.22681,
+  "lon": -117.02927,
+  "coastal": false,
+  "point_id": "g33.25_-117.00"
+ },
+ {
+  "id": "via-de-la-valle",
+  "name": "Via De La Valle",
+  "kind": "sd_community",
+  "zip": "92014",
+  "lat": 32.98318,
+  "lon": -117.24413,
+  "coastal": false,
+  "point_id": "g33.00_-117.25"
+ },
+ {
+  "id": "vista",
+  "name": "Vista",
+  "kind": "census_place",
+  "zip": "92081",
+  "lat": 33.1847,
+  "lon": -117.2414,
+  "coastal": false,
+  "point_id": "g33.25_-117.25"
+ },
+ {
+  "id": "winter-gardens",
+  "name": "Winter Gardens",
+  "kind": "census_place",
+  "zip": "92040",
+  "lat": 32.8385,
+  "lon": -116.92793,
+  "coastal": false,
+  "point_id": "g33.00_-117.00"
+ }
+]
