@@ -59,7 +59,7 @@ async function pagesUnder(dir, prefix = '') {
   return pages;
 }
 
-export async function prepare({ source = join(ROOT, 'web/out'), output = join(ROOT, '.vercel/output'), ...options } = {}) {
+export async function prepare({ source = join(ROOT, 'web/out'), output = join(ROOT, '.vercel/output'), services = false, ...options } = {}) {
   source = resolve(source); output = resolve(output);
   // Packaging must never delete a source tree, even when called from another script.
   if (source === output || source.startsWith(`${output}/`) || output.startsWith(`${source}/`)) throw new Error('Source and output directories must be separate');
@@ -83,9 +83,13 @@ export async function prepare({ source = join(ROOT, 'web/out'), output = join(RO
   routes.push({ src: '/.*', dest: '/404.html', status: 404 });
   await rm(output, { recursive: true, force: true });
   await mkdir(output, { recursive: true });
-  await cp(source, join(output, 'static'), { recursive: true });
-  await writeFile(join(output, 'config.json'), JSON.stringify({ version: 3, routes,
+  const webOutput = services ? join(output, 'services/web') : output;
+  await mkdir(webOutput, { recursive: true });
+  await cp(source, join(webOutput, 'static'), { recursive: true });
+  await writeFile(join(webOutput, 'config.json'), JSON.stringify({ version: 3, routes,
     overrides: { 'tiles/sandiego.pmtiles': { contentType: 'application/vnd.pmtiles' } } }, null, 2) + '\n');
+  if (services) await writeFile(join(output, 'config.json'), JSON.stringify({ version: 3,
+    services: [{ name: 'web', root: 'web' }], routes: [{ src: '/.*', destination: { service: 'web' } }] }, null, 2) + '\n');
   return manifest;
 }
 
@@ -93,7 +97,7 @@ if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.m
   try {
     const unknown = process.argv.slice(2).filter(a => !['--allow-unavailable', '--allow-test-reporting'].includes(a));
     if (unknown.length) throw new Error(`Unknown arguments: ${unknown.join(' ')}`);
-    const manifest = await prepare({ allowUnavailable: process.argv.includes('--allow-unavailable'), allowTestReporting: process.argv.includes('--allow-test-reporting') });
+    const manifest = await prepare({ services: true, allowUnavailable: process.argv.includes('--allow-unavailable'), allowTestReporting: process.argv.includes('--allow-test-reporting') });
     process.stdout.write(`Vercel package ready: ${manifest.places} neighborhoods; forecasts ${manifest.forecast_status}\n`);
   } catch (error) { process.stderr.write(`${error.message}\n`); process.exitCode = 1; }
 }

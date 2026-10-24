@@ -80,3 +80,18 @@ test('test reporting builds require an explicit QA override and cannot be mistak
     await assert.doesNotReject(validateExport(f.source, { allowUnavailable: true, allowTestReporting: true }));
   } finally { await rm(f.root, { recursive: true, force: true }); }
 });
+
+test('hourly prebuilt output preserves the Git integration web service and its static API routes', async () => {
+  const f = await fixture();
+  try {
+    await prepare({ ...f, allowUnavailable: true, services: true });
+    const config = JSON.parse(await readFile(join(f.output, 'config.json'), 'utf8'));
+    assert.deepEqual(config.services, [{ name: 'web', root: 'web' }]);
+    assert.deepEqual(config.routes[0].destination, { service: 'web' });
+    const web = join(f.output, 'services/web');
+    const routing = JSON.parse(await readFile(join(web, 'config.json'), 'utf8'));
+    assert.ok(routing.routes.some(route => route.src === '/api/.*' && route.headers['Cache-Control'] === 'no-store'));
+    assert.ok((await readFile(join(web, 'static/api/places.json'), 'utf8')).includes('test-place'));
+    assert.ok((await readFile(join(web, 'static/404.html'), 'utf8')).includes('Outlook SD'));
+  } finally { await rm(f.root, { recursive: true, force: true }); }
+});
