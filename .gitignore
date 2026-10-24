@@ -13,6 +13,10 @@ data/outlook.db
 state.tar.gz
 web/public/api/
 web/public/fonts/
+web/public/app-build.json
+web/public/map-assets/*.mjs
+web/public/map-assets/MAPLIBRE-LICENSE.txt
+web/tsconfig.tsbuildinfo
 web/test-results/
 web/playwright-report/
 .vercel/

@@ -6,6 +6,8 @@ from pathlib import Path
 import pandas as pd
 import requests
 from dotenv import load_dotenv
+from pipeline.security import redact
+from pipeline.storage import atomic_output
 
 load_dotenv()
 ROOT = Path(__file__).resolve().parents[2]
@@ -15,23 +17,12 @@ BBOX = (-117.60, 32.53, -116.08, 33.51)  # west, south, east, north — San Dieg
 UA = {"User-Agent": os.environ.get("NWS_USER_AGENT") or "OutlookSD"}
 
 
-SECRET_VARS = ("AIRNOW_API_KEY", "FIRMS_MAP_KEY", "NEXT_PUBLIC_SUPABASE_ANON_KEY")
-
-
-def redact(text):
-    """Remove API key values from URLs / messages before they are printed or logged."""
-    for v in SECRET_VARS:
-        if os.environ.get(v):
-            text = text.replace(os.environ[v], "***")
-    return text
-
-
 def now_utc():
     return datetime.now(timezone.utc)
 
 
 def save_raw(source, content, ext):
-    out = RAW / source / f"{now_utc():%Y%m%dT%H%M%SZ}.{ext}"
+    out = RAW / source / f"{now_utc():%Y%m%dT%H%M%S%fZ}.{ext}"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_bytes(content if isinstance(content, bytes) else content.encode())
     return out
@@ -57,14 +48,16 @@ def upsert(df, name, keys):
     if path.exists():
         df = pd.concat([pd.read_parquet(path), df], ignore_index=True)
     df = df.drop_duplicates(keys, keep="last").sort_values(keys).reset_index(drop=True)
-    df.to_parquet(path, index=False)
+    with atomic_output(path) as temporary:
+        df.to_parquet(temporary, index=False)
     return df
 
 
 def write(df, name):
     path = PROCESSED / f"{name}.parquet"
     path.parent.mkdir(parents=True, exist_ok=True)
-    df.to_parquet(path, index=False)
+    with atomic_output(path) as temporary:
+        df.to_parquet(temporary, index=False)
     return df
 
 

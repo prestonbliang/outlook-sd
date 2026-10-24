@@ -28,6 +28,17 @@ test('freshness handles old, invalid, and future times without implying negative
   assert.equal(reportAge('2026-10-24T11:30:00Z', now), '30 min ago');
   assert.equal(reportAge('2026-10-24T09:00:00Z', now), '3 hr ago');
   assert.equal(reportAge('2026-10-22T12:00:00Z', now), '2 days ago');
-  assert.equal(reportAge('2026-10-24T13:00:00Z', now), 'Just now');
+  assert.equal(reportAge('2026-10-24T13:00:00Z', now), 'Time unavailable');
   assert.equal(reportAge('invalid', now), 'Time unavailable');
+});
+
+test('malformed server counts stay unavailable instead of becoming coverage', async () => {
+  const { validateSummaries } = await import('../../lib/community.ts');
+  const summary = { place_id: 'la-jolla', hazard: 'water', total: 1, reporters: 1, problem_reports: 1, clear_reports: 0,
+    last_report_at: '2026-10-24T12:00:00Z', kinds: { water_sewage: 1 } };
+  assert.deepEqual(validateSummaries([summary]), [summary]);
+  assert.throws(() => validateSummaries([{ ...summary, reporters: '3' }]));
+  assert.throws(() => validateSummaries([{ ...summary, total: 10 }]));
+  assert.throws(() => validateSummaries([{ ...summary, kinds: { fire_smoke: 1 } }]));
+  assert.throws(() => validateSummaries([summary, summary]));
 });

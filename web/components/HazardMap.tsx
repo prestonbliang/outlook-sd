@@ -12,7 +12,7 @@ import { AQI_HEX, LEVEL_HEX, LEVEL_WORD, PMTILES, Place, TILE_NAME, TileName, ge
 import { COVERAGE_LABEL, coverageFor, reportAge, type Summary } from "@/lib/community";
 
 let protocolAdded = false;
-const ASSETS = "https://protomaps.github.io/basemaps-assets";
+const ASSETS = "/map-assets";
 function baseStyle(): StyleSpecification {
   return {
     version: 8, glyphs: `${ASSETS}/fonts/{fontstack}/{range}.pbf`, sprite: `${ASSETS}/sprites/v4/grayscale`,
@@ -24,14 +24,14 @@ function baseStyle(): StyleSpecification {
 const match = (prop: string, table: Record<string, string>, fallback = "#D5DCE3") =>
   ["match", ["coalesce", ["get", prop], "none"], ...Object.entries(table).flat(), fallback] as unknown as ExpressionSpecification;
 
-export type MapData = GeoJSON.FeatureCollection & { date?: string; mode?: string; run_ts?: string; stale_inputs?: string[] };
+export type MapData = GeoJSON.FeatureCollection & { date?: string; mode?: string; run_ts?: string; stale_inputs?: string[]; context_notice?: string | null };
 type Selection = { lon: number; lat: number; properties: Record<string, unknown>; place?: Place };
 
 export default function HazardMap({ tile, date, center, label, places = [], summaries = null, showReports = false,
-  showCoverage = false, marker = true, onPlacePick }: {
+  showCoverage = false, marker = true, observationsOnPage = false, onPlacePick }: {
   tile: TileName; date?: string; center?: { lat: number; lon: number }; label?: string;
   places?: Place[]; summaries?: Summary[] | null; showReports?: boolean; showCoverage?: boolean;
-  marker?: boolean; onPlacePick?: (place: Place) => void;
+  marker?: boolean; observationsOnPage?: boolean; onPlacePick?: (place: Place) => void;
 }) {
   const mapRef = useRef<MapRef>(null);
   const [data, setData] = useState<MapData | null>(null);
@@ -41,6 +41,7 @@ export default function HazardMap({ tile, date, center, label, places = [], summ
   const [hover, setHover] = useState(false);
   const [ready, setReady] = useState(false);
   if (!protocolAdded && typeof window !== "undefined") {
+    maplibregl.setWorkerUrl("/map-assets/maplibre-gl-worker.mjs");
     maplibregl.addProtocol("pmtiles", new Protocol().tile);
     protocolAdded = true;
   }
@@ -57,14 +58,15 @@ export default function HazardMap({ tile, date, center, label, places = [], summ
       duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 500 });
   }, [center?.lat, center?.lon, ready]);
 
+  const summaryByPlace = useMemo(() => new Map(summaries?.filter(s => s.hazard === tile).map(s => [s.place_id, s])), [summaries, tile]);
   const neighborhoodData = useMemo<GeoJSON.FeatureCollection>(() => ({
     type: "FeatureCollection", features: places.filter((p) => tile !== "water" || p.coastal).map((p) => {
-      const summary = summaries?.find((r) => r.hazard === tile && r.place_id === p.id);
+      const summary = summaryByPlace.get(p.id);
       return { type: "Feature", geometry: { type: "Point", coordinates: [p.lon, p.lat] },
         properties: { id: p.id, name: p.name, neighborhood: true, coverage: coverageFor(summary),
           total: summary?.total ?? 0, problem: summary?.problem_reports ?? 0, clear: summary?.clear_reports ?? 0 } };
     }),
-  }), [places, summaries, tile]);
+  }), [places, summaryByPlace, tile]);
   const interactive = [
     ...(data ? tile === "fire" ? ["hz-fire-cells", "hz-fire-active"] : [`hz-${tile}`] : []),
     ...(places.length ? ["neighborhoods"] : []),
@@ -77,12 +79,14 @@ export default function HazardMap({ tile, date, center, label, places = [], summ
     const p = feature.properties ?? {};
     const point = { lon: event.lngLat.lng, lat: event.lngLat.lat };
     const selectedPlace = places.find((x) => x.id === p.id);
-    const nearest = selectedPlace ?? [...places].sort((a, b) => haversineKm(point, a) - haversineKm(point, b))[0];
+    const candidates = tile === "water" ? places.filter(place => place.coastal) : places;
+    const nearest = selectedPlace ?? candidates.reduce<Place | undefined>((best, place) =>
+      !best || haversineKm(point, place) < haversineKm(point, best) ? place : best, undefined);
     const nearby = nearest && haversineKm(point, nearest) <= 30 ? nearest : undefined;
     setSelection({ ...point, properties: p, place: nearby });
     if (nearby) onPlacePick?.(nearby);
   }
-  const selectedSummary = selection?.place ? summaries?.find((s) => s.place_id === selection.place!.id && s.hazard === tile) : undefined;
+  const selectedSummary = selection?.place ? summaryByPlace.get(selection.place.id) : undefined;
   const p = selection?.properties;
   const hazardLayers = (() => {
     if (tile === "heat" || tile === "flood") return <Layer id={`hz-${tile}`} type="fill"
@@ -99,7 +103,7 @@ export default function HazardMap({ tile, date, center, label, places = [], summ
       "circle-stroke-color": "#FFFFFF", "circle-stroke-width": 2 }} />;
   })();
   return (
-    <div className="hazard-map" role="region" aria-label={label ?? `San Diego ${TILE_NAME[tile].toLowerCase()} map`}>
+    <div className="hazard-map" role="region" aria-busy={!ready} aria-label={label ?? `San Diego ${TILE_NAME[tile].toLowerCase()} map`}>
       <MapGL ref={mapRef} mapLib={maplibregl} mapStyle={style} reuseMaps
         initialViewState={{ longitude: center?.lon ?? -116.9, latitude: center?.lat ?? 33, zoom: center ? 10.5 : 8.5 }}
         maxBounds={[-118.4, 32.2, -115.4, 33.9]} minZoom={7} style={{ position: "absolute", inset: 0 }}
@@ -135,10 +139,11 @@ export default function HazardMap({ tile, date, center, label, places = [], summ
             <p className="small muted">Neighborhood: {selection.place.name}</p>
             {summaries !== null && <p className="small">{COVERAGE_LABEL[coverageFor(selectedSummary)]}
               {selectedSummary && ` · ${selectedSummary.total} observations · ${reportAge(selectedSummary.last_report_at)}`}</p>}
-            <button className="button-link" onClick={() => {
+            {onPlacePick && (observationsOnPage ? <button className="button-link" onClick={() => {
               onPlacePick?.(selection.place!);
               document.getElementById("map-report")?.scrollIntoView({ behavior: "auto", block: "start" });
-            }}>View neighborhood observations</button>
+              document.getElementById("map-report")?.focus({ preventScroll: true });
+            }}>View neighborhood observations</button> : <p><Link href={`/map/?place=${selection.place.id}&hazard=${tile}#map-report`}>View neighborhood observations</Link></p>)}
             <p><Link href={`/hazard/${tile}/?place=${selection.place.id}`}>Forecast and official source →</Link></p>
           </>}
         </Popup>}
@@ -151,6 +156,7 @@ export default function HazardMap({ tile, date, center, label, places = [], summ
           !data.features.some((f) => f.properties?.level || f.properties?.active_fire) ? "No map forecast data available for this day." :
           `${data.mode === "observation" ? "Current observations" : "Forecast"} · ${updatedText(data.run_ts ?? null)}`}
         {data?.stale_inputs?.length ? " · Some source data is not current." : ""}
+        {data?.context_notice && <span> {data.context_notice}</span>}
         {mapError && <span> Background map or map assets could not load. Use the neighborhood list below.</span>}
       </div>
     </div>

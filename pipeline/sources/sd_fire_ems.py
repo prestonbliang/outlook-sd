@@ -1,6 +1,4 @@
 """City of San Diego Fire-Rescue calls for service (data.sandiego.gov), aggregated to daily calls per ZIP."""
-import io
-
 import pandas as pd
 
 from ._common import RAW, get, upsert

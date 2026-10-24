@@ -16,7 +16,9 @@ case "${1:-preview}" in
 esac
 # IDs link the existing project. This file is ignored by git and contains no token.
 node --input-type=module <<'JS'
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { assertReleaseBuild } from './scripts/public-config.mjs';
+assertReleaseBuild(JSON.parse(readFileSync('.vercel/output/static/app-build.json', 'utf8')));
 mkdirSync('.vercel', { recursive: true });
 writeFileSync('.vercel/project.json', JSON.stringify({
   projectId: process.env.VERCEL_PROJECT_ID, orgId: process.env.VERCEL_ORG_ID,

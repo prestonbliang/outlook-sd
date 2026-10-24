@@ -108,3 +108,74 @@ def test_cached_heat_geometry_cannot_keep_an_old_rating(client):
     ]}))
     properties = client.get("/map/heat").json()["features"][0]["properties"]
     assert properties == {"zip": "92101"}
+
+
+def test_forecast_window_does_not_bridge_missing_days(client):
+    assert api.window([{"date": "2026-10-24", "verdict": "Low"}, {"date": "2026-10-26", "verdict": "Low"}]) == {
+        "verdict": "Low", "through": "2026-10-24"}
+
+
+def test_optional_fire_feeds_are_not_required_weather_inputs(client):
+    status = {name: {"stale": True} for name in api.STALE_HOURS}
+    status["openmeteo"] = {"stale": False}
+    assert api.stale_inputs("fire", status) == []
+    status["openmeteo"] = {"stale": True}
+    assert "Open-Meteo weather" in api.stale_inputs("fire", status)
+
+
+def test_artifact_cache_returns_independent_objects(client):
+    first = api.artifact("water", "thresholds.json")
+    first["test_mutation"] = True
+    assert "test_mutation" not in api.artifact("water", "thresholds.json")
+
+
+def test_air_fallback_ignores_malformed_observations(client, monkeypatch):
+    monkeypatch.setattr(api, "read_parquet", lambda name: pd.DataFrame([
+        {"Latitude": "bad", "Longitude": -117.12, "AQI": 500, "SiteName": "Bad location"},
+        {"Latitude": 32.58, "Longitude": -117.12, "AQI": "missing", "SiteName": "Bad AQI"},
+        {"Latitude": "32.58", "Longitude": "-117.12", "AQI": "42", "SiteName": "Valid site"},
+    ]).assign(ts_utc="2026-10-24T15:00:00Z", Parameter="PM2.5"))
+    tile = api.air_tile(api.place_by_id("imperial-beach"), {})
+    assert tile["current"]["aqi"] == 42
+    assert tile["current"]["site"] == "Valid site"
+
+
+def test_official_alerts_remain_visible_without_model_forecasts(client, monkeypatch):
+    monkeypatch.setattr(api, "nws_alerts", lambda events: [{"headline": "Official warning"}])
+    for tile in ["flood", "fire"]:
+        result = api.BUILDERS[tile](api.place_by_id("imperial-beach"), {"nws": {"stale": False}})
+        assert result["days"] == []
+        assert result["official_advisory"]["active"] is True
+        assert result["official_advisory"]["headline"] == "Official warning"
+
+
+def test_stale_alert_feed_cannot_confirm_or_clear_an_alert(client):
+    for alerts in [[], [{"headline": "Old warning"}]]:
+        assert api.alert_status(alerts, {"nws": {"stale": True}})["active"] is None
+    assert api.alert_status([], {"nws": {"stale": False}})["active"] is False
+
+
+def test_water_chart_history_uses_pacific_dates_not_server_timezone(client, monkeypatch):
+    timestamp = pd.Timestamp
+    class FixedTimestamp:
+        @staticmethod
+        def now(tz=None):
+            now = timestamp("2026-10-24T01:00:00Z")  # Oct 23 in San Diego, Oct 24 on a UTC server.
+            return now.tz_convert(tz) if tz else now.tz_localize(None)
+    monkeypatch.setattr(api.pd, "Timestamp", FixedTimestamp)
+    seed_water("2026-10-22")
+    seed_water("2026-10-23")
+    station = next(iter(api.water_stations()))
+    assert [p["t"] for p in api.series_water(station)["observed"]] == ["2026-10-22"]
+
+
+def test_stale_incidents_are_not_shown_as_current_map_markers(client, monkeypatch):
+    incidents = pd.DataFrame([{"Latitude": 32.7, "Longitude": -117.1, "Name": "Old incident",
+                               "AcresBurned": 10, "PercentContained": 0}])
+    monkeypatch.setattr(api, "read_parquet", lambda name: incidents if name == "calfire_active" else None)
+    monkeypatch.setattr(api, "source_status", lambda: {"calfire": {"stale": True}})
+    result = api.map_layer("fire")
+    assert result["features"] == []
+    assert "older incident markers are hidden" in result["context_notice"]
+    monkeypatch.setattr(api, "source_status", lambda: {"calfire": {"stale": False}})
+    assert api.map_layer("fire")["features"][0]["properties"]["active_fire"] is True

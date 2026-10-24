@@ -10,6 +10,15 @@ begin
   if not has_function_privilege('anon', 'public.report_summary(int)', 'EXECUTE') then
     raise exception 'anon cannot read coverage summaries';
   end if;
+  if has_table_privilege('anon', 'public.reports', 'UPDATE') or has_table_privilege('anon', 'public.reports', 'DELETE') then
+    raise exception 'anon can modify existing reports';
+  end if;
+  if has_column_privilege('anon', 'public.reports', 'created_at', 'INSERT') then
+    raise exception 'anon can supply a report timestamp';
+  end if;
+  if not (select relrowsecurity from pg_class where oid = 'public.reports'::regclass) then
+    raise exception 'reports row-level security is not enabled';
+  end if;
 end $$;
 
 set local role anon;
@@ -40,6 +49,33 @@ begin
     raise exception 'Expected an inland-water rejection';
   exception when sqlstate 'P0001' then
     if sqlerrm not like 'Choose a coastal%' then raise; end if;
+  end;
+  begin
+    perform count(*) from public.reports;
+    raise exception 'Expected raw report reads to be denied';
+  exception when insufficient_privilege then null;
+  end;
+  begin
+    insert into public.reports (place_id, hazard, kind, client_id) values
+      ('imperial-beach', 'air', 'water_ok', '00000000-0000-4000-a000-000000000003');
+    raise exception 'Expected mismatched hazard/type to be rejected';
+  exception when check_violation then null;
+  end;
+end $$;
+
+-- Ten distinct observations are allowed; the eleventh is denied even for another hazard.
+insert into public.reports (place_id, hazard, kind, client_id)
+select 'imperial-beach', split_part(kind, '_', 1), kind, '00000000-0000-4000-a000-000000000004'::uuid
+from unnest(array['water_sewage', 'water_sign', 'water_ok', 'air_smoke', 'air_ok', 'heat_extreme', 'heat_ok',
+                  'flood_street', 'flood_overtop', 'flood_ok']) as types(kind);
+do $$
+begin
+  begin
+    insert into public.reports (place_id, hazard, kind, client_id) values
+      ('imperial-beach', 'fire', 'fire_smoke', '00000000-0000-4000-a000-000000000004');
+    raise exception 'Expected hourly report cap';
+  exception when sqlstate 'P0001' then
+    if sqlerrm not like 'Too many reports from this device%' then raise; end if;
   end;
 end $$;
 reset role;

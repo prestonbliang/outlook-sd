@@ -32,11 +32,36 @@ export function coverageFor(summary?: Summary): Coverage {
   return summary.reporters < 3 ? "limited" : "reported";
 }
 export function reportAge(iso: string, now = Date.now()): string {
-  const minutes = Math.max(0, Math.floor((now - Date.parse(iso)) / 60000));
-  if (!Number.isFinite(minutes)) return "Time unavailable";
+  const age = now - Date.parse(iso);
+  if (!Number.isFinite(age) || age < -300000) return "Time unavailable";
+  const minutes = Math.max(0, Math.floor(age / 60000));
   if (minutes < 1) return "Just now";
   if (minutes < 60) return `${minutes} min ago`;
   if (minutes < 1440) return `${Math.floor(minutes / 60)} hr ago`;
   const days = Math.floor(minutes / 1440);
   return `${days} day${days === 1 ? "" : "s"} ago`;
+}
+
+/** Reject malformed summaries instead of turning corrupt/unavailable data into reporting gaps. */
+export function validateSummaries(rows: unknown): Summary[] {
+  if (!Array.isArray(rows)) throw new Error("Invalid community observations");
+  const seen = new Set<string>();
+  for (const row of rows) {
+    if (!row || typeof row !== "object" || !/^[a-z0-9-]{2,60}$/.test(row.place_id) || !Object.hasOwn(KINDS, row.hazard)) throw new Error("Invalid community observations");
+    const counts = [row.total, row.reporters, row.problem_reports, row.clear_reports];
+    if (counts.some(n => !Number.isSafeInteger(n) || n < 0) || row.reporters > row.total || row.total !== row.problem_reports + row.clear_reports || (row.total > 0 && !row.reporters)) throw new Error("Invalid observation counts");
+    if (typeof row.last_report_at !== "string" || !/^\d{4}-\d{2}-\d{2}T/.test(row.last_report_at) || !Number.isFinite(Date.parse(row.last_report_at)) || !row.kinds || typeof row.kinds !== "object" || Array.isArray(row.kinds)) throw new Error("Invalid observation details");
+    const allowed = KINDS[row.hazard as TileName].map(k => k.kind);
+    let total = 0;
+    let problems = 0;
+    for (const [kind, n] of Object.entries(row.kinds)) {
+      if (!allowed.includes(kind) || typeof n !== "number" || !Number.isSafeInteger(n) || n < 0) throw new Error("Invalid observation details");
+      total += n;
+      if (KINDS[row.hazard as TileName].find(k => k.kind === kind)!.problem) problems += n;
+    }
+    const key = `${row.place_id}/${row.hazard}`;
+    if (total !== row.total || problems !== row.problem_reports || seen.has(key)) throw new Error("Inconsistent community observations");
+    seen.add(key);
+  }
+  return rows;
 }

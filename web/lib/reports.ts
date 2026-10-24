@@ -1,10 +1,10 @@
 import type { TileName } from "./api";
-import { KINDS, type Summary } from "./community";
+import { KINDS, validateSummaries, type Summary } from "./community";
 export { KINDS, KIND_LABEL } from "./community";
 export type { Summary } from "./community";
 
-const URL_ = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
-const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const URL_ = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim().replace(/\/$/, "");
+const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
 export const reportsEnabled = Boolean(URL_ && ANON);
 export const REPORTS_CHANGED = "outlook-sd-reports-changed";
 export interface Count { place_id: string; hazard: TileName; kind: string; day: string; n: number }
@@ -16,7 +16,9 @@ function clientId(): string {
   // Require a persistent browser code so disabled storage can't silently defeat repeat limits.
   try {
     let id = localStorage.getItem("outlook-sd-client");
-    if (!id) { id = crypto.randomUUID(); localStorage.setItem("outlook-sd-client", id); }
+    if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+      id = crypto.randomUUID(); localStorage.setItem("outlook-sd-client", id);
+    }
     return id;
   } catch {
     throw new Error("Enable site storage in your browser to submit an observation.");
@@ -24,7 +26,8 @@ function clientId(): string {
 }
 export async function sendReport(placeId: string, hazard: TileName, kind: string): Promise<void> {
   if (!reportsEnabled) throw new Error("Community reporting is not connected yet.");
-  if (!KINDS[hazard].some((k) => k.kind === kind)) throw new Error("Choose a report type for this hazard.");
+  if (!/^[a-z0-9-]{2,60}$/.test(placeId)) throw new Error("Choose a listed neighborhood.");
+  if (!KINDS[hazard]?.some((k) => k.kind === kind)) throw new Error("Choose a report type for this hazard.");
   let r: Response;
   try {
     r = await fetch(`${URL_}/rest/v1/reports`, {
@@ -34,7 +37,7 @@ export async function sendReport(placeId: string, hazard: TileName, kind: string
     });
   } catch (e) {
     if (e instanceof Error && e.message.includes("site storage")) throw e;
-    throw new Error("Could not send your report. Check your connection and try again.");
+    throw new Error("Could not confirm your report was saved. Check your connection and try again.");
   }
   if (!r.ok) {
     const body = await r.json().catch(() => ({}));
@@ -58,7 +61,6 @@ export async function reportSummary(hours = 24, signal?: AbortSignal): Promise<S
     cache: "no-store",
   });
   if (!r.ok) throw new Error("Community observations could not be loaded. Please try again.");
-  const rows = await r.json();
-  if (!Array.isArray(rows)) throw new Error("Community observations are temporarily unavailable.");
-  return rows;
+  try { return validateSummaries(await r.json()); }
+  catch { throw new Error("Community observations are temporarily unavailable."); }
 }

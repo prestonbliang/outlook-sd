@@ -5,11 +5,13 @@ import traceback
 import pandas as pd
 
 from models.common import ART
+from models.version import artifact_version
 from pipeline import db, predict
 from pipeline.features import air, fire, flood, heat, water
 from pipeline.sources import (airnow, beachwatch, calfire, calheatscore, cdip, firms, geo, ibwc, noaa_tides, nws,
                               reports, sd_fire_ems)
-from pipeline.sources._common import PROCESSED, ROOT, redact
+from pipeline.sources._common import PROCESSED, ROOT, redact, write
+from pipeline.storage import atomic_output
 
 TZ = "America/Los_Angeles"
 
@@ -42,11 +44,11 @@ def fetch_all(con):
     run_source(con, "cdip", cdip.fetch_live, "ts_utc")
     alerts = run_source(con, "nws", nws.fetch_live, "onset")
     if alerts is not None:
-        alerts.to_parquet(PROCESSED / "nws_alerts_live.parquet", index=False)
+        write(alerts, "nws_alerts_live")
     run_source(con, "calheatscore", lambda: calheatscore.fetch_live(zips), "issued", every_hours=6)
     fires = run_source(con, "calfire", calfire.fetch_live, "Updated")
     if fires is not None:
-        fires.to_parquet(PROCESSED / "calfire_active.parquet", index=False)
+        write(fires, "calfire_active")
     run_source(con, "airnow", lambda: airnow.fetch_live()[0], "ts_utc")
     run_source(con, "firms", firms.fetch_live, "ts_utc")
     run_source(con, "sd_fire_ems", sd_fire_ems.fetch_live, "date", every_hours=24)
@@ -76,8 +78,7 @@ def weather_points():
 
 
 def model_version(tile):
-    m = ART / tile / "metrics.json"
-    return pd.Timestamp(m.stat().st_mtime, unit="s").strftime("%Y%m%dT%H%M") if m.exists() else "none"
+    return artifact_version(ART / tile)
 
 
 def forecast_all(con, run_ts):
@@ -101,12 +102,12 @@ def forecast_all(con, run_ts):
             rows, detail = fn(now, wx)
             db.log_forecasts(con, run_ts, tile, rows, model_version(tile))
             if tile == "flood":  # hourly curve for the detail chart
-                detail[["target", "tide_pred", "lvl50", "lvl90"]].to_parquet(PROCESSED / "flood_forecast_hourly.parquet")
+                write(detail[["target", "tide_pred", "lvl50", "lvl90"]], "flood_forecast_hourly")
             if tile == "fire":
                 for date, day in detail.groupby("date"):
                     cells = fire.grid().merge(day[["cell", "p", "level"]], on="cell").to_crs(4326)
-                    cells[["cell", "p", "level", "geometry"]].to_file(
-                        PROCESSED / f"map_fire_cells-{date:%Y-%m-%d}.geojson", driver="GeoJSON")
+                    with atomic_output(PROCESSED / f"map_fire_cells-{date:%Y-%m-%d}.geojson") as path:
+                        cells[["cell", "p", "level", "geometry"]].to_file(path, driver="GeoJSON")
             print(f"{tile}: {len(rows)} forecasts")
         except Exception as e:
             print(f"[predict {tile}] FAILED: {redact(str(e))[:300]}")
@@ -120,7 +121,7 @@ def save_weather_series(wx):
         d = heat.daily_weather(h)
         d["rain_mm"] = water.rain_daily(p, source=h)
         frames.append(d.assign(point_id=p))
-    pd.concat(frames).rename_axis("date").reset_index().to_parquet(PROCESSED / "weather_daily_live.parquet")
+    write(pd.concat(frames).rename_axis("date").reset_index(), "weather_daily_live")
 
 
 def log_place_levels(con, run_ts):
@@ -148,7 +149,8 @@ def write_maps(con):
     z = z.merge(h, on="zip", how="left")
     z["source"] = z.value.notna().map({True: "outlook", False: "calheatscore"})
     z["chs"] = z.zip.map(chs)
-    z[["zip", "value", "level", "source", "chs", "geometry"]].to_file(PROCESSED / "map_heat.geojson", driver="GeoJSON")
+    with atomic_output(PROCESSED / "map_heat.geojson") as path:
+        z[["zip", "value", "level", "source", "chs", "geometry"]].to_file(path, driver="GeoJSON")
     f = pd.read_sql("SELECT value, level FROM forecasts WHERE tile='flood' AND target_date=? "
                     "AND run_ts=(SELECT MAX(run_ts) FROM forecasts WHERE tile='flood')", con, params=(today,))
     if not (PROCESSED / "coastal_places.parquet").exists():
@@ -156,7 +158,8 @@ def write_maps(con):
     cp = gpd.read_parquet(PROCESSED / "coastal_places.parquet")
     if len(f):
         cp["level"], cp["peak_ft_mllw"] = f.level.iloc[0], round(f.value.iloc[0] - 3.79, 2)
-    cp.to_file(PROCESSED / "map_flood.geojson", driver="GeoJSON")
+    with atomic_output(PROCESSED / "map_flood.geojson") as path:
+        cp.to_file(path, driver="GeoJSON")
 
 
 def observed(tile):
@@ -164,7 +167,7 @@ def observed(tile):
     if tile == "flood":
         t = flood.load_tides().observed_ft.dropna()
         d = t.groupby(t.index.tz_convert(TZ).date).max()
-        d = d.iloc[:-1]  # today's peak is not final yet
+        d = d[d.index < pd.Timestamp.now(tz=TZ).date()]  # Never discard a completed day when today's observations are missing.
         return {(flood.STATION, str(k)): float(v) for k, v in d.items()}
     if tile == "water":
         lab, _ = water.labels()

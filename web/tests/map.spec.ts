@@ -93,3 +93,45 @@ test.describe("community reporting", () => {
     await expect(page.getByText(/Your observation .* was saved/)).toHaveCount(0);
   });
 });
+
+test("saved neighborhoods persist across reload and can be removed", async ({ page }) => {
+  await page.goto("/map/?place=imperial-beach");
+  await page.getByRole("button", { name: "☆ Save this place", exact: true }).click();
+  await expect(page.getByRole("button", { name: "★ Saved", exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("button", { name: "★ Saved", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "★ Saved", exact: true }).click();
+  await expect(page.getByRole("button", { name: "☆ Save this place", exact: true })).toBeVisible();
+});
+
+test("neighborhood and hazard selections follow browser back", async ({ page }) => {
+  await page.goto("/map/?place=imperial-beach");
+  await expect(page.getByRole("radio", { name: "Water", exact: true })).toBeChecked();
+  await page.getByRole("radio", { name: "Heat", exact: true }).check();
+  await page.goBack();
+  await expect(page.getByRole("radio", { name: "Water", exact: true })).toBeChecked();
+  await page.getByRole("radio", { name: "Heat", exact: true }).check();
+  await page.getByLabel("Filter by neighborhood or ZIP").fill("91901");
+  await page.getByRole("button", { name: /Alpine.*91901/ }).click();
+  await expect(page.getByRole("heading", { name: "Alpine", exact: true })).toBeVisible();
+  await page.goBack();
+  await expect(page.getByRole("heading", { name: "Imperial Beach", exact: true })).toBeVisible();
+});
+
+test("map links restore the selected hazard and forecast date", async ({ page }) => {
+  await page.goto("/map/?place=la-jolla&hazard=heat&date=2026-10-26");
+  await expect(page.getByRole("radio", { name: "Heat", exact: true })).toBeChecked();
+  await expect(page.getByRole("radio", { name: /Mon, Oct 26/ })).toBeChecked();
+  await page.getByRole("button", { name: "Share this view" }).click();
+  const link = page.getByLabel("Link to this map view");
+  await expect(link).toHaveValue(/place=la-jolla&hazard=heat&date=2026-10-26/);
+});
+
+test("keyboard navigation can skip directly to the main content", async ({ page }) => {
+  await page.goto("/map/?place=imperial-beach");
+  await page.keyboard.press("Tab");
+  const skip = page.getByRole("link", { name: "Skip to main content" });
+  await expect(skip).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#main-content")).toBeFocused();
+});
