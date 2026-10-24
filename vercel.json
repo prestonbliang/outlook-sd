@@ -5,7 +5,8 @@
       "root": "web",
       "framework": "nextjs",
       "installCommand": "npm ci",
-      "buildCommand": "bash ../scripts/vercel-git-build.sh"
+      "buildCommand": "bash ../scripts/vercel-git-build.sh",
+      "bindings": []
     }
   },
   "rewrites": [

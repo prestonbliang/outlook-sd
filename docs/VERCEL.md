@@ -14,6 +14,23 @@ The root [`vercel.json`](../vercel.json) supports Vercel's GitHub integration an
 
 The browser already requests static URLs such as `/api/places.json`, `/api/outlook/imperial-beach.json` and `/api/map/heat.json`. These are served by the **web service**, not rewritten into Python endpoints. Reports go directly to Supabase using its public anon key and database policies. There are no Next API route handlers, websocket services, or authenticated application servers to provision.
 
+## Service calls and bindings
+
+The confirmed deployment retains the existing static architecture. The service name is `web`, all public paths route to it, and its explicit `bindings: []` declares that it calls no internal Vercel service.
+
+| Caller | Target | How it is called | Vercel binding |
+| --- | --- | --- | --- |
+| Browser | `web` | Same-origin `/api/*.json`, page and asset requests | None; public HTTP |
+| Web build | Python API assembly | `python -m api.export` invokes FastAPI in-process through TestClient | None; build-time execution |
+| Browser | Supabase | `NEXT_PUBLIC_SUPABASE_URL` with the public anon key | None; external managed service |
+| GitHub Actions | Source APIs | Scheduled ingestion using provider credentials | None; external providers |
+
+The `localhost:8000` development API command is for local inspection; the deployed frontend does not call it. No Docker/service-discovery hostnames or runtime server-to-server API URLs are used by the web app. `NEXT_PUBLIC_API_URL` remains `/api` by default, so client requests agree with the public paths.
+
+Do not add an unused FastAPI service or manually configure a binding URL for this architecture. Vercel [service bindings](https://vercel.com/docs/services/bindings) are injected only into runtime functions, not static browser code or build steps. A future private runtime API would require a server-side caller and a deliberate architecture change.
+
+For routing checks, run `vercel dev --local` (the older `-L` spelling is deprecated). Pages and `/api/*.json` must resolve through `web`, unknown paths return 404, and PMTiles range requests return 206. The local CLI can also serve existing repository source paths from its development filesystem; this is not the production asset allowlist. Inspect the production build output separately: it must contain the static web assets and exported JSON, with no Python source or SQLite database.
+
 The Python API reads precomputed source tables and SQLite. Its mutable database and the hourly ingestion/inference process must not be placed in request-time Vercel Functions. They remain in GitHub Actions. Do not add `api/main.py` as a second Vercel service. Vercel CLI's warning that the root `api/` directory is not built is expected: its code generates the static JSON during the web build.
 
 ## Vercel project settings
