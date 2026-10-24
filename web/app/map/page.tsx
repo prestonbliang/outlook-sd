@@ -1,57 +1,155 @@
 "use client";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useState } from "react";
-import { AQI_HEX, LEVEL_HEX, LEVEL_WORD, TILE_NAME, TILE_ORDER, TileName } from "@/lib/api";
-import { reportsEnabled } from "@/lib/reports";
+import { useEffect, useMemo, useState } from "react";
+import LevelBadge from "@/components/LevelBadge";
+import MapBoundary from "@/components/MapBoundary";
+import PlacePicker from "@/components/PlacePicker";
+import ReportBox from "@/components/ReportBox";
+import { AQI_HEX, LEVEL_HEX, LEVEL_WORD, TILE_NAME, TILE_ORDER, Outlook, TileName, dayName, get } from "@/lib/api";
+import { COVERAGE_LABEL, coverageFor, reportAge } from "@/lib/community";
+import { useCommunity } from "@/lib/useCommunity";
 import { usePlace } from "@/lib/usePlace";
 
-const HazardMap = dynamic(() => import("@/components/HazardMap"), { ssr: false });
+const HazardMap = dynamic(() => import("@/components/HazardMap"), {
+  ssr: false, loading: () => <div className="map-loading" role="status">Loading San Diego map…</div>,
+});
 const NOTES: Record<TileName, string> = {
-  water: "Monitored beach stations, today's chance of bacteria above the state standard.",
-  air: "AirNow monitors, current AQI. Forecast coming soon.",
-  heat: "ZIP codes: Outlook SD heat model in City of San Diego Fire-Rescue ZIPs, the state CalHeatScore elsewhere.",
-  flood: "Places along the ocean and bay shore, colored by today's forecast peak at the San Diego Bay gauge. Approximate.",
-  fire: "2 km areas rated Moderate or higher for a new large fire today (Low areas are not shaded). Dark dots: active CAL FIRE incidents.",
+  water: "Monitored beach stations: predicted chance of bacteria above the state standard. Appearance alone cannot establish water quality.",
+  air: "Monitor locations: daily AQI forecasts, or current readings when today's forecast is unavailable.",
+  heat: "ZIP areas: the Outlook SD model in City Fire-Rescue ZIPs; state CalHeatScore elsewhere. Gray means no rating.",
+  flood: "Coastal outlines share one San Diego Bay gauge forecast. These are approximate shoreline areas, not street-level flood predictions.",
+  fire: "2 km areas: relative risk of a new fire growing beyond 10 acres. Dark dots are active incidents, shown for today only.",
 };
 
 export default function MapPage() {
-  const { place, placeId } = usePlace();
+  const { places, place, placeId, choose, error: placeError } = usePlace();
   const [tile, setTile] = useState<TileName>("water");
+  const [dates, setDates] = useState<string[]>([]);
+  const [date, setDate] = useState<string>();
+  const [dateError, setDateError] = useState(false);
+  const [hours, setHours] = useState(24);
   const [showReports, setShowReports] = useState(true);
+  const [showCoverage, setShowCoverage] = useState(false);
+  const [onlyGaps, setOnlyGaps] = useState(false);
+  const [search, setSearch] = useState("");
+  const [outlook, setOutlook] = useState<Outlook | null>(null);
+  const [outlookError, setOutlookError] = useState<string | null>(null);
+  const community = useCommunity(hours);
+  useEffect(() => {
+    get<{ dates: string[] }>("map/dates.json").then((d) => { setDates(d.dates); setDate(d.dates[0]); })
+      .catch(() => setDateError(true));
+    const selected = new URLSearchParams(window.location.search).get("hazard");
+    if (TILE_ORDER.includes(selected as TileName)) setTile(selected as TileName);
+  }, []);
+  useEffect(() => {
+    if (!placeId) return;
+    const controller = new AbortController();
+    setOutlook(null); setOutlookError(null);
+    get<Outlook>(`outlook/${placeId}.json`, controller.signal).then(setOutlook)
+      .catch((e) => { if (!controller.signal.aborted) setOutlookError(e.message); });
+    return () => controller.abort();
+  }, [placeId]);
+  function selectTile(t: TileName) {
+    setTile(t);
+    const url = new URL(window.location.href); url.searchParams.set("hazard", t);
+    window.history.replaceState(null, "", url);
+  }
+  const eligible = useMemo(() => places.filter((p) => tile !== "water" || p.coastal), [places, tile]);
+  const byPlace = useMemo(() => new Map(community.data?.filter((s) => s.hazard === tile).map((s) => [s.place_id, s])), [community.data, tile]);
+  const gaps = eligible.filter((p) => coverageFor(byPlace.get(p.id)) !== "reported");
+  const shown = eligible.filter((p) => (!onlyGaps || !community.data || coverageFor(byPlace.get(p.id)) !== "reported") &&
+    (!search.trim() || `${p.name} ${p.zip}`.toLowerCase().includes(search.trim().toLowerCase())));
+  const current = outlook?.tiles.find((t) => t.tile === tile);
+  const forecast = current?.days.find((d) => d.date === date);
   const legend = tile === "air" ? AQI_HEX : LEVEL_HEX;
+  const windowLabel = hours === 24 ? "24 hours" : "7 days";
   return (
-    <main className="wrap" style={{ maxWidth: 1100 }}>
-      <p className="small"><Link href={`/?place=${placeId ?? ""}`}>← Today</Link></p>
-      <h1>Map</h1>
-      <fieldset style={{ border: 0, padding: 0, margin: "12px 0", display: "flex", gap: 16, flexWrap: "wrap" }}>
-        <legend className="small" style={{ fontWeight: 600, marginBottom: 4 }}>Hazard</legend>
-        {TILE_ORDER.map((t) => (
-          <label key={t} style={{ display: "flex", gap: 6, alignItems: "center", cursor: "pointer" }}>
-            <input type="radio" name="hazard" checked={tile === t} onChange={() => setTile(t)} />{TILE_NAME[t]}
-          </label>
-        ))}
+    <main className="map-page">
+      <header className="explorer-header">
+        <div><p className="eyebrow">Outlook SD · San Diego County</p><h1>Explore your neighborhood</h1>
+          <p className="muted">Local forecasts and observations from people nearby.</p></div>
+        <nav aria-label="Main navigation"><Link href={`/?place=${placeId ?? "downtown"}`}>Today</Link>
+          <Link href="/track-record/">Track record</Link><Link href="/data/">Data</Link></nav>
+      </header>
+      <fieldset className="hazard-switcher">
+        <legend className="sr-only">Choose a hazard</legend>
+        {TILE_ORDER.map((t) => <label key={t} className={tile === t ? "hazard-option selected" : "hazard-option"}>
+          <input type="radio" name="hazard" checked={tile === t} onChange={() => selectTile(t)} />{TILE_NAME[t]}</label>)}
       </fieldset>
-      <p className="small muted" style={{ margin: "0 0 8px" }}>{NOTES[tile]}</p>
-      {reportsEnabled && (
-        <label className="small" style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 8 }}>
-          <input type="checkbox" checked={showReports} onChange={(e) => setShowReports(e.target.checked)} />
-          Show community reports, last 7 days (number = reports; dark circle = mostly problem reports, white = mostly all-clear)
-        </label>
-      )}
-      <div style={{ height: "60vh", minHeight: 360, border: "1px solid var(--rule)" }}>
-        <HazardMap tile={tile} center={place ?? undefined} showReports={showReports} marker={false} />
+      <div className="explorer-grid">
+        <aside className="explorer-sidebar" aria-label="Map controls and observations">
+          <div className="explorer-panel">
+            <h2>Find a place</h2>
+            <PlacePicker places={places} onPick={(p) => choose(p.id)} />
+            {placeError && <p role="alert">Neighborhoods could not load: {placeError}</p>}
+            <fieldset className="day-switcher"><legend>Forecast day</legend>
+              {dates.map((d, i) => <label key={d} className={date === d ? "day-option selected" : "day-option"}>
+                <input type="radio" name="forecast-day" checked={date === d} onChange={() => setDate(d)} />
+                {i === 0 ? "Today" : dayName(d)}</label>)}
+            </fieldset>
+            {dateError && <p role="status" className="small">Day selection is unavailable. Showing today's map.</p>}
+            <p className="small muted">{NOTES[tile]}</p>
+          </div>
+          <div className="explorer-panel">
+            <p className="eyebrow">Help fill the gaps</p><h2>Community coverage</h2>
+            <p className="small">A blind spot means we need more observations here. It does not mean the area has lower risk.</p>
+            {!community.enabled ? <p className="notice small">Community reporting is not connected yet. Coverage is unknown.</p> : <>
+              <label className="small field-label" htmlFor="report-window">Observations from the past</label>
+              <select id="report-window" value={hours} onChange={(e) => setHours(Number(e.target.value))}>
+                <option value={24}>24 hours</option><option value={168}>7 days</option>
+              </select>
+              {community.error ? <p role="status" className="small">{community.error} <button className="button-link" onClick={community.refresh}>Retry</button></p> :
+                community.data === null ? <p role="status" className="small">Loading coverage…</p> : <>
+                  <p className="coverage-stat"><strong>{gaps.length}</strong> of {eligible.length} neighborhoods need more observations.</p>
+                  <label className="check-option"><input type="checkbox" checked={showReports} onChange={(e) => setShowReports(e.target.checked)} />Show community observations</label>
+                  <label className="check-option"><input type="checkbox" checked={showCoverage} onChange={(e) => setShowCoverage(e.target.checked)} />Highlight reporting blind spots</label>
+                  <label className="check-option"><input type="checkbox" checked={onlyGaps} onChange={(e) => setOnlyGaps(e.target.checked)} />List only areas needing reports</label>
+                  <p className="small muted">Coverage goal: observations from at least 3 browsers per neighborhood and hazard in the selected window. Browser counts are not verified people.</p>
+                </>}
+              <p className="small muted">Reports describe the past {windowLabel}, even when a future forecast day is selected. Observations never change a forecast.</p>
+            </>}
+          </div>
+        </aside>
+        <div className="explorer-main">
+          <div className="explorer-map">
+            <MapBoundary><HazardMap tile={tile} date={date} center={place ?? undefined} places={places} onPlacePick={(p) => choose(p.id)}
+              summaries={community.data} showReports={showReports} showCoverage={showCoverage} /></MapBoundary>
+          </div>
+          <ul aria-label="Map legend" className="map-legend">
+            {Object.entries(legend).map(([key, hex]) => <li key={key}><span aria-hidden style={{ background: hex }} />{LEVEL_WORD[key]}</li>)}
+            <li><span aria-hidden style={{ background: "#D5DCE3" }} />No rating</li>
+            {community.data && showCoverage && <li><span className="gap-key" aria-hidden />More reports needed</li>}
+            {community.data && showReports && <li>Community circles: dark = more problem reports; white = equal or more clear observations. Tap for counts.</li>}
+          </ul>
+          <p className="small muted">Tap a station, shaded area, or neighborhood circle to inspect it. You can also select a neighborhood below.</p>
+          {place && <section className="selected-neighborhood" id="map-report" aria-label="Selected neighborhood">
+            <div className="selected-heading"><div><p className="eyebrow">Selected neighborhood · ZIP {place.zip}</p><h2>{place.name}</h2></div>
+              <Link href={`/hazard/${tile}/?place=${place.id}`}>Full {TILE_NAME[tile].toLowerCase()} forecast →</Link></div>
+            {outlookError ? <p role="status">The neighborhood forecast could not load.</p> : !outlook ? <p role="status">Loading neighborhood forecast…</p> :
+              forecast ? <p>{date && dayName(date, "long")}: <LevelBadge tile={tile} level={forecast.level} /> {forecast.verdict}</p> :
+                <p>{current?.reason ?? "No forecast available for this place and day."}</p>}
+            {tile === "water" && !place.coastal ? <p className="notice">Choose a coastal neighborhood to report beach conditions.</p> :
+              <ReportBox key={`${place.id}-${tile}`} tile={tile} placeId={place.id} placeName={place.name} />}
+          </section>}
+          <section className="neighborhood-section" aria-labelledby="neighborhoods-heading">
+            <h2 id="neighborhoods-heading">Neighborhoods{onlyGaps && community.data ? " needing observations" : ""}</h2>
+            <label className="field-label small" htmlFor="neighborhood-filter">Filter by neighborhood or ZIP</label>
+            <input id="neighborhood-filter" type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search San Diego County" />
+            <p className="small muted" role="status">{shown.length} neighborhoods</p>
+            <ul className="neighborhood-list">{shown.map((p) => {
+              const summary = byPlace.get(p.id);
+              return <li key={p.id}><button aria-pressed={placeId === p.id} onClick={() => choose(p.id)}>
+                <span><strong>{p.name}</strong><span className="small muted">ZIP {p.zip}</span></span>
+                <span className="small">{community.data ? COVERAGE_LABEL[coverageFor(summary)] : "Coverage unavailable"}
+                  {summary && <span className="muted">{summary.total} observations · {reportAge(summary.last_report_at)}</span>}</span>
+              </button></li>;
+            })}</ul>
+            {shown.length === 0 && <p>No neighborhoods match these filters.</p>}
+          </section>
+        </div>
       </div>
-      <ul aria-label="Legend" style={{ listStyle: "none", padding: 0, display: "flex", gap: 16, flexWrap: "wrap", margin: "10px 0" }}>
-        {Object.entries(legend).map(([k, hex]) => (
-          <li key={k} style={{ display: "flex", gap: 6, alignItems: "center" }} className="small">
-            <span aria-hidden style={{ width: 14, height: 14, background: hex, border: "1px solid var(--rule)" }} />{LEVEL_WORD[k]}
-          </li>
-        ))}
-        <li className="small" style={{ display: "flex", gap: 6, alignItems: "center" }}>
-          <span aria-hidden style={{ width: 14, height: 14, background: "#D5DCE3" }} />No rating
-        </li>
-      </ul>
+      <p className="disclaimer">Outlook SD is a forecast, not an official advisory. Follow posted beach signs and official alerts. Only report from a place you are already observing; do not enter a hazardous area to fill a reporting gap.</p>
     </main>
   );
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import HazardRow from "@/components/HazardRow";
 import PlacePicker from "@/components/PlacePicker";
+import MapBoundary from "@/components/MapBoundary";
 import { Outlook, TILE_NAME, TileName, get, updatedText } from "@/lib/api";
 import { usePlace } from "@/lib/usePlace";
 
@@ -18,11 +19,14 @@ export default function Today() {
 
   useEffect(() => {
     if (!placeId) return;
+    const controller = new AbortController();
     setOutlook(null); setLoadError(null);
-    get<Outlook>(`outlook/${placeId}.json`).then(setOutlook).catch((e) => setLoadError(e.message));
+    get<Outlook>(`outlook/${placeId}.json`, controller.signal).then(setOutlook)
+      .catch((e) => { if (!controller.signal.aborted) setLoadError(e.message); });
+    return () => controller.abort();
   }, [placeId]);
 
-  const q = placeId ? `?place=${placeId}` : "";
+  const q = `?place=${placeId ?? "downtown"}`;
   return (
     <div className="today">
       <main className="side">
@@ -42,7 +46,7 @@ export default function Today() {
             ))}
           </div>
           <nav className="nav" aria-label="More">
-            <Link href={`/map/${q}`}>Map</Link>
+            <Link href={`/map/${q}&hazard=${mapTile}`}>Map & community</Link>
             <Link href={`/track-record/${q}`}>Track record</Link>
             <Link href={`/data/${q}`}>Data</Link>
           </nav>
@@ -50,7 +54,7 @@ export default function Today() {
         </div>
       </main>
       <div className="mapcol">
-        {place && <HazardMap tile={mapTile} center={place} label={`${TILE_NAME[mapTile]} map around ${place.name}`} />}
+        {place && <MapBoundary><HazardMap tile={mapTile} center={place} label={`${TILE_NAME[mapTile]} map around ${place.name}`} /></MapBoundary>}
       </div>
       <style>{`
         .mapcol { display: none; }

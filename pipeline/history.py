@@ -12,7 +12,11 @@ WEATHER_START = "2014-01-01"
 
 
 def weather():
-    pts = pd.read_csv(PROCESSED / "weather_points.csv")
+    path = PROCESSED / "weather_points.csv"
+    if not path.exists():
+        PROCESSED.mkdir(parents=True, exist_ok=True)
+        openmeteo.grid_points().to_csv(path, index=False)
+    pts = pd.read_csv(path)
     # coastal/urban points first (Flood, Water, Heat, Air); east-county points are needed only by Fire
     pts = pts.iloc[np.argsort(np.hypot(pts.lat - 32.72, pts.lon + 117.16))]
     openmeteo.fetch_history(pts, start=WEATHER_START)

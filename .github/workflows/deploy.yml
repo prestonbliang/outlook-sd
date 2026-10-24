@@ -1,0 +1,108 @@
+name: deploy-vercel
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Vercel deployment target
+        required: true
+        type: choice
+        default: preview
+        options: [preview, production]
+      allow_unavailable:
+        description: Explicitly allow an initial launch with unavailable forecasts
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pipeline
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      AIRNOW_API_KEY: ${{ secrets.AIRNOW_API_KEY }}
+      FIRMS_MAP_KEY: ${{ secrets.FIRMS_MAP_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      NWS_USER_AGENT: ${{ vars.NWS_USER_AGENT }}
+      ALLOW_UNAVAILABLE: ${{ inputs.allow_unavailable }}
+      DEPLOY_TARGET: ${{ inputs.target }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Vercel configuration
+        run: |
+          for name in VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID; do
+            if [[ -z "${!name}" ]]; then
+              echo "Missing GitHub Actions secret: $name"
+              exit 1
+            fi
+          done
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+        working-directory: web
+      - name: Restore forecast state
+        id: state
+        run: |
+          if gh release download state -p state.tar.gz; then
+            scripts/state.sh unpack
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          elif [[ "$ALLOW_UNAVAILABLE" == "true" ]]; then
+            echo "No state restored. This launch will display unavailable forecasts."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "No state could be restored. Follow docs/VERCEL.md to bootstrap live sources."
+            exit 1
+          fi
+      - name: Refresh forecasts and preserve the log
+        if: steps.state.outputs.found == 'true'
+        run: |
+          uv run python -m pipeline.run_all
+          scripts/state.sh pack
+          gh release upload state state.tar.gz --clobber
+      - run: uv run pytest -q tests
+      - run: uv run python -m api.export
+      - run: npm run test:unit
+        working-directory: web
+      - run: npm run build
+        working-directory: web
+      - run: npm run typecheck
+        working-directory: web
+      - run: npx playwright install --with-deps chromium
+        working-directory: web
+      - run: npm run test:e2e
+        working-directory: web
+      - name: Package tested site for Vercel
+        run: |
+          flags=()
+          if [[ "$ALLOW_UNAVAILABLE" == "true" ]]; then flags+=(--allow-unavailable); fi
+          node scripts/prepare-vercel.mjs "${flags[@]}"
+      - name: Deploy tested output
+        id: deploy
+        run: |
+          scripts/deploy-vercel.sh "$DEPLOY_TARGET" > deployment-url.txt
+          url="$(tail -n 1 deployment-url.txt)"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Deployment: $url" >> "$GITHUB_STEP_SUMMARY"
+      - name: Check deployed pages, API, and map byte ranges
+        env:
+          DEPLOY_URL: ${{ steps.deploy.outputs.url }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+        run: |
+          flags=()
+          if [[ "$ALLOW_UNAVAILABLE" == "true" ]]; then flags+=(--allow-unavailable); fi
+          python scripts/check_deployment.py "$DEPLOY_URL" "${flags[@]}"

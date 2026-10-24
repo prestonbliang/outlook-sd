@@ -1,8 +1,9 @@
 """SQLite forecast log (data/outlook.db): forecasts, scores and source status."""
 import json
 import sqlite3
+from pathlib import Path
 
-from pipeline.sources._common import ROOT
+ROOT = Path(__file__).resolve().parents[1]
 
 DB = ROOT / "data" / "outlook.db"
 SCHEMA = """
@@ -34,8 +35,9 @@ def connect():
 def log_forecasts(con, run_ts, tile, rows, model_version):
     """rows: dicts with unit_id, target_date, lead_days, value, level, factors, extra."""
     con.executemany(
-        "INSERT OR REPLACE INTO forecasts (run_ts, tile, unit_id, target_date, lead_days, value, level, "
-        "factors_json, extra_json, model_version) VALUES (?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO forecasts (run_ts, tile, unit_id, target_date, lead_days, value, level, "
+        "factors_json, extra_json, model_version) VALUES (?,?,?,?,?,?,?,?,?,?) "
+        "ON CONFLICT(run_ts, tile, unit_id, target_date) DO NOTHING",
         [(run_ts, tile, r["unit_id"], r["target_date"], r["lead_days"], r["value"], r["level"],
           json.dumps(r.get("factors", [])), json.dumps(r.get("extra", {})), model_version) for r in rows])
     con.commit()

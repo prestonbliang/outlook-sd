@@ -11,10 +11,15 @@ export function usePlace() {
   const [placeId, setPlaceId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
-    get<Place[]>("places.json").then(setPlaces).catch((e) => setError(e.message));
+    const controller = new AbortController();
     let saved: string | null = null;
     try { saved = localStorage.getItem(KEY); } catch { /* storage blocked */ }
-    setPlaceId(new URLSearchParams(window.location.search).get("place") || saved || DEFAULT_PLACE);
+    const requested = new URLSearchParams(window.location.search).get("place") || saved || DEFAULT_PLACE;
+    get<Place[]>("places.json", controller.signal).then((rows) => {
+      setPlaces(rows);
+      setPlaceId(rows.some((p) => p.id === requested) ? requested : DEFAULT_PLACE);
+    }).catch((e) => { if (!controller.signal.aborted) setError(e.message); });
+    return () => controller.abort();
   }, []);
   const choose = useCallback((id: string) => {
     setPlaceId(id);

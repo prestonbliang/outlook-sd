@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const WORDS = /Low|Moderate|High|Very high|Good|Don't swim|Swim with caution|Coming soon|No |Higher than usual tide|Minor coastal flooding|Moderate coastal flooding|Inland|Not rated|heat risk/;
+const WORDS = /Low|Moderate|High|Very high|Good|Don't swim|Swim with caution|Coming soon|No |Higher than usual tide|Minor coastal flooding|Moderate coastal flooding|Inland|Not rated|heat risk|unavailable/;
 
 for (const place of ["imperial-beach", "la-jolla"]) {
   test(`Today renders five hazard rows with text for ${place}`, async ({ page }) => {

@@ -1,50 +1,53 @@
 "use client";
-import { useEffect, useState } from "react";
-import { TileName } from "@/lib/api";
-import { Count, KINDS, KIND_LABEL, reportCounts, reportsEnabled, sendReport } from "@/lib/reports";
+import Link from "next/link";
+import { useId, useState } from "react";
+import type { TileName } from "@/lib/api";
+import { COVERAGE_LABEL, KIND_LABEL, KINDS, coverageFor, reportAge } from "@/lib/community";
+import { sendReport } from "@/lib/reports";
+import { useCommunity } from "@/lib/useCommunity";
 
-/** One-tap community report for this place and hazard, plus the last 7 days of reports here. */
 export default function ReportBox({ tile, placeId, placeName }: { tile: TileName; placeId: string; placeName: string }) {
-  const [counts, setCounts] = useState<Count[] | null>(null);
+  const id = useId();
+  const { data, error, refresh, enabled } = useCommunity(24);
+  const summary = data?.find((r) => r.place_id === placeId && r.hazard === tile);
   const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
-
-  const load = () => reportCounts(7).then((c) => setCounts(c.filter((x) => x.place_id === placeId && x.hazard === tile)))
-    .catch(() => setCounts(null));
-  useEffect(() => { if (reportsEnabled) load(); }, [placeId, tile]); // eslint-disable-line react-hooks/exhaustive-deps
-
   async function send(kind: string) {
+    if (busy) return;
     setBusy(true); setStatus(null);
     try {
       await sendReport(placeId, tile, kind);
-      setStatus({ ok: true, text: `Thanks. Your report for ${placeName} is counted below.` });
-      load();
-    } catch (e) {
-      setStatus({ ok: false, text: (e as Error).message });
-    } finally { setBusy(false); }
+      setStatus({ ok: true, text: `Thanks. Your observation for ${placeName} was saved.` });
+    } catch (e) { setStatus({ ok: false, text: (e as Error).message }); }
+    finally { setBusy(false); }
   }
-
-  const totals = new Map<string, number>();
-  counts?.forEach((c) => totals.set(c.kind, (totals.get(c.kind) ?? 0) + c.n));
   return (
-    <section aria-labelledby="report-h" style={{ borderTop: "1px solid var(--rule)", marginTop: 20, paddingTop: 12 }}>
-      <h2 id="report-h">What do you see in {placeName}?</h2>
-      {tile === "fire" && <p style={{ fontWeight: 600 }}>If you see a new fire, call 911 first.</p>}
-      {!reportsEnabled ? <p className="small muted">Community reports are not connected on this copy of the app.</p> : <>
-        <p className="small muted">One tap. We store only the neighborhood, the report type and the time — no name, no exact location. Reports are from app users and are not checked by officials.</p>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {KINDS[tile].map((k) => (
-            <button key={k.kind} disabled={busy} onClick={() => send(k.kind)}
-                    style={{ padding: "8px 12px", border: "1px solid var(--signal)", background: "var(--paper)", color: "var(--signal)",
-                             borderRadius: 2, cursor: busy ? "wait" : "pointer" }}>{k.label}</button>
-          ))}
+    <section className="report-box" aria-labelledby={id}>
+      <p className="eyebrow">Community observations</p>
+      <h2 id={id}>What do you see in {placeName}?</h2>
+      {tile === "fire" && <p className="notice">If you see a new fire, call 911 first. This form does not contact emergency services.</p>}
+      {!enabled ? <p className="small muted">Community reporting is not connected yet. Forecasts are still available.</p> : <>
+        {error ? <p role="status" className="small">{error} <button className="button-link" onClick={refresh}>Retry</button></p> :
+          data === null ? <p className="small muted" role="status">Loading recent observations…</p> :
+          <div className={`coverage-note coverage-${coverageFor(summary)}`}>
+            <strong>{COVERAGE_LABEL[coverageFor(summary)]}</strong>
+            <p className="small">{summary ? `${summary.total} observation${summary.total === 1 ? "" : "s"} from ${summary.reporters} browser${summary.reporters === 1 ? "" : "s"} in the past 24 hours. Latest: ${reportAge(summary.last_report_at)}.` :
+              "This neighborhood is a reporting blind spot for this hazard in the past 24 hours."}
+              {coverageFor(summary) !== "reported" && " If you are already here, help fill the gap with what you observe."}</p>
+          </div>}
+        <p className="small">Report only what you observe here now. Choose one:</p>
+        <div className="report-options" aria-busy={busy}>
+          {KINDS[tile].map((k) => <button key={k.kind} className="observation-button" disabled={busy}
+            onClick={() => send(k.kind)}>{k.label}</button>)}
         </div>
-        {status && <p role="status" className="small" style={{ color: status.ok ? "var(--ink)" : "var(--lvl-high)" }}>{status.text}</p>}
-        <p className="small" style={{ marginBottom: 0 }}>
-          Reports here, last 7 days: {totals.size === 0 ? "none yet." :
-            [...totals.entries()].map(([k, n]) => `${KIND_LABEL[k]} ${n}`).join(" · ")}
-        </p>
+        {status && <p role={status.ok ? "status" : "alert"} className={status.ok ? "small" : "small form-error"}>{status.text}</p>}
+        {summary && <ul className="observation-counts small">{Object.entries(summary.kinds).map(([kind, n]) =>
+          <li key={kind}>{KIND_LABEL[kind] ?? kind}: <strong>{n}</strong></li>)}</ul>}
       </>}
+      <p className="small muted">Observations are unverified and never change the forecast. No reports does not mean no hazard.
+        {tile === "water" && " Clear-looking water can still contain harmful bacteria; follow posted signs."}</p>
+      <p className="small muted">We store the neighborhood, report type, time, and a random browser code for repeat limits.
+        No name or precise location. <Link href="/data/#community">How reports work</Link></p>
     </section>
   );
 }

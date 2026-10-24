@@ -21,6 +21,7 @@ def _read_zip(source, url, name):
 
 
 def fetch_history():
+    PROCESSED.mkdir(parents=True, exist_ok=True)
     county = _read_zip("census", COUNTY_URL, "county.zip")
     county = county[(county.STATEFP == "06") & (county.COUNTYFP == "073")].to_crs(4326)[["GEOID", "NAME", "geometry"]]
     zcta = _read_zip("census", ZCTA_URL, "zcta.zip").to_crs(4326)

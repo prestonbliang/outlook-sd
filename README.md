@@ -4,6 +4,14 @@ A 3-day, neighborhood-level forecast for five hazards in San Diego County: beach
 
 Outlook SD is a forecast, not an official advisory. Every tile links to the official source.
 
+## Map and community observations
+
+The Map page lets users switch hazards and forecast days, inspect stations and shaded areas, search neighborhoods or ZIPs, and submit observations for a selected neighborhood. A neighborhood list provides the same selection controls without requiring WebGL. On small screens the controls and map stack vertically.
+
+Community observations include counts, time since the latest report, and coverage over the past 24 hours or 7 days. Reporting blind spots are places with fewer than three reporting browsers for the selected hazard and time window. They ask for more observations; they are not risk ratings or confidence scores. Browser codes are not verified people. The app stores no precise user coordinates, names, emails, or free text. Reports never modify the forecast.
+
+Community reporting requires Supabase configuration and the current `supabase/schema.sql`, including its `report_summary` function. Disconnected or failed requests show coverage as unavailable. Reports remain observations about recent conditions when a future forecast day is selected.
+
 ## What each tile forecasts
 
 | Tile | Question | Unit | Status |
@@ -88,22 +96,28 @@ GitHub Actions (hourly)
 
 Needs Python 3.12 with [uv](https://docs.astral.sh/uv/), and Node 22.
 
+For a fresh clone, use the complete [setup and deployment guide](docs/SETUP.md). Run `make doctor` to see which dependencies, source tables, and service settings are missing. Run `make init` after dependency installation to explore the app with explicit missing-data states before restoring source data. Existing deployments should restore the `state` release rather than download and retrain everything.
+
+For Vercel, follow the [Vercel launch guide](docs/VERCEL.md). The manual `deploy-vercel` workflow supports an explicit first launch before forecast state exists. Both deployment workflows validate and package `.vercel/output` for `vercel deploy --prebuilt`, then check the hosted pages, API, and map byte-range support.
+
 ```bash
 cp .env.example .env          # add AIRNOW_API_KEY, FIRMS_MAP_KEY (free) and the Supabase URL + anon key
 uv sync
 make probe                    # check every data source
 make history                  # download and process history (≈1 GB peak, mostly temporary)
-make train                    # Flood, Heat, Water
+make train                    # deliberately rebuild all five models (overwrites artifacts)
 uv run python -m pipeline.run_all   # one live run: forecasts into data/outlook.db
 uv run python -m api.export   # static API for the web app
 cd web && npm ci && npm run build && npx http-server out   # or: make api / make web for development
 make test                     # pytest (schema, leakage, API contract) + Playwright smoke test
 ```
 
+`make refresh` combines the live pipeline and API export. `make build` exports the API and builds the site. Core API and leakage tests run on fixtures without the historical archive; processed-data schema tests require their source tables. Browser tests require a completed static build. See the setup guide for type checks, browser installation, Supabase database tests, and the first state-release upload.
+
 ### Community reports (Supabase)
 
 1. Create a free project at supabase.com.
-2. Open **SQL Editor**, paste [`supabase/schema.sql`](supabase/schema.sql) and run it. It creates an insert-only `reports` table with row-level security, a per-device rate limit and a `report_counts()` function that returns only daily counts.
+2. Open **SQL Editor**, paste [`supabase/schema.sql`](supabase/schema.sql) and run it. It creates an insert-only `reports` table with row-level security, a neighborhood whitelist, per-browser repeat limits, daily counts, and a recent-coverage summary. Reapply the full schema when upgrading from the older reporting implementation; existing reports are preserved.
 3. From **Project Settings → API**, copy the project URL and the `anon` public key into `.env` as `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and add both as GitHub Actions secrets.
 
 The anon key is meant to be public: with the schema's policies it can only add reports and read counts. Raw rows and device IDs are never readable.

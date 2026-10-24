@@ -1,0 +1,46 @@
+name: checks
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+        working-directory: web
+      - run: uv run pytest -q tests
+      - run: uv run python -m api.export
+      - run: npm run test:unit
+        working-directory: web
+      - run: npm run build
+        working-directory: web
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://reports.example.invalid
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: test-public-key
+      - run: npm run typecheck
+        working-directory: web
+      - run: node scripts/prepare-vercel.mjs --allow-unavailable
+      - run: npx playwright install --with-deps chromium
+        working-directory: web
+      - run: npm run test:e2e
+        working-directory: web
+        env:
+          E2E_REPORTS_ENABLED: "1"
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-test-results
+          path: web/test-results/

@@ -5,7 +5,9 @@
     "fonts": "node scripts/copy-fonts.mjs",
     "dev": "npm run fonts && next dev",
     "build": "npm run fonts && next build",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:unit": "node --experimental-strip-types --test tests/unit/*.test.mjs",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@observablehq/plot": "0.6.17",

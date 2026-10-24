@@ -53,4 +53,6 @@ No AI model produces the forecasts or the text shown in the app. Forecasts come 
 
 ### Student contributions
 
+**Codex (OpenAI)** was used to audit fresh-clone behavior, improve missing-data and forecast-date handling, extend the interactive map and community reporting/coverage features, and write regression tests, setup diagnostics, and documentation. These changes still require the validation and service configuration described in `docs/SETUP.md` before a live deployment.
+
 _To be written by the student: what you designed, decided, checked, changed or wrote yourself._

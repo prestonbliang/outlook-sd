@@ -6,7 +6,9 @@ from pipeline.features import flood, heat, water
 
 
 def test_flood_state_uses_only_past_observations():
-    tides, waves = flood.load_tides(), flood.load_waves()
+    times = pd.date_range("2025-01-01", "2025-09-01", freq="h", tz="UTC")
+    tides = pd.DataFrame({"residual_ft": np.sin(np.arange(len(times)))}, index=times)
+    waves = pd.DataFrame({"hs_m": 1., "tp_s": 10., "sst_anom": .5}, index=times)
     for issue in pd.DatetimeIndex(["2025-03-01 12:00", "2025-08-15 00:00"], tz="UTC"):
         before = flood.state_at(tides, waves, pd.DatetimeIndex([issue]))
         t2, w2 = tides.copy(), waves.copy()
@@ -16,7 +18,8 @@ def test_flood_state_uses_only_past_observations():
 
 
 def test_water_flow_features_use_days_before_issue():
-    fd = water.flow_daily()
+    times = pd.date_range("2019-01-01", "2019-03-01")
+    fd = pd.DataFrame({"mean": 1., "max": 2., "n": 24}, index=times)
     issue = pd.Timestamp("2019-02-10")
     before = water.flow_features(fd).loc[issue]
     fd2 = fd.copy()
@@ -26,7 +29,9 @@ def test_water_flow_features_use_days_before_issue():
 
 
 def test_heat_call_level_lags_at_least_90_days():
-    ems = pd.read_parquet(heat.PROCESSED / "ems_daily_zip.parquet").assign(date=lambda x: pd.to_datetime(x.date))
+    dates = pd.date_range("2023-01-01", "2025-12-31")
+    ems = pd.DataFrame([(d, z, 10 + d.day % 5) for d in dates for z in ["92101", "92109"]],
+                       columns=["date", "zip", "calls"])
     target = pd.Timestamp("2025-07-01")
     lvl = heat.call_level(ems).set_index(["date", "zip"]).level_365d
     ems2 = ems.copy()
@@ -37,6 +42,15 @@ def test_heat_call_level_lags_at_least_90_days():
 
 
 def test_flood_rows_never_use_observed_target_as_feature():
-    d = flood.training_table().head(5000)
+    times = pd.date_range("2025-01-01", periods=240, freq="h", tz="UTC")
+    tides = pd.DataFrame({"predicted_ft": 5., "residual_ft": .2, "observed_ft": 5.2}, index=times)
+    waves = pd.DataFrame({"hs_m": 1., "tp_s": 10., "sst_anom": .5}, index=times)
+    weather = pd.DataFrame({c: 1. for c in flood.WX}, index=times)
+    issue = pd.DatetimeIndex([times[168]])
+    d = flood.build(issue, tides, weather, waves)
+    changed = tides.copy()
+    changed.loc[changed.index > issue[0], ["residual_ft", "observed_ft"]] = 999.
+    after = flood.build(issue, changed, weather, waves)
     assert "residual" not in flood.FEATURES and "observed" not in flood.FEATURES
     assert (d.target > d.issue).all()
+    pd.testing.assert_frame_equal(d[flood.FEATURES], after[flood.FEATURES])
