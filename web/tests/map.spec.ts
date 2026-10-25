@@ -127,9 +127,10 @@ test("map links restore the selected hazard and forecast date", async ({ page })
   await expect(link).toHaveValue(/place=la-jolla&hazard=heat&date=2026-10-26/);
 });
 
-test("keyboard navigation can skip directly to the main content", async ({ page }) => {
+test("keyboard navigation can skip directly to the main content", async ({ page, browserName }) => {
   await page.goto("/map/?place=imperial-beach");
-  await page.keyboard.press("Tab");
+  // WebKit on macOS (like Safari's default setting) moves Tab focus only between form controls; Option+Tab reaches links
+  await page.keyboard.press(browserName === "webkit" && process.platform === "darwin" ? "Alt+Tab" : "Tab");
   const skip = page.getByRole("link", { name: "Skip to main content" });
   await expect(skip).toBeFocused();
   await page.keyboard.press("Enter");
