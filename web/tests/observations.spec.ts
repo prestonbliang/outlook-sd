@@ -3,11 +3,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { KINDS, LEGACY_KINDS } from "../lib/community";
 import { mockApi, QA_NOW } from "./fixtures";
 
-const allKinds = Object.values(KINDS).flat().map(kind => kind.kind);
-test.beforeEach(async ({ page }) => {
-  await mockApi(page);
-  await page.route("**/rest/v1/rpc/report_kinds", route => route.fulfill({ json: allKinds }));
-});
+test.beforeEach(async ({ page }) => { await mockApi(page); });
 
 for (const hazard of ["water", "air", "heat", "flood", "fire"] as const) {
   test(`${hazard} offers all supported choices with accessible mobile controls`, async ({ page }) => {

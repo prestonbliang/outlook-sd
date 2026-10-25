@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { KINDS } from "../lib/community";
 
 // Deliberately synthetic, browser-test-only records. Never imported by application code.
 export const QA_NOW = "2026-10-24T18:00:00Z";
@@ -22,7 +23,16 @@ export function heatFixture() {
     series: { units: "°F", threshold: null, observed_label: "Test history",
       observed: [{ t: "2026-10-23", v: 79 }], forecast: [{ t: "2026-10-24", v: 85, hi: 90 }] } };
 }
+export async function mockCommunityApi(page: Page) {
+  // Keep all read-only reporting requests local, including vocabulary discovery.
+  // Individual tests can override these routes to exercise older databases or outages.
+  await page.route("**/rest/v1/rpc/report_kinds", route => route.fulfill({
+    json: Object.values(KINDS).flat().map(kind => kind.kind),
+  }));
+  await page.route("**/rest/v1/rpc/report_summary", route => route.fulfill({ json: [] }));
+}
 export async function mockApi(page: Page) {
+  await mockCommunityApi(page);
   await page.clock.setFixedTime(new Date(QA_NOW));
   await page.route("**/api/**", async route => {
     const path = new URL(route.request().url()).pathname;
@@ -43,5 +53,4 @@ export async function mockApi(page: Page) {
     else if (path.endsWith("track-record.json")) json = { tiles: Object.fromEntries(QA_TILES.map(t => [t, { held_out: null, live: null, community: null }])) };
     await route.fulfill({ json });
   });
-  await page.route("**/rest/v1/rpc/report_summary", route => route.fulfill({ json: [] }));
 }

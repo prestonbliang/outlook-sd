@@ -1,7 +1,9 @@
 import { expect, test } from "@playwright/test";
+import { mockCommunityApi } from "./fixtures";
 
 // Network-independent contract fixture, explicitly missing forecasts rather than fabricated live values.
 test.beforeEach(async ({ page }) => {
+  await mockCommunityApi(page);
   await page.route("**/api/**", async (route) => {
     const path = new URL(route.request().url()).pathname;
     const places = [
@@ -54,17 +56,15 @@ test.describe("community reporting", () => {
     let saved = false;
     let payload: Record<string, unknown> | undefined;
     let sentHeaders: Record<string, string> | undefined;
-    await page.route("**/rest/v1/**", async (route) => {
-      const path = new URL(route.request().url()).pathname;
-      if (path.endsWith("/reports")) {
-        payload = route.request().postDataJSON(); saved = true;
-        sentHeaders = route.request().headers();
-        await route.fulfill({ status: 201, body: "" });
-      } else await route.fulfill({ json: saved ? [{
-        place_id: "imperial-beach", hazard: "water", total: 1, reporters: 1,
-        problem_reports: 1, clear_reports: 0, last_report_at: new Date().toISOString(), kinds: { water_sewage: 1 },
-      }] : [] });
+    await page.route("**/rest/v1/reports", async (route) => {
+      payload = route.request().postDataJSON(); saved = true;
+      sentHeaders = route.request().headers();
+      await route.fulfill({ status: 201, body: "" });
     });
+    await page.route("**/rest/v1/rpc/report_summary", route => route.fulfill({ json: saved ? [{
+      place_id: "imperial-beach", hazard: "water", total: 1, reporters: 1,
+      problem_reports: 1, clear_reports: 0, last_report_at: new Date().toISOString(), kinds: { water_sewage: 1 },
+    }] : [] }));
     await page.goto("/map/?place=imperial-beach");
     await page.getByRole("button", { name: "Sewage smell or brown water", exact: true }).click();
     await expect(page.getByText("Thanks. Your observation for Imperial Beach was saved.")).toBeVisible();
@@ -88,9 +88,8 @@ test.describe("community reporting", () => {
   });
 
   test("repeat-report rejection is explained without claiming success", async ({ page }) => {
-    await page.route("**/rest/v1/**", (route) => route.request().url().endsWith("/reports")
-      ? route.fulfill({ status: 400, json: { message: "You already sent this report for this place in the last 6 hours" } })
-      : route.fulfill({ json: [] }));
+    await page.route("**/rest/v1/reports", route => route.fulfill({ status: 400,
+      json: { message: "You already sent this report for this place in the last 6 hours" } }));
     await page.goto("/map/?place=imperial-beach");
     await page.getByRole("button", { name: "Sewage smell or brown water", exact: true }).click();
     const reportBox = page.getByRole("region", { name: "What do you see in Imperial Beach?", exact: true });
