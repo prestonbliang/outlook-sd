@@ -39,9 +39,11 @@ def main():
     check("Web dependencies", (ROOT / "web/node_modules/next/package.json").exists(), "cd web && npm ci")
     check("Shared .env", env_file.exists(), "copy .env.example to .env and configure your services")
     for name, service in [("AIRNOW_API_KEY", "AirNow live forecasts"), ("FIRMS_MAP_KEY", "NASA satellite detections"),
-                          ("NEXT_PUBLIC_SUPABASE_URL", "Community reporting URL"),
-                          ("NEXT_PUBLIC_SUPABASE_ANON_KEY", "Community reporting public key")]:
+                          ("NEXT_PUBLIC_SUPABASE_URL", "Community reporting URL")]:
         check(service, bool(env.get(name)), f"configure {name} in .env")
+    check("Community reporting public key", bool(env.get("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY") or
+                                                env.get("NEXT_PUBLIC_SUPABASE_ANON_KEY")),
+          "configure NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (or legacy NEXT_PUBLIC_SUPABASE_ANON_KEY) in .env")
     for name, task in [("zcta_sd.parquet", "geo"), ("coastal_places.parquet", "geo"), ("acs_zcta.parquet", "acs"),
                        ("ems_daily_zip.parquet", "ems"), ("beach_results.parquet", "beachwatch"),
                        ("ibwc_flow.parquet", "ibwc"), ("cdip_191.parquet", "cdip"), ("tides_9410170.parquet", "tides")]:

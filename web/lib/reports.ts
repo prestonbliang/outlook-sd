@@ -1,16 +1,18 @@
 import type { TileName } from "./api";
 import { KINDS, validateSummaries, type Summary } from "./community";
+import { reportingHeaders } from "./reporting-headers";
 export { KINDS, KIND_LABEL } from "./community";
 export type { Summary } from "./community";
 
 const URL_ = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim().replace(/\/$/, "");
-const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
-export const reportsEnabled = Boolean(URL_ && ANON);
+const PUBLIC_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim()
+  || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+export const reportsEnabled = Boolean(URL_ && PUBLIC_KEY);
 export const REPORTS_CHANGED = "outlook-sd-reports-changed";
 export interface Count { place_id: string; hazard: TileName; kind: string; day: string; n: number }
 
 function headers() {
-  return { apikey: ANON!, Authorization: `Bearer ${ANON}`, "Content-Type": "application/json" };
+  return reportingHeaders(PUBLIC_KEY!);
 }
 function clientId(): string {
   // Require a persistent browser code so disabled storage can't silently defeat repeat limits.

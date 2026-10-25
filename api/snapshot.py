@@ -18,4 +18,5 @@ def manifest(directory, now, commit=None):
             "source_commit": commit, "places": len(places), "forecast_places": counts,
             "forecast_status": "ready" if any(counts.values()) else "unavailable",
             "reporting_configured": bool(os.environ.get("NEXT_PUBLIC_SUPABASE_URL") and
-                                         os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY"))}
+                                         (os.environ.get("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY") or
+                                          os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY")))}

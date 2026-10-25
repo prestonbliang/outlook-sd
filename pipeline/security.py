@@ -3,7 +3,8 @@ import os
 import re
 from urllib.parse import quote, quote_plus, urljoin, urlparse
 
-SECRET_VARS = ("AIRNOW_API_KEY", "FIRMS_MAP_KEY", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "VERCEL_TOKEN", "GH_TOKEN")
+SECRET_VARS = ("AIRNOW_API_KEY", "FIRMS_MAP_KEY", "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+               "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "VERCEL_TOKEN", "GH_TOKEN")
 
 
 def redact(text):

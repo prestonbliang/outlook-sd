@@ -8,7 +8,17 @@ test('partial reporting configuration fails explicitly', () => {
 });
 test('service-role and secret keys cannot reach the browser build', () => {
   const jwt = `header.${Buffer.from(JSON.stringify({ role: 'service_role' })).toString('base64url')}.signature`;
-  for (const key of [jwt, 'sb_secret_test']) assert.throws(() => validatePublicConfig({ NEXT_PUBLIC_SUPABASE_URL: url, NEXT_PUBLIC_SUPABASE_ANON_KEY: key }), /private Supabase key/);
+  for (const name of ['NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'NEXT_PUBLIC_SUPABASE_ANON_KEY']) {
+    for (const key of [jwt, 'sb_secret_test']) assert.throws(() => validatePublicConfig({ NEXT_PUBLIC_SUPABASE_URL: url, [name]: key }), /private Supabase key/);
+  }
+  assert.throws(() => validatePublicConfig({ NEXT_PUBLIC_SUPABASE_URL: url, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_test', NEXT_PUBLIC_SUPABASE_ANON_KEY: 'sb_secret_unused' }), /private Supabase key/);
+});
+test('publishable keys configure reporting without requiring a legacy key', () => {
+  const config = { NEXT_PUBLIC_SUPABASE_URL: url, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_test' };
+  assert.doesNotThrow(() => validatePublicConfig(config));
+  assert.deepEqual(publicBuildMetadata(config), { schema_version: 1, reporting: 'configured' });
+  assert.ok(!JSON.stringify(publicBuildMetadata(config)).includes(config.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY));
+  assert.deepEqual(publicBuildMetadata({ ...config, NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-public-key' }), { schema_version: 1, reporting: 'configured' });
 });
 test('remote reporting requires HTTPS but local development remains supported', () => {
   const config = { NEXT_PUBLIC_SUPABASE_URL: 'http://example.com', NEXT_PUBLIC_SUPABASE_ANON_KEY: 'public' };

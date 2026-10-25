@@ -53,10 +53,12 @@ test.describe("community reporting", () => {
   test("saving an observation refreshes counts and sends no exact location", async ({ page }) => {
     let saved = false;
     let payload: Record<string, unknown> | undefined;
+    let sentHeaders: Record<string, string> | undefined;
     await page.route("**/rest/v1/**", async (route) => {
       const path = new URL(route.request().url()).pathname;
       if (path.endsWith("/reports")) {
         payload = route.request().postDataJSON(); saved = true;
+        sentHeaders = route.request().headers();
         await route.fulfill({ status: 201, body: "" });
       } else await route.fulfill({ json: saved ? [{
         place_id: "imperial-beach", hazard: "water", total: 1, reporters: 1,
@@ -71,6 +73,9 @@ test.describe("community reporting", () => {
     expect(payload!.place_id).toBe("imperial-beach");
     expect(payload!.kind).toBe("water_sewage");
     expect(payload!.client_id).toMatch(/^[0-9a-f-]{36}$/);
+    expect(sentHeaders!.apikey).toBeTruthy();
+    if (sentHeaders!.apikey.startsWith("sb_publishable_")) expect(sentHeaders).not.toHaveProperty("authorization");
+    else expect(sentHeaders!.authorization).toBe(`Bearer ${sentHeaders!.apikey}`);
     await expect(page.getByRole("checkbox", { name: "Highlight reporting blind spots" })).toBeVisible();
   });
 
