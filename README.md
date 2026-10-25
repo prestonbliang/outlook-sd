@@ -16,11 +16,13 @@ Community reporting requires Supabase configuration and the current `supabase/sc
 
 | Tile | Question | Unit | Status |
 |---|---|---|---|
-| Water | Will bacteria exceed the state standard at the nearest monitored beach? | Beach Watch station-day | Model live (provisional split, see below) |
-| Heat | How many extra emergency calls will heat cause in my ZIP? | ZIP-day, City of San Diego Fire-Rescue area | Model live; levels need ACS population |
-| Flood | How high will the bay and coast get at the next high tides? | Hourly water level, NOAA 9410170 | Model live |
-| Air | AQI for PM2.5 and ozone | Monitor-day | Model trained (beats persistence); live forecasts start once the AirNow key is set |
-| Fire | Chance a new fire starts and grows past 10 acres | 2 km cell-day | Model live; levels are ranks (riskiest 25 / 10 / 2% of days) |
+| Water | Will bacteria exceed the state standard at the nearest monitored beach? | Beach Watch station-day | Inference implemented; provisional evaluation split, see below |
+| Heat | How many extra emergency calls will heat cause in my ZIP? | ZIP-day, City of San Diego Fire-Rescue area | Inference implemented; levels need ACS population |
+| Flood | How high will the bay and coast get at the next high tides? | Hourly water level, NOAA 9410170 | Inference implemented |
+| Air | AQI for PM2.5 and ozone | Monitor-day | Inference implemented; AirNow API or public hourly-file observations |
+| Fire | Chance a new fire starts and grows past 10 acres | 2 km cell-day | Inference implemented; levels are ranks (riskiest 25 / 10 / 2% of days) |
+
+Current availability depends on source and publication freshness. Check the deployed Data page; the table describes implemented models, not a guarantee that every live feed is connected.
 
 ## Results on held-out data
 
@@ -82,14 +84,18 @@ Full metrics: `models/artifacts/<tile>/metrics.json`.
 ### Using the app
 
 - **Today:** five hazard cards, visible forecast freshness, official warnings, and links into the matching map and detail view. Missing or stale forecasts remain explicit; tomorrow's outlook is never labelled as today's.
+- **Planning brief:** review three Pacific calendar days with beach/outdoor presets or your own hazard focus, remembered only on your device. Attention counts use current ratings, preserve unknowns and link to the exact map day. They are not a combined risk score.
 - **Your places:** save up to eight neighborhoods on your device and switch between them from Today or the map.
+- **Compare saved places:** open an on-demand table of today's five hazards across saved neighborhoods. A failed place can be retried without hiding the others; old or missing ratings stay marked.
 - **Map & reports:** explore hazards and forecast days, inspect layers, search neighborhoods, share a link with the selected place/day/hazard/reporting window, and use browser back/forward to restore selections.
 - **Community coverage:** see recent aggregate observations and areas needing more reports. Blind spots describe participation, not safety. Failed reads never become zero-report claims, and reports never alter model forecasts.
 - **What if:** two sliders. Cap the Tijuana River's border flow and see how many South Bay beach tests the Water model would flag as unsafe (2017–2021, the years with flow records). Raise the sea and count the days per year San Diego Bay would reach NOAA's minor-flood level (the real 2014–2025 gauge record, shifted up). Built by `models/scenarios.py`.
 - **South Bay smell record and cool zones:** South Bay places show the last 30 days of APCD odor complaints. Heat and Air show the nearest County Cool Zones.
 - **Details and track record:** inspect source freshness, exact chart values in accessible tables, model performance against baselines, and official sources.
+- **Connection status:** Data separates the published forecast snapshot from live community reads, with publication details and time-aware source status. Open pages update freshness as time passes.
 
 See the [engineering audit](docs/AUDIT.md) for the improvement scope, validation evidence, and remaining release requirements.
+The [product improvement review](docs/IMPROVEMENT_REVIEW.md) evaluates 18 practical innovations, records this pass's changes and explains the next priorities.
 
 ```
 GitHub Actions (hourly)

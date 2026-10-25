@@ -29,6 +29,7 @@ export async function mockApi(page: Page) {
     const place = QA_PLACES.find(p => path.includes(p.id)) ?? QA_PLACES[0];
     let json: unknown = { type: "FeatureCollection", features: [], date: "2026-10-24", stale_inputs: [] };
     if (path.endsWith("places.json")) json = QA_PLACES;
+    else if (path.endsWith("build.json")) json = { schema_version: 1, generated_at: QA_NOW, forecast_date: "2026-10-24", source_commit: "123456789abcdef" };
     else if (path.endsWith("dates.json")) json = { dates: ["2026-10-24", "2026-10-25", "2026-10-26", "2026-10-27"] };
     else if (path.includes("/outlook/")) json = { place, updated_at: null, tiles: QA_TILES.map(emptyTile) };
     else if (path.includes("/hazard/")) {

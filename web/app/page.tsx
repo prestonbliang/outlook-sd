@@ -7,28 +7,32 @@ import PlacePicker from "@/components/PlacePicker";
 import MapBoundary from "@/components/MapBoundary";
 import Watchlist from "@/components/Watchlist";
 import OdorCard from "@/components/OdorCard";
+import PlanningBrief from "@/components/PlanningBrief";
 import { ELEVATED, Outlook, TILE_LABEL, TILE_NAME, TileName, dayName, get, updatedText } from "@/lib/api";
-import { currentDay, forecastState, localDate } from "@/lib/forecast";
+import { currentDay, forecastDates, forecastState, localDate } from "@/lib/forecast";
 import { usePlace } from "@/lib/usePlace";
+import { useNow } from "@/lib/useNow";
 
 const HazardMap = dynamic(() => import("@/components/HazardMap"), { ssr: false,
   loading: () => <div className="map-loading" role="status">Loading neighborhood map…</div> });
 
-/** Air without a forecast or a recent observation (no AirNow key) is a one-line note, not a broken-looking card. */
+/** Air without a forecast or an observation gets an explicit snapshot-availability note. */
 const notConnected = (t: Outlook["tiles"][number]) => t.tile === "air" && !t.days.length && !t.current;
 
 /** First day (of the next three) when two or more hazards are High or worse at once. */
-function compound(o: Outlook) {
-  const dates = [...new Set(o.tiles.flatMap(t => t.days.slice(0, 3).map(d => d.date)))].sort();
+function compound(o: Outlook, now: number) {
+  const dates = forecastDates(now);
   for (const date of dates) {
-    const hit = o.tiles.filter(t => t.days.some(d => d.date === date && d.level && ELEVATED.has(d.level)));
+    const hit = o.tiles.filter(t => forecastState(t, now, date) === "current"
+      && t.days.some(d => d.date === date && d.level && ELEVATED.has(d.level)));
     if (hit.length >= 2) return { day: date === localDate() ? "today" : `on ${dayName(date, "long")}`,
-      names: hit.map(t => TILE_LABEL[t.tile]).join(" and ") };
+      count: hit.length, names: hit.map(t => TILE_LABEL[t.tile]).join(" and ") };
   }
   return null;
 }
 
 export default function Today() {
+  const now = useNow();
   const { places, place, placeId, choose, error, retry } = usePlace();
   const [outlook, setOutlook] = useState<Outlook | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -54,7 +58,7 @@ export default function Today() {
   const q = `?place=${placeId ?? "downtown"}`;
   const available = outlook?.tiles.filter(t => currentDay(t)).length ?? 0;
   const stale = outlook?.tiles.some(t => forecastState(t) === "stale");
-  const together = outlook ? compound(outlook) : null;
+  const together = outlook ? compound(outlook, now) : null;
   return <div className="today">
     <main className="side">
       <div className="wrap today-content">
@@ -73,18 +77,21 @@ export default function Today() {
           <div className="outlook-refresh"><p className="small muted">{updatedText(outlook.updated_at)}</p><button className="button-link" onClick={() => setAttempt(x => x + 1)}>Refresh outlook</button></div>
           {!available ? <p>No forecasts are available for today. You can explore the map and check the official sources linked below.</p> :
             stale ? <p>Some forecasts use older or incomplete source data. Check the update times and official advisories.</p> : null}
+          {(!available || stale) && <p className="small muted">Refresh checks for a newer published snapshot. Official sources may update sooner.</p>}
         </div>}
         {!outlook && !loadError && !error && <div className="forecast-skeleton" role="status" aria-label="Loading five hazard forecasts">
           {["Water", "Air", "Heat", "Flood", "Fire"].map(name => <div key={name}><span>{name}</span><span className="skeleton-line" /></div>)}
         </div>}
-        {together && <div className="compound-banner" role="note"><strong>Two hazards at once {together.day}:</strong> {together.names}. Plan ahead.</div>}
+        {together && <div className="compound-banner" role="note"><strong>{together.count === 2 ? "Two" : together.count} hazards at once {together.day}:</strong> {together.names}. Plan ahead.</div>}
+        {outlook && <a className="planning-jump" href="#planning-heading">Open your three-day planning brief ↓</a>}
         {outlook && <ul className="level-key" aria-label="Color key">{["low", "moderate", "high", "very_high"].map(l =>
           <li key={l}><span style={{ background: `var(--lvl-${l.replace("_", "-")})` }} />{{ low: "Low", moderate: "Moderate", high: "High", very_high: "Very high" }[l]}</li>)}
           <li className="muted">Tap a row for details</li></ul>}
         <div className="hazard-list">{outlook?.tiles.filter(t => !notConnected(t)).map(t => <HazardRow key={`${placeId}-${t.tile}`} tile={t} placeId={outlook.place.id}
           onSelect={() => setMapTile(t.tile)} coolZone={t.tile === "heat" || t.tile === "air" ? outlook.cool_zones?.[0] : undefined} />)}</div>
         {outlook?.tiles.filter(notConnected).map(t => <p key={t.tile} className="small muted not-connected">
-          {TILE_LABEL[t.tile]}: live data is not connected yet. <a href={t.official_advisory.url}>Check AirNow for current air quality</a>.</p>)}
+          {TILE_LABEL[t.tile]}: no forecast or observation is available in this snapshot. <a href={t.official_advisory.url}>Check AirNow for current air quality</a>.</p>)}
+        {outlook && <PlanningBrief outlook={outlook} />}
         {outlook?.odor && <OdorCard odor={outlook.odor} place={outlook.place.name} />}
         {place && <Watchlist places={places} selected={place} onPick={choose} />}
         <div className="community-callout"><h2>See something? Report it.</h2>

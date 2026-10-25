@@ -283,6 +283,8 @@ def predict_air(now, wx):
         wxd = {p: air.weather_daily(wx[p]) for p in st.loc[sites, "point_id"].unique()}
         rows = air.build(q, st, hist, wxd)
         rows = rows[rows.lead_k == (rows.date - today).dt.days].dropna(subset=["aqi_prev"])
+        if rows.empty:
+            continue  # No complete prior-day observations for this pollutant; do not invent a lag or crash the other one.
         rows["site"] = pd.Categorical(rows.site.astype(str), categories=cats)
         rows["q50"], rows["q90"] = m50.predict(rows[air.FEATURES]), m90.predict(rows[air.FEATURES])
         for i, r in rows.iterrows():

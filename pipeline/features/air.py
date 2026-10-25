@@ -45,6 +45,10 @@ def build(lab, st, history, wx_by_point):
     rows["lead_k"] = np.tile(np.arange(4), len(lab))
     rows["issue"] = rows.date - pd.to_timedelta(rows.lead_k, unit="D")
     h = history.pivot_table(index="date", columns="site", values="aqi").asfreq("D")
+    # A live issue date often follows the last complete AQI day. Extend the calendar,
+    # never the values, so shifting yesterday's reading can reach today's issue row.
+    if len(h.index) and len(rows):
+        h = h.reindex(pd.date_range(min(h.index.min(), rows.issue.min()), max(h.index.max(), rows.issue.max()), freq="D"))
     prev = h.shift(1)  # day before issue
     mean7 = h.shift(1).rolling(7, min_periods=4).mean()
     idx = pd.MultiIndex.from_arrays([rows.issue, rows.site])
@@ -59,7 +63,7 @@ def build(lab, st, history, wx_by_point):
             continue
         parts.append(pd.DataFrame(w.reindex(g.date)[wcols].to_numpy(), columns=wcols, index=g.index))
     rows = rows.join(pd.concat(parts))
-    rows["dow"], rows["month"] = rows.date.dt.dayofweek, rows.date.dt.month
+    rows["dow"], rows["month"] = rows.date.dt.day_of_week, rows.date.dt.month
     rows["site"] = rows.site.astype("category")
     return rows
 

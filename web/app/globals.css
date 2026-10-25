@@ -240,3 +240,37 @@ summary { cursor: pointer; color: var(--signal); font-size: 14px; font-weight: 6
 .rel-value { text-align: right; }
 .cool-list { padding-left: 18px; } .cool-list li { margin-bottom: 10px; } .cool-list summary { padding: 4px 0; }
 .not-connected { margin: 12px 0 0; }
+
+/* Planning and comparison use the existing forecast levels, with explicit coverage gaps. */
+.planning-jump { display: inline-flex; min-height: 44px; align-items: center; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
+.planning-brief { border: 1px solid var(--rule); border-radius: 10px; background: white; padding: 16px; margin: 20px 0; }
+.planning-brief h2 { font-size: 19px; }
+.planning-brief > p { margin: 8px 0 12px; }
+.planning-presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.planning-focus summary { padding: 10px 0; }
+.planning-focus fieldset { display: flex; gap: 8px 14px; flex-wrap: wrap; padding: 0 0 12px; border: 0; margin: 0; }
+.planning-focus label { display: flex; gap: 6px; align-items: center; min-height: 44px; font-size: 13px; }
+.planning-days { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.planning-day { padding: 10px; border: 1px solid var(--rule); border-top: 3px solid #A6B7BE; border-radius: 7px; min-width: 0; }
+.planning-day h3 { font-size: 14px; }
+.planning-day p { margin: 8px 0; }
+.planning-day .small { font-size: 12px; }
+.planning-summary { font-size: 14px; font-weight: 600; }
+.planning-attention { border-top-color: var(--lvl-high); background: #FFFAF5; }
+.planning-day summary { font-size: 12px; }
+.planning-day ul { list-style: none; padding: 0; margin: 0; font-size: 12px; }
+.planning-day li + li { border-top: 1px solid var(--rule); margin-top: 8px; padding-top: 8px; }
+.planning-day a { overflow-wrap: anywhere; }
+.plan-state { display: block; margin-top: 3px; }
+.planning-method { font-size: 12px; margin-bottom: 0 !important; }
+.comparison-toggle { margin-top: 8px; font-size: 13px; }
+.saved-comparison { min-width: 0; }
+.saved-comparison .table-scroll table { min-width: 560px; }
+.saved-comparison th, .saved-comparison td { padding: 10px 12px 10px 0; }
+.comparison-rating { display: inline-block; font-size: 12px; }
+.snapshot-status { border: 1px solid var(--rule); border-radius: 10px; background: white; padding: 18px; margin: 20px 0; }
+.snapshot-status > p { margin: 10px 0; }
+.publication-details { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; font-size: 13px; margin: 0; }
+.publication-details dt { font-weight: 600; }
+.publication-details dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 380px) { .planning-days { grid-template-columns: 1fr; } }

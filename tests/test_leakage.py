@@ -2,7 +2,7 @@
 import numpy as np
 import pandas as pd
 
-from pipeline.features import flood, heat, water
+from pipeline.features import air, flood, heat, water
 
 
 def test_flood_state_uses_only_past_observations():
@@ -54,3 +54,20 @@ def test_flood_rows_never_use_observed_target_as_feature():
     assert "residual" not in flood.FEATURES and "observed" not in flood.FEATURES
     assert (d.target > d.issue).all()
     pd.testing.assert_frame_equal(d[flood.FEATURES], after[flood.FEATURES])
+
+
+def test_live_air_can_use_yesterday_when_today_has_no_complete_aqi_yet():
+    issue = pd.Timestamp("2026-10-25")
+    history = pd.DataFrame({"site": "test", "date": pd.date_range("2026-10-18", "2026-10-24"), "aqi": range(1, 8)})
+    sites = pd.DataFrame({"point_id": ["p"]}, index=pd.Index(["test"], name="site"))
+    weather = {"p": pd.DataFrame({c: [1.] for c in ["tmax", "tmin", "rh_mean", "sw_sum", "wind_mean", "wind_max", "blh_max", "precip", "offshore_hours"]}, index=[issue])}
+    lab = pd.DataFrame({"site": ["test"], "date": [issue]})
+    before = air.build(lab, sites, history, weather)
+    row = before[before.lead_k == 0].iloc[0]
+    assert row.aqi_prev == 7 and row.aqi_prev_mean7 == 4
+    # Today's partial reading and any future outcomes must not enter today's issued features.
+    future = pd.concat([history, pd.DataFrame({"site": "test", "date": [issue, issue + pd.Timedelta(days=1)], "aqi": 9999})])
+    after = air.build(lab, sites, future, weather)
+    pd.testing.assert_frame_equal(before[air.FEATURES], after[air.FEATURES])
+    missing_yesterday = air.build(lab, sites, history[history.date < "2026-10-24"], weather)
+    assert pd.isna(missing_yesterday[missing_yesterday.lead_k == 0].iloc[0].aqi_prev)

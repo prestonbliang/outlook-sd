@@ -1,6 +1,29 @@
 # Final implementation and QA status
 
-Updated October 24, 2026. Outlook SD is a locally tested release candidate. It is not deployed, and its live source archive and reporting service are not configured in this checkout. See [RELEASE.md](RELEASE.md) for reproducible QA, launch requirements and a competition demonstration.
+Outlook SD is deployed at https://outlook-sd-kof2.vercel.app and remains a release candidate. The current pass refreshes real sources, fixes morning Air inference, bootstraps the fork's `state` release, and verifies a read-only connection to Supabase. The hosted build now reports community configuration present; hourly Vercel publishing still needs credentials and a post-deployment strict check. See [IMPROVEMENT_REVIEW.md](IMPROVEMENT_REVIEW.md) for the audit, 18 evaluated innovations, tradeoffs, limits and five-item roadmap.
+
+## Current improvement pass — October 25, 2026
+
+Implemented local three-day planning preferences/presets, on-demand saved-neighborhood comparison, source-specific expiry checks on open pages, qualified official warnings/incident context, publication/community connection diagnostics, resilient scenario states/controls, dated advice, Pacific-midnight rollover and bounded Parquet caching. Static hosting, existing models, RLS and anonymous reporting remain in place. No model was retrained or test observation inserted into the live project.
+
+- Full Python suite against real processed sources: **105 passed, 15 subtests passed, 0 skipped**. Two existing nonblocking deprecations remain (Starlette's HTTPX test adapter and CDIP's `Timestamp.utcnow`).
+- Frontend unit tests: **42 passed, 0 skipped**. Production static build, strict TypeScript, Ruff correctness/unused-import checks and Git whitespace checks passed.
+- Full Playwright suite: **129 passed, 0 skipped**, using Chromium, Firefox and WebKit with reporting tests enabled. Includes accessibility checks, four viewport widths, maps/navigation, planner/preferences, saved comparison recovery, scenario failures, freshness/midnight boundaries and report success/outage/duplicate rejection. Tests use intercepted API/report responses; they do not submit to the live database.
+- Disposable PostgreSQL 17: applied the schema twice and passed `supabase/tests.sql`, then removed the container. Hosted aggregate RPC reads succeeded; direct raw-report reads remain denied. Live report submission still needs a genuine resident observation, not fabricated QA data.
+- Installed dependency audits reported **zero known vulnerabilities** (npm including development dependencies; pip-audit against the application virtual environment). No dependencies were added.
+- Real pipeline refresh: Flood 4, Water 524, Heat 136 and Fire 444 forecast rows; Air 64 after fixing the calendar gap. The first run exposed the Air bug; inference was rerun successfully after the fix. FIRMS has no key and remains explicitly unavailable; the documented public AirNow backup supplied observations. Existing weights and held-out evaluation results were preserved.
+- Real static export: **691 JSON files / 110 neighborhoods**. Strict read-only deployment check against the local production export passed with `--require-reporting`; all five hazards have some current coverage. Prebuilt service packaging passed without unavailable/test overrides. This is point-in-time coverage, not a promise that every neighborhood has every hazard.
+- Uploaded the validated real archive to [the fork's state release](https://github.com/prestonbliang/outlook-sd/releases/tag/state), downloaded it again, restored it in a temporary directory and checked SQLite integrity. Vercel builds now prefer the deploying repository's state when Git metadata is available, with upstream fallback only on a missing asset.
+- Inspected actual desktop/mobile pages and the live Supabase read status. At the pre-push hosted check, reporting was configured but the old forecast snapshot was unavailable; hosted freshness must be checked after deployment.
+
+## Current launch requirements
+
+1. Verify this code deployment uses the fork's current archive; enable Vercel Git metadata or set its explicit `OUTLOOK_STATE_URL` if necessary. Run the strict hosted checker with `--require-reporting`.
+2. Configure `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` for the existing hourly workflow, plus provider/contact settings. The fork currently has only the two public Supabase Actions secrets. A code push and one state bootstrap do not establish hourly publishing.
+3. Verify a genuine observation reaches Supabase and updates community coverage. Do not use a service-role key in browser settings.
+4. Test on intended physical devices/assistive technologies and record an honest competition demonstration. Water evaluation remains provisional and anonymous browser counts are not verified people.
+
+## Historical QA evidence (superseded where current results appear above)
 
 Vercel GitHub integration is now configured explicitly in the root `vercel.json`. A local Vercel CLI production build successfully emitted one static web service, all 690 API JSON files, and no serverless functions. The Git build supports safe optional runtime-state restoration; the prebuilt hourly path uses the same service layout. See [VERCEL.md](VERCEL.md) for the required project settings and environment-variable locations. The counts below describe the prior finalization pass; deployment-specific regressions are covered additionally in `tests/test_vercel_git.py` and the web packaging unit tests.
 
@@ -44,7 +67,7 @@ Run against the actual processed source tables, forecast log and all 32 weather 
 
 Nonblocking test-tool warnings remain from Starlette's legacy HTTPX adapter and the development static server. They did not fail the checks; no production application warning was suppressed.
 
-## Required before public launch
+## Historical launch requirements from the earlier finalization pass
 
 1. Restore/bootstrap actual source tables and the forecast database; configure AirNow/FIRMS/contact settings; run the pipeline and verify genuinely current forecasts and scoring. The repository's `state` release returned 404 when checked. Existing model weights/evaluations were preserved.
 2. Configure the real Supabase project, apply/verify its schema/RLS, set both public build values, and verify a real report updates coverage. Local PostgreSQL tests do not prove the hosted service is configured.

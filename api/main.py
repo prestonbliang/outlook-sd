@@ -75,7 +75,15 @@ def cached_json(path, modified):
 
 def read_parquet(name):
     p = PROCESSED / f"{name}.parquet"
-    return pd.read_parquet(p) if p.exists() else None
+    if not p.exists():
+        return None
+    # Reuse unchanged inputs during export; callers cannot mutate the cached frame.
+    return cached_parquet(str(p), p.stat().st_mtime_ns).copy(deep=True)
+
+
+@lru_cache(maxsize=12)
+def cached_parquet(path, modified):
+    return pd.read_parquet(path)
 
 
 def haversine_km(lat1, lon1, lat2, lon2):
@@ -101,15 +109,23 @@ def source_status():
     s = s.astype(object).where(s.notna(), None)
     now = pd.Timestamp.now(tz="UTC")
     out = {k: {"last_success": None, "newest_data": None, "error": "No successful fetch yet",
-               "age_hours": None, "stale": True} for k in [*STALE_HOURS, "reports"]}
+               "age_hours": None, "stale": True, "reference_at": None,
+               "max_age_hours": STALE_HOURS.get(k, 24)} for k in [*STALE_HOURS, "reports"]}
     for r in s.itertuples():
         newest = pd.to_datetime(r.newest_data, utc=True, errors="coerce") if r.newest_data else pd.NaT
+        if r.source == "calheatscore" and r.newest_data:
+            issued = pd.to_datetime(r.newest_data, errors="coerce")
+            if pd.notna(issued) and issued.tzinfo is None:
+                # The provider's issue date and heat_tile's run timestamp use Pacific midnight.
+                newest = issued.tz_localize(TZ).tz_convert("UTC")
         ref = newest if pd.notna(newest) and r.source not in {"nws", "calfire", "firms", "reports"} else \
             pd.to_datetime(r.last_success, utc=True, errors="coerce")
         age = (now - ref).total_seconds() / 3600 if pd.notna(ref) else None
         out[r.source] = {"last_success": r.last_success, "newest_data": r.newest_data, "error": redact(r.error) if r.error else None,
                          "age_hours": None if age is None else round(age, 1),
-                         "stale": age is None or age > STALE_HOURS.get(r.source, 24)}
+                         "reference_at": ref.isoformat() if pd.notna(ref) else None,
+                         "max_age_hours": STALE_HOURS.get(r.source, 24),
+                         "stale": age is None or age < -5 / 60 or age > STALE_HOURS.get(r.source, 24)}
     return out
 
 
@@ -122,6 +138,16 @@ SOURCE_NAMES = {"ibwc": "IBWC border flow", "noaa_tides": "NOAA tide gauge", "cd
 
 def stale_inputs(tile, status):
     return [SOURCE_NAMES[k] for k in STATUS_KEYS[tile] if status.get(k, {"stale": True})["stale"]]
+
+
+def source_check(key, status):
+    return {"name": SOURCE_NAMES[key], "reference_at": status.get(key, {}).get("reference_at"),
+            "max_age_hours": STALE_HOURS[key]}
+
+
+def source_checks(tile, status):
+    keys = ["calheatscore"] if tile.get("model") == "calheatscore" else STATUS_KEYS[tile["tile"]]
+    return [source_check(k, status) for k in keys]
 
 
 # ------------------------------------------------------------------ tiles
@@ -231,8 +257,11 @@ def nws_alerts(events):
 
 def alert_status(alerts, status):
     fresh = not status.get("nws", {"stale": True})["stale"]
+    expiry = alerts[0].get("expires") if alerts else None
     return {"active": bool(alerts) if fresh else None,
             "headline": alerts[0]["headline"] if alerts else None,
+            "check": source_check("nws", status),
+            "expires_at": str(expiry) if expiry is not None and pd.notna(expiry) else None,
             "url": "https://www.weather.gov/sgx/"}
 
 
@@ -389,6 +418,7 @@ def outlook_for(place):
     status = source_status()
     tiles = [BUILDERS[t](place, status) for t in TILES]
     for tile in tiles:
+        tile["source_checks"] = source_checks(tile, status)
         tile["quality"] = quality(tile)
     runs = [t.get("run_ts") for t in tiles if t.get("run_ts")]
     return {"place": {"id": place["id"], "name": place["name"], "zip": place["zip"], "coastal": place["coastal"]},
@@ -473,7 +503,9 @@ def hazard(tile: str, place_id: str):
     if tile not in TILES:
         raise HTTPException(404, f"unknown tile {tile}")
     place = place_by_id(place_id)
-    t = BUILDERS[tile](place, source_status())
+    status = source_status()
+    t = BUILDERS[tile](place, status)
+    t["source_checks"] = source_checks(t, status)
     t["quality"] = quality(t)
     level = t["days"][0]["level"] if t.get("days") else None
     series = None
@@ -486,6 +518,7 @@ def hazard(tile: str, place_id: str):
     return {"place": {"id": place["id"], "name": place["name"], "zip": place["zip"], "coastal": place["coastal"]}, **t,
             "window": window(t.get("days", [])), "series": series,
             "what_to_do": ACTIONS[tile].get(level or "none", ACTIONS[tile]["none"]),
+            "what_to_do_by_date": {d["date"]: ACTIONS[tile].get(d.get("level") or "none", ACTIONS[tile]["none"]) for d in t.get("days", [])},
             "metrics": track_summary(tile), "cool_zones": cool_zones_near(place) if tile in ("heat", "air") else []}
 
 
@@ -583,8 +616,16 @@ def map_layer(tile: str, date: str | None = None):
                 feats.append({"type": "Feature", "geometry": {"type": "Point", "coordinates": [point[1], point[0]]},
                               "properties": {"name": r.SiteName, "aqi": int(r.AQI), "parameter": r.Parameter,
                                              "level": lvl, "label": verdict("air", lvl)}})
+    checks = source_checks({"tile": tile}, status)
+    stale = stale_inputs(tile, status)
+    if tile == "heat" and any(f["properties"].get("source") == "calheatscore" for f in feats):
+        checks.append(source_check("calheatscore", status))
+        if status.get("calheatscore", {"stale": True})["stale"]:
+            stale.append(SOURCE_NAMES["calheatscore"])
     return {"type": "FeatureCollection", "features": feats, "date": date, "mode": mode,
-            "run_ts": observed_at if fc.empty else fc.run_ts.max(), "stale_inputs": stale_inputs(tile, status),
+            "run_ts": observed_at if fc.empty else fc.run_ts.max(), "stale_inputs": stale,
+            "source_checks": checks,
+            "incident_check": source_check("calfire", status) if tile == "fire" else None,
             "context_notice": context_notice}
 
 
@@ -740,7 +781,7 @@ def scenarios():
     if not out:
         return {"flow": None, "sea_level": None}
     f = read_parquet("ibwc_flow")
-    if f is not None and len(f):
+    if isinstance(out.get("flow"), dict) and f is not None and len(f):
         week = f[f.ts_utc >= f.ts_utc.max() - pd.Timedelta(days=7)].discharge_m3s.dropna()
         if len(week):
             out["flow"]["recent_mgd"] = round(float(week.mean()) / 0.0438126)

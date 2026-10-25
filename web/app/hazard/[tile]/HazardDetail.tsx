@@ -6,15 +6,21 @@ import LevelBadge from "@/components/LevelBadge";
 import ReportBox from "@/components/ReportBox";
 import SourceLine from "@/components/SourceLine";
 import ForecastStatus from "@/components/ForecastStatus";
-import { dateLabel, observationIsCurrent } from "@/lib/forecast";
+import { advisoryIsCurrent, currentDay, dateLabel, localDate, observationIsCurrent } from "@/lib/forecast";
 import { usePlace } from "@/lib/usePlace";
+import { useNow } from "@/lib/useNow";
 import { Hazard, TILE_LABEL, tileMeaning, TILE_NAME, TileName, dayName, get } from "@/lib/api";
 
 function windowText(h: Hazard) {
-  const w = h.window;
-  if (!w) return h.verdict ?? "";
-  const first = h.days[0]?.date;
-  return w.through === first ? `${w.verdict} · ${dateLabel(first)}` : `${w.verdict} through ${dateLabel(w.through)}`;
+  const today = currentDay(h);
+  if (!today) return "No forecast for today";
+  let through = today.date;
+  for (const day of h.days.filter(d => d.date > today.date)) {
+    const next = new Date(`${through}T12:00:00Z`); next.setUTCDate(next.getUTCDate() + 1);
+    if (day.verdict !== today.verdict || !Number.isFinite(day.value) || day.date !== next.toISOString().slice(0, 10)) break;
+    through = day.date;
+  }
+  return through === today.date ? `${today.verdict} · Today` : `${today.verdict} through ${dateLabel(through)}`;
 }
 
 // Fire levels are ranks: cut-offs at the 75th, 90th and 98th percentiles of all 2023 area-days
@@ -35,6 +41,7 @@ function valueText(tile: TileName, d: Hazard["days"][number]) {
 }
 
 export default function HazardDetail({ tile }: { tile: TileName }) {
+  useNow(); // Re-evaluate current-day labels and observation age while this page stays open.
   const { placeId, error: placeError, retry } = usePlace();
   const [h, setH] = useState<Hazard | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -51,7 +58,10 @@ export default function HazardDetail({ tile }: { tile: TileName }) {
   if (err || placeError) return <main className="wrap"><h1>{TILE_NAME[tile]} forecast</h1><div className="error-panel" role="alert"><p>{err ?? placeError}</p>
     <button className="secondary-button" onClick={() => { retry(); setAttempt(x => x + 1); }}>Try again</button></div><Link href="/">Back to today</Link></main>;
   if (!h) return <main className="wrap" aria-busy="true"><h1>{TILE_NAME[tile]} forecast</h1><p role="status">Loading neighborhood details…</p></main>;
-  const d0 = h.days[0];
+  const d0 = currentDay(h);
+  const upcoming = h.days.filter(day => day.date >= localDate());
+  const advice = d0 && h.what_to_do_by_date?.[d0.date] ? h.what_to_do_by_date[d0.date] :
+    !h.days.length || h.days[0]?.date === d0?.date ? h.what_to_do : "Guidance for the current day is unavailable in this snapshot. Check the official source for current advice.";
   return (
     <main className="wrap">
       <p className="small"><Link href={`/?place=${h.place.id}`}>← {h.place.name}</Link></p>
@@ -64,10 +74,11 @@ export default function HazardDetail({ tile }: { tile: TileName }) {
         {tile === "water" ? `Nearest monitored beach: ${h.unit.name}` : tile === "flood" ? `${h.unit.name}; levels in ${h.units}` : h.unit.name}
       </p>}
       {h.reason && !d0 && <p>{h.reason}</p>}
-      {h.official_advisory.active && h.official_advisory.headline && (
-        <p role="note" style={{ borderLeft: "6px solid var(--lvl-high)", paddingLeft: 10 }}>NWS: {h.official_advisory.headline}</p>
+      {h.official_advisory.active !== false && h.official_advisory.headline && (
+        <p role="note" style={{ borderLeft: "6px solid var(--lvl-high)", paddingLeft: 10 }}>NWS: {h.official_advisory.headline}
+          {!advisoryIsCurrent(h.official_advisory) && " · Last recorded warning; check the official source for its current status."}</p>
       )}
-      {(tile === "flood" || tile === "fire") && h.official_advisory.active === null && <p className="notice small">Official alert status could not be confirmed. <a href={h.official_advisory.url}>Check the official source</a>.</p>}
+      {(tile === "flood" || tile === "fire") && (h.official_advisory.active === null || !advisoryIsCurrent(h.official_advisory)) && <p className="notice small">Official alert status could not be confirmed. <a href={h.official_advisory.url}>Check the official source</a>.</p>}
 
       {h.factors.length > 0 && <>
         <h2 style={{ marginTop: 20 }}>Why</h2>
@@ -85,19 +96,19 @@ export default function HazardDetail({ tile }: { tile: TileName }) {
 
       {h.series && <><h2 style={{ marginTop: 20 }}>Past 7 days and forecast</h2><ForecastChart series={h.series} /></>}
 
-      {h.days.length > 0 && <>
+      {upcoming.length > 0 && <>
         <h2 style={{ marginTop: 20 }}>Next days</h2>
         <div className="table-scroll"><table>
           <caption className="sr-only">{TILE_NAME[tile]} forecast by day for {h.place.name}</caption>
           <thead><tr><th scope="col">Day</th><th scope="col">Level</th><th scope="col">Detail</th></tr></thead>
-          <tbody>{h.days.map((d) => (
+          <tbody>{upcoming.map((d) => (
             <tr key={d.date}><td>{dayName(d.date, "long")}</td><td><LevelBadge tile={tile} level={d.level} /></td>
               <td>{valueText(tile, d)}</td></tr>))}</tbody>
         </table></div>
       </>}
 
       <h2 style={{ marginTop: 20 }}>What to do</h2>
-      <p>{h.what_to_do}</p>
+      <p>{advice}</p>
       {h.cool_zones && h.cool_zones.length > 0 && <>
         <h2 style={{ marginTop: 20 }}>Air-conditioned places nearby</h2>
         <p className="small muted">County of San Diego Cool Zones: free, air-conditioned public places (season June 1 – October 31). Check hours before you go.</p>

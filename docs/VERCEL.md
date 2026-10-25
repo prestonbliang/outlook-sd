@@ -35,7 +35,7 @@ The Python API reads precomputed source tables and SQLite. Its mutable database 
 
 ## Vercel project settings
 
-Connect `raunavm/outlook-sd` to the existing Vercel project:
+Connect the maintained repository (`prestonbliang/outlook-sd` for the fork) to the existing Vercel project:
 
 | Setting | Value |
 | --- | --- |
@@ -64,7 +64,7 @@ Set the following in Vercel's Environment Variables UI for the environments wher
 | `NEXT_PUBLIC_SUPABASE_URL` | Community reports; set together with the key below | Public, embedded in the browser build |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Community reports; use the browser-safe `sb_publishable_...` key | Public by design; RLS restricts access |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Optional legacy fallback; the publishable key takes precedence | Public by design; never use a service-role or secret key |
-| `OUTLOOK_STATE_URL` | Optional override for the published forecast archive; Vercel defaults to the upstream public `state` release | Build-only; a signed URL must remain secret |
+| `OUTLOOK_STATE_URL` | Optional archive override; otherwise prefer the deploying repository's public `state` release, then upstream if its asset is missing | Build-only; a signed URL must remain secret |
 | `OUTLOOK_REQUIRE_LIVE_FORECASTS` | Set `1` for a live production release; fails builds without current forecast coverage | Build-only; default `0` permits an initial unavailable-data launch |
 | `NEXT_PUBLIC_API_URL` | Optional; default `/api` already points at the generated JSON | Public |
 | `NEXT_PUBLIC_PMTILES_URL` | Optional; default `/tiles/sandiego.pmtiles` | Public |
@@ -77,12 +77,12 @@ The separate **GitHub Actions** pipeline needs `AIRNOW_API_KEY`, `FIRMS_MAP_KEY`
 
 1. `npm ci` installs the web dependencies.
 2. `scripts/vercel-git-build.sh` uses uv, or bootstraps pinned uv into an isolated temporary Python environment if the frontend build image does not have it. It installs the frozen Python dependencies using Python 3.12.
-3. The build script calls `scripts/vercel_state.py --published`, downloading `OUTLOOK_STATE_URL` or defaulting to `https://github.com/raunavm/outlook-sd/releases/download/state/state.tar.gz`. This explicit build option works even if system environment variables are disabled in the dashboard. This is the project's real published snapshot: release assets are not part of Git checkouts and are not copied into forks. It restores only ordinary files under `data/processed/` and `data/outlook.db`, rejects links, traversal/source-code paths, oversized archives and failed downloads, and never prints signed URLs. A download failure fails the build instead of silently publishing empty forecasts. An explicit URL always takes precedence.
+3. The build script calls `scripts/vercel_state.py --published`. An explicit `OUTLOOK_STATE_URL` always takes precedence. Otherwise `VERCEL_GIT_REPO_OWNER` and `VERCEL_GIT_REPO_SLUG` select the deploying repository's `state/state.tar.gz` release asset. Only a missing asset (HTTP 404) falls back to `https://github.com/raunavm/outlook-sd/releases/download/state/state.tar.gz`; authentication, server and corrupt-archive failures fail the build. If system Git variables are disabled, the shared upstream asset is used directly; set the explicit fork URL to select its archive in that case. Release assets are not included in Git checkouts or copied into forks. Restoration permits only ordinary files under `data/processed/` and `data/outlook.db`, rejects links, traversal/source-code paths and oversized archives, and never prints signed URLs.
 4. `python -m api.export` generates the neighborhood, hazard, map, scenario and health JSON through the existing API contracts. It does not create sample forecasts or user reports.
 5. `npm --prefix web run build` copies local map assets and produces the Next.js static export.
 6. The existing release validator checks complete pages, neighborhood/hazard/date JSON, map data, basemap bytes, build configuration, and freshness. `OUTLOOK_REQUIRE_LIVE_FORECASTS=1` requires current real forecast coverage.
 
-Running the restorer directly without `--published` or `OUTLOOK_STATE_URL` keeps local data and performs no download. The Vercel build script restores the public upstream snapshot automatically, including when run locally; a fork does not need to duplicate its release to show the same forecasts. Freshness and unavailable states still apply when the upstream pipeline stops updating. For an independently operated fork, supply its own maintained archive URL. See [SETUP.md](SETUP.md) to bootstrap actual data. Never run `make train` simply to deploy the committed models.
+Running the restorer directly without `--published` or `OUTLOOK_STATE_URL` keeps local data and performs no download. Freshness and unavailable states still apply when a pipeline stops updating. The fork's real runtime archive was bootstrapped on October 25, 2026; this does not configure hourly Vercel publishing. See [SETUP.md](SETUP.md) to bootstrap actual data. Never run `make train` simply to deploy the committed models.
 
 For a public GitHub repository with a populated `state` release, its asset URL can be used as `OUTLOOK_STATE_URL`. A private repository's release asset needs a genuinely accessible signed/private-storage download URL: Vercel's GitHub checkout permission does not automatically authenticate arbitrary archive downloads. Keep the archive current through the existing pipeline. The URL is a build input, not something the browser fetches.
 
@@ -117,6 +117,8 @@ python scripts/check_deployment.py https://YOUR-DEPLOYMENT.vercel.app --allow-un
 
 Omit `--allow-unavailable` for the real forecast launch. The check verifies pages, JSON, snapshot freshness, 110 neighborhoods, and a 16-byte PMTiles range response. Then test a real report against the configured Supabase project.
 
+Add `--require-reporting` once community observations are intended to be live. It fails if the deployed browser build still reports unconfigured/test settings, even when the database is working separately. The hosted check also verifies the What-if page and scenario JSON and rechecks forecast expiry at request time. Inspect **Data → What is connected?** for publication provenance and the separate live community-read status.
+
 ## Remaining operational requirements
 
-The repository's runtime archive, forecast database, source credentials and hosted Supabase schema are not supplied by `vercel.json`. Configure those before claiming live forecasts/reporting. No hosted Vercel deployment or dashboard setting was changed during this implementation. The local build and packaging checks do not establish that a hosted project has the right credentials or archive access.
+The repository's runtime archive, forecast database, source credentials and hosted Supabase schema are not supplied by `vercel.json`. Configure those before claiming live forecasts/reporting. Dashboard settings were not changed during this improvement pass; pushing code can trigger the existing Git integration. Local build and packaging checks alone do not establish that a hosted project has the right credentials or archive access. See [STATUS.md](STATUS.md) for executed hosted checks and outstanding operational work.

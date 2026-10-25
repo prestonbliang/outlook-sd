@@ -6,6 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+from urllib.error import HTTPError
 
 from scripts import vercel_state
 from scripts.vercel_state import restore
@@ -79,6 +80,32 @@ class GitBuildTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 vercel_state.main(published=True)
             self.assertEqual(download.call_args.args[0].full_url, url)
+
+    def test_owned_published_state_is_preferred_with_only_missing_asset_fallback(self):
+        own = "https://github.com/example/outlook-sd/releases/download/state/state.tar.gz"
+        for failure in (None, 404, 403, 500):
+            with self.subTest(failure=failure):
+                response = MagicMock()
+                response.url = own if failure is None else vercel_state.PUBLISHED_STATE_URL
+                response.read.side_effect = [b"archive", b""]
+                response.__enter__.return_value = response
+                effects = [response] if failure is None else [HTTPError(own, failure, "unavailable", {}, None), response]
+                with patch.dict("os.environ", {"OUTLOOK_STATE_URL": "", "VERCEL_GIT_REPO_OWNER": "example", "VERCEL_GIT_REPO_SLUG": "outlook-sd"}, clear=True), \
+                     patch("dotenv.load_dotenv"), patch.object(vercel_state, "urlopen", side_effect=effects) as download, \
+                     patch.object(vercel_state, "restore") as restore_state:
+                    if failure in {403, 500}:
+                        with self.assertRaises(RuntimeError):
+                            vercel_state.main(published=True)
+                        restore_state.assert_not_called()
+                    else:
+                        vercel_state.main(published=True)
+                        restore_state.assert_called_once()
+                    self.assertEqual(download.call_args_list[0].args[0].full_url, own)
+                    self.assertEqual(download.call_count, 2 if failure == 404 else 1)
+
+    def test_invalid_repository_metadata_does_not_change_default_archive(self):
+        with patch.dict("os.environ", {"VERCEL_GIT_REPO_OWNER": "../elsewhere", "VERCEL_GIT_REPO_SLUG": "outlook-sd"}, clear=True):
+            self.assertEqual(vercel_state.published_urls(), [vercel_state.PUBLISHED_STATE_URL])
 
     def test_local_export_does_not_download_or_replace_runtime_data(self):
         with patch.dict("os.environ", {"VERCEL": "0", "OUTLOOK_STATE_URL": ""}), \

@@ -41,7 +41,8 @@ def main(out=ROOT / "web" / "public" / "api"):
             put(f"hazard/{t}/{p['id']}.json", f"/hazard/{t}?place_id={p['id']}")
     # Public deployment metadata contains no keys or raw community observations.
     from api.snapshot import manifest
-    (tmp / "build.json").write_text(json.dumps(manifest(tmp, datetime.now(timezone.utc), os.environ.get("GITHUB_SHA")),
+    (tmp / "build.json").write_text(json.dumps(manifest(tmp, datetime.now(timezone.utc),
+                                                       os.environ.get("GITHUB_SHA") or os.environ.get("VERCEL_GIT_COMMIT_SHA")),
                                                separators=(",", ":")))
     shutil.rmtree(out, ignore_errors=True)
     tmp.rename(out)  # swap in one step so a deploy never sees a half-written tree

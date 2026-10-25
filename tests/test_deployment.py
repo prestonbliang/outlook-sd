@@ -27,6 +27,15 @@ class DeploymentTests(unittest.TestCase):
         if path == "/api/build.json":
             body = {"schema_version": 1, "generated_at": datetime.now(timezone.utc).isoformat(),
                     "places": 1, "forecast_status": self.forecast_status}
+        elif path == "/app-build.json":
+            body = {"schema_version": 1, "reporting": self.reporting}
+        elif path == "/api/scenarios.json":
+            body = {"flow": None, "sea_level": None}
+        elif path.startswith("/api/outlook/"):
+            now = datetime.now(timezone.utc)
+            from zoneinfo import ZoneInfo
+            body = {"tiles": [{"run_ts": now.isoformat() if not self.expired else "2020-01-01T00:00:00Z",
+                                "days": [{"date": now.astimezone(ZoneInfo("America/Los_Angeles")).date().isoformat(), "value": 1}]}]}
         elif path == "/api/places.json":
             body = [{"id": "test-place"}]
         elif "/map/" in path:
@@ -39,6 +48,8 @@ class DeploymentTests(unittest.TestCase):
         self.requests = []
         self.forecast_status = "ready"
         self.range_status = 206
+        self.reporting = "configured"
+        self.expired = False
 
     def test_checks_static_pages_api_and_range_support_with_get_only(self):
         with patch("scripts.check_deployment.urlopen", self.response):
@@ -64,6 +75,18 @@ class DeploymentTests(unittest.TestCase):
         for url in ["file:///etc/passwd", "https://test.vercel.app/map", "https://test.vercel.app/?token=value"]:
             with self.assertRaises(ValueError):
                 check(url)
+
+    def test_reporting_requirement_detects_missing_vercel_variables(self):
+        self.reporting = "unconfigured"
+        with patch("scripts.check_deployment.urlopen", self.response):
+            with self.assertRaisesRegex(ValueError, "public Vercel variables"):
+                check("https://test.vercel.app", require_reporting=True)
+
+    def test_fresh_build_cannot_claim_that_expired_forecasts_are_current(self):
+        self.expired = True
+        with patch("scripts.check_deployment.urlopen", self.response):
+            with self.assertRaisesRegex(ValueError, "expired since publication"):
+                check("https://test.vercel.app")
 
 
 if __name__ == "__main__":

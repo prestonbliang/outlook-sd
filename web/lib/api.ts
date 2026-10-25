@@ -24,13 +24,15 @@ export const ELEVATED = new Set(["high", "very_high", "usg", "unhealthy", "very_
 export interface Place { id: string; name: string; zip: string; lat: number; lon: number; coastal: boolean; kind: string }
 export interface Day { date: string; level: string | null; value: number | null; verdict: string; [k: string]: unknown }
 export interface Factor { label: string; value: string; direction: "up" | "down" }
+export interface SourceCheck { name: string; reference_at: string | null; max_age_hours: number }
 export interface Tile {
   tile: TileName; days: Day[]; reason: string | null; factors: Factor[]; sources: string[]; stale_inputs: string[];
   verdict?: string; status?: string; unit?: { id: string; name: string }; units?: string; model?: string; run_ts?: string;
-  official_advisory: { active: boolean | null; url: string; headline?: string | null };
+  official_advisory: { active: boolean | null; url: string; headline?: string | null; check?: SourceCheck; expires_at?: string | null };
   current?: { aqi: number; parameter: string; site: string; time: string; level: string; verdict: string };
   active_fires?: { name: string; acres: number | null; km: number; url: string }[]; red_flag?: string[];
   active_fires_available?: boolean;
+  source_checks?: SourceCheck[];
 }
 export interface CoolZone { name: string; address: string; km: number; hours: string | null; phone: string | null; pets: string | null }
 export interface OdorRecord { through: string; days: number; south_bay: number; here: number; report_days: number; last_here: string | null; url: string }
@@ -41,6 +43,7 @@ export interface Series { units: string; threshold: { value: number; label: stri
 export interface Hazard extends Tile {
   place: Outlook["place"]; window: { verdict: string; through: string } | null; series: Series | null;
   what_to_do: string; metrics: TrackSummary | null; cool_zones?: CoolZone[];
+  what_to_do_by_date?: Record<string, string>;
 }
 export interface TrackRow { metric: string; model: number | null; model_ci95?: [number, number]; baselines: Record<string, number | null> }
 export interface TrackSummary { headline: string; period: string; inputs: string; table: TrackRow[]; note?: string;

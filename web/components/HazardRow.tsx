@@ -5,7 +5,7 @@ import { CoolZone, ELEVATED, TILE_LABEL, tileMeaning, Tile, levelColor } from "@
 import DayStrip from "./DayStrip";
 import SourceLine from "./SourceLine";
 import ForecastStatus from "./ForecastStatus";
-import { currentDay, dateLabel, observationIsCurrent } from "@/lib/forecast";
+import { advisoryIsCurrent, currentDay, dateLabel, observationIsCurrent } from "@/lib/forecast";
 
 /** One hazard: 6 px level bar, name, verdict, reason (above Low), 3-day strip. Tap expands the why. */
 export default function HazardRow({ tile, placeId, onSelect, coolZone }: { tile: Tile; placeId: string; onSelect?: () => void; coolZone?: CoolZone }) {
@@ -34,7 +34,8 @@ export default function HazardRow({ tile, placeId, onSelect, coolZone }: { tile:
         </button>
         {coolOff && <p className="small cool-line">{tile.tile === "air" ? "Clean indoor air nearby" : "Cool off nearby"}: {coolZone.name}, {(coolZone.km * 0.621).toFixed(1)} mi</p>}
         <ForecastStatus tile={tile} />
-        {tile.official_advisory.active && tile.official_advisory.headline && <p className="notice small"><a href={tile.official_advisory.url}>{tile.official_advisory.headline}</a></p>}
+        {tile.official_advisory.active !== false && tile.official_advisory.headline && <p className="notice small"><a href={tile.official_advisory.url}>{tile.official_advisory.headline}</a>
+          {!advisoryIsCurrent(tile.official_advisory) && " · Last recorded warning; check the official source for its current status."}</p>}
         {!today && tile.days[0] && <p className="small muted">Next available forecast: {dateLabel(tile.days[0].date)}</p>}
         {open && (
           <div id={`${id}-more`} style={{ paddingTop: 8 }}>

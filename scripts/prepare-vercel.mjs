@@ -10,7 +10,7 @@ const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const json = async (path) => JSON.parse(await readFile(path, 'utf8'));
 
 export async function validateExport(source, { allowUnavailable = false, allowTestReporting = false, now = new Date() } = {}) {
-  for (const page of ['index.html', '404.html', 'map/index.html', 'data/index.html', 'track-record/index.html',
+  for (const page of ['index.html', '404.html', 'map/index.html', 'data/index.html', 'track-record/index.html', 'what-if/index.html',
     ...TILES.map(t => `hazard/${t}/index.html`)]) {
     if (!(await readFile(join(source, page), 'utf8')).trim()) throw new Error(`Missing exported page: ${page}`);
   }
@@ -30,6 +30,8 @@ export async function validateExport(source, { allowUnavailable = false, allowTe
   if (dates?.length !== 4 || new Set(dates).size !== 4 || dates[0] !== manifest.forecast_date) throw new Error('Forecast map dates do not match the snapshot');
   await json(join(source, 'api/health.json'));
   await json(join(source, 'api/track-record.json'));
+  const scenarios = await json(join(source, 'api/scenarios.json'));
+  if (!scenarios || !Object.hasOwn(scenarios, 'flow') || !Object.hasOwn(scenarios, 'sea_level')) throw new Error('Incomplete scenario export');
   for (const tile of TILES) {
     for (const suffix of ['', ...dates.map(d => `-${d}`)]) {
       const layer = await json(join(source, `api/map/${tile}${suffix}.json`));
