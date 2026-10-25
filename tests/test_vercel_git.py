@@ -58,16 +58,16 @@ class GitBuildTests(unittest.TestCase):
                 vercel_state.main()
             self.assertNotIn("private-build-token", str(error.exception))
 
-    def test_fresh_vercel_build_restores_published_state_without_manual_configuration(self):
+    def test_fresh_vercel_build_restores_published_state_without_system_environment_variables(self):
         response = MagicMock()
         response.url = vercel_state.PUBLISHED_STATE_URL
         response.read.side_effect = [b"archive bytes", b""]
         response.__enter__.return_value = response
-        with patch.dict("os.environ", {"VERCEL": "1", "OUTLOOK_STATE_URL": ""}), \
+        with patch.dict("os.environ", {"OUTLOOK_STATE_URL": ""}, clear=True), \
              patch("dotenv.load_dotenv"), \
              patch.object(vercel_state, "urlopen", return_value=response) as download, \
              patch.object(vercel_state, "restore") as restore_state:
-            vercel_state.main()
+            vercel_state.main(published=True)
             self.assertEqual(download.call_args.args[0].full_url, vercel_state.PUBLISHED_STATE_URL)
             restore_state.assert_called_once()
 
@@ -77,7 +77,7 @@ class GitBuildTests(unittest.TestCase):
              patch("dotenv.load_dotenv"), \
              patch.object(vercel_state, "urlopen", side_effect=OSError()) as download:
             with self.assertRaises(RuntimeError):
-                vercel_state.main()
+                vercel_state.main(published=True)
             self.assertEqual(download.call_args.args[0].full_url, url)
 
     def test_local_export_does_not_download_or_replace_runtime_data(self):

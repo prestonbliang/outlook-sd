@@ -15,7 +15,7 @@ else
 fi
 
 "$outlook_uv" sync --frozen --python 3.12
-"$outlook_uv" run --frozen python scripts/vercel_state.py
+"$outlook_uv" run --frozen python scripts/vercel_state.py --published
 "$outlook_uv" run --frozen python -m api.export
 npm --prefix web run build
 
