@@ -71,7 +71,8 @@ Full metrics: `models/artifacts/<tile>/metrics.json`.
 - **Heat model coverage:** City of San Diego Fire-Rescue ZIPs only. Other ZIPs show the state CalHeatScore.
 - **Flood** uses one gauge, San Diego Bay. The map marks shoreline places, not individual streets.
 - **Fire** labels after 2020 come from CAL FIRE incidents and perimeter centroids, so some ignition points are approximate. The hazard-zone layer covers State Responsibility Areas only.
-- **Air** live forecasts need the AirNow key. AirNow's own forecast becomes the comparison baseline from the day the key is added.
+- **Air** uses the AirNow API when a key is set and falls back to AirNow's keyless public hourly files otherwise (values can differ from the API by a few AQI points). AirNow's own forecast, logged as a future baseline, needs the key; its old `/forecast/latLong/` service was retired Sep 30, 2026 and replaced by `/forecast/current/`.
+- **Backups and outages:** when CDIP's ERDDAP server is down, wave readings come from NOAA's copy of the same buoy (NDBC 46232), filling only the missing hours. Any other failed source keeps its last data and the app labels the affected forecasts as using older data.
 - **Community reports** are unverified, rate-limited and published only as counts. They never change a forecast.
 - **Sewage smell** is shown as a record, not a forecast. `models/eval_odor.py` tested whether night-time weather predicts days with 3+ South Bay odor complaints beyond recent complaints. It did not (Brier gain −0.003, 95% CI −0.017 to +0.012), so no smell forecast ships. Complaints are a proxy with reporting bias.
 - **"What if" estimates** are the Water model's learned association with border flow, not a causal effect. The sea-level shift ignores waves and local subsidence.

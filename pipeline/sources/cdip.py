@@ -3,9 +3,11 @@ import io
 
 import pandas as pd
 
-from ._common import get, upsert
+from ._common import PROCESSED, get, upsert
 
 ERDDAP = "https://erddap.cencoos.org/erddap/tabledap/edu_ucsd_cdip_{st}.csv"
+# The same physical buoy (CDIP 191 = NDBC 46232), republished by NOAA: backup when ERDDAP is down.
+NDBC_191 = "https://www.ndbc.noaa.gov/data/realtime2/46232.txt"
 VARS = {"sea_surface_wave_significant_height": "hs_m",
         "sea_surface_wave_period_at_variance_spectral_density_maximum": "tp_s",
         "sea_surface_wave_from_direction": "dp_deg",
@@ -30,5 +32,26 @@ def fetch_history(start="2010-01-01"):
         upsert(fetch(st, start), f"cdip_{st}", ["ts_utc"])
 
 
+def parse_ndbc(text):
+    """NDBC realtime2 standard met: WVHT (m), DPD = peak period (s), MWD = direction at DPD (°), WTMP (°C); MM = missing."""
+    rows = [ln.split() for ln in text.splitlines() if ln and not ln.startswith("#")]
+    df = pd.DataFrame(rows, columns=text.splitlines()[0].lstrip("#").split()).replace("MM", None)
+    df["ts_utc"] = pd.to_datetime(df.YY + "-" + df.MM + "-" + df.DD + " " + df.hh + ":" + df.mm, utc=True)
+    out = pd.DataFrame({"ts_utc": df.ts_utc, "station": "191"})
+    for col, short in {"WVHT": "hs_m", "DPD": "tp_s", "MWD": "dp_deg", "WTMP": "sst_c"}.items():
+        out[short] = pd.to_numeric(df[col], errors="coerce")
+    out["tz_source"] = "UTC (NDBC 46232 copy)"
+    return out.dropna(subset=list(VARS.values()), how="all")
+
+
 def fetch_live():
-    return upsert(fetch("191", pd.Timestamp.utcnow() - pd.Timedelta(days=3)), "cdip_191", ["ts_utc"])
+    try:
+        df = fetch("191", pd.Timestamp.utcnow() - pd.Timedelta(days=3))
+    except RuntimeError as e:
+        print(f"[cdip] ERDDAP unavailable, using NOAA's copy of the same buoy: {str(e)[:120]}")
+        df = parse_ndbc(get("cdip_191", NDBC_191).text)
+        stored = PROCESSED / "cdip_191.parquet"
+        if stored.exists():  # only fill the gap: the two feeds log the same waves at different minutes
+            have = pd.read_parquet(stored, columns=["ts_utc", "tz_source"])
+            df = df[df.ts_utc > have[have.tz_source == "UTC"].ts_utc.max()]
+    return upsert(df, "cdip_191", ["ts_utc"])

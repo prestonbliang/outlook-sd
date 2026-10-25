@@ -18,6 +18,8 @@ Outlook SD is built from public data and open-source software. Everything outsid
 | CalHeatScore (live API) | CalEPA / OEHHA | State of California open data (no license listed) | Heat: comparison and fallback rating |
 | EPA AirData daily PM2.5 (88101) and ozone (44201) | U.S. EPA | U.S. government work (public domain) | Air: training labels |
 | AirNow API | U.S. EPA | U.S. government work (public domain) | Air: live hourly observations (daily AQI computed with EPA breakpoints) |
+| AirNow public hourly data files (files.airnowtech.org) | U.S. EPA | U.S. government work (public domain) | Air: backup for hourly observations when the API is down or no key is set |
+| NDBC station 46232 realtime data (same buoy as CDIP 191) | NOAA National Data Buoy Center | U.S. government work (public domain) | Water, Flood: backup wave readings when CDIP's ERDDAP is down |
 | California Historic Fire Perimeters; CAL FIRE incident API | CAL FIRE | State of California public information | Fire |
 | Spatial wildfire occurrence data 1992–2020, 6th ed. (FPA FOD, RDS-2013-0009.6) | USDA Forest Service | U.S. government work (public domain) | Fire: labels 2014–2020 |
 | Fire Hazard Severity Zones in State Responsibility Areas (FHSZ in SRA) | CAL FIRE | State of California public information | Fire: hazard share per 2 km cell |

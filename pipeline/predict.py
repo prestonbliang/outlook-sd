@@ -273,15 +273,17 @@ def predict_air(now, wx):
         m90 = lgb.Booster(model_file=str(art / f"model_{param}_q90.txt"))
         st = pd.DataFrame(json.loads((art / f"sites_{param}.json").read_text())).set_index("site")
         hist = daily[(daily.parameter == param) & daily.site.isin(st.index)][["site", "date", "aqi"]]
-        sites = [s for s in hist.site.unique() if st.loc[s, "point_id"] in wx]
+        cats = json.loads((art / f"site_categories_{param}.json").read_text())  # order = model's category codes
+        trained = set(cats)
+        # a monitor with no training-period data (e.g. one opened after 2023) has no learned site effect: skip it
+        sites = [s for s in hist.site.unique() if s in trained and st.loc[s, "point_id"] in wx]
         if not sites:
             continue
         q = pd.DataFrame([(s, today + pd.Timedelta(days=k)) for s in sites for k in range(4)], columns=["site", "date"])
         wxd = {p: air.weather_daily(wx[p]) for p in st.loc[sites, "point_id"].unique()}
         rows = air.build(q, st, hist, wxd)
         rows = rows[rows.lead_k == (rows.date - today).dt.days].dropna(subset=["aqi_prev"])
-        rows["site"] = pd.Categorical(rows.site.astype(str),
-                                      categories=json.loads((art / f"site_categories_{param}.json").read_text()))
+        rows["site"] = pd.Categorical(rows.site.astype(str), categories=cats)
         rows["q50"], rows["q90"] = m50.predict(rows[air.FEATURES]), m90.predict(rows[air.FEATURES])
         for i, r in rows.iterrows():
             v = max(float(r.q50), 0)
