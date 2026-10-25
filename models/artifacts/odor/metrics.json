@@ -1,0 +1,26 @@
+{
+  "period": {
+    "train": "2024-01-01 \u2192 2025-03-31",
+    "test": "2025-07-01 \u2192 2026-10-17"
+  },
+  "label": "Day with 3 or more South Bay odor complaints to APCD",
+  "test_days": 474,
+  "event_days": 145,
+  "brier": {
+    "recent_reports": 0.17896769528849074,
+    "recent_plus_weather": 0.1817296344684572
+  },
+  "auc": {
+    "recent_reports": 0.838538937218321,
+    "recent_plus_weather": 0.840834294099151
+  },
+  "weather_brier_gain": {
+    "value": -0.0027619391799664494,
+    "ci95": [
+      -0.017046854190503245,
+      0.011956363916164996
+    ]
+  },
+  "calm_night_correlation": 0.31116797693708265,
+  "weather_adds_skill": false
+}

@@ -27,6 +27,7 @@ def main(out=ROOT / "web" / "public" / "api"):
 
     put("places.json", "/places")
     put("track-record.json", "/track-record")
+    put("scenarios.json", "/scenarios")
     put("health.json", "/health")
     put("map/dates.json", "/map/dates")
     dates = c.get("/map/dates").json()["dates"]

@@ -4,7 +4,7 @@ import sys
 import numpy as np
 import pandas as pd
 
-from .sources import (airdata, beachwatch, calfire, cdip, fpa_fod, geo, ibwc, noaa_tides, nws, openmeteo,
+from .sources import (airdata, apcd, beachwatch, calfire, cdip, cool_zones, fpa_fod, geo, ibwc, noaa_tides, nws, openmeteo,
                       sd_fire_ems)
 from .sources._common import PROCESSED
 
@@ -51,6 +51,8 @@ STEPS = {
     "airdata": airdata.fetch_history,
     "calfire": calfire.fetch_history,
     "fpa_fod": fpa_fod.fetch_history,
+    "apcd": apcd.fetch_history,
+    "cool_zones": cool_zones.fetch_history,
 }
 
 if __name__ == "__main__":

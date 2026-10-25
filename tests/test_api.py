@@ -190,3 +190,26 @@ def test_track_record_with_fire_scores_that_have_no_hit(client):
         con.execute("INSERT INTO scores VALUES (1, 1.0, NULL, NULL, '2026-10-24T00:00:00+00:00')")
     live = client.get("/track-record").json()["tiles"]["fire"]["live"]
     assert live["hits"] == 0 and live["observed_fires"] == 1 and live["expected_fires"] == 0.2
+
+
+def test_odor_record_only_for_south_bay_and_counts_last_30_days(client):
+    pd.DataFrame({"record": ["a", "b", "c", "d"], "zip": ["91932", "91932", "92154", "92101"],
+                  "date": pd.to_datetime(["2026-10-21", "2026-09-01", "2026-10-10", "2026-10-20"]).date,
+                  "city": "x", "outcome": "x", "tz_source": "x"}).to_parquet(api.PROCESSED / "odor_complaints.parquet")
+    assert api.odor_reports(api.place_by_id("downtown")) is None
+    o = api.odor_reports(api.place_by_id("imperial-beach"))
+    assert (o["here"], o["south_bay"], o["last_here"], o["through"]) == (1, 2, "2026-10-21", "2026-10-21")
+
+
+def test_cool_zones_are_sorted_by_distance_and_blank_fields_are_null(client):
+    pd.DataFrame({"name": ["Far", "Near"], "address": ["1 A St", "2 B St"], "city": "San Diego", "zip": "92101",
+                  "phone": ["", "619"], "pets": [None, "Service Animals Only"], "hours": ["", "Mon 10-6"],
+                  "lat": [33.2, 32.72], "lon": [-117.2, -117.16]}).to_parquet(api.PROCESSED / "cool_zones.parquet")
+    z = api.cool_zones_near(api.place_by_id("downtown"))
+    assert [x["name"] for x in z] == ["Near", "Far"]
+    assert z[1]["phone"] is None and z[1]["hours"] is None and z[0]["phone"] == "619"
+
+
+def test_scenarios_without_artifacts_is_an_explicit_empty_state(client, monkeypatch):
+    monkeypatch.setattr(api, "artifact", lambda tile, name: None)
+    assert client.get("/scenarios").json() == {"flow": None, "sea_level": None}

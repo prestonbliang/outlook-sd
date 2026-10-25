@@ -26,6 +26,9 @@ Outlook SD is built from public data and open-source software. Everything outsid
 | ACS 2019–2023 5-year summary files (tables B01003, B01001, B19013, B25035) | U.S. Census Bureau | U.S. government work (public domain) | Heat: population for per-resident levels; context |
 | Community reports (one-tap, structured) | Outlook SD users, stored in Supabase | Collected by this app; published only as daily counts | Shown next to forecasts; compared with forecasts; never used for training |
 | Community planning areas | City of San Diego | Open Data Commons PDDL | Named neighborhoods |
+| Air-quality complaint log, 2018 → present (Complaint-Report.xlsx) | San Diego County Air Pollution Control District | Public records dataset (no license listed) | South Bay sewage-smell record; odor-forecast test (not shipped) |
+| Cool Zones (hosted feature layer) | County of San Diego HHSA, via SANDAG GIS | Public GIS layer (no license listed) | Nearest air-conditioned public places on Heat and Air |
+| State of California Sea Level Rise Guidance, 2024 update | California Ocean Protection Council | State of California public information | "What if" page: context sentence only |
 | Protomaps daily basemap build (OpenStreetMap data) | Protomaps; OpenStreetMap contributors | ODbL (© OpenStreetMap contributors) | Map background |
 
 Water exceedance standards: 104 MPN or CFU per 100 mL for culture methods (California 17 CCR §7958); 1,413 DNA copies per 100 mL for ddPCR (Crain et al., 2021; EPA Region 9 approval for San Diego County, May 2022).

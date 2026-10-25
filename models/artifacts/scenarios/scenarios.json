@@ -1,0 +1,152 @@
+{
+  "flow": {
+    "period": "2017-01-01 \u2192 2021-05-26",
+    "samples": 6346,
+    "observed_unsafe_share": 0.213,
+    "no_cap_unsafe_share": 0.1413,
+    "caps": [
+      {
+        "cap_mgd": 0,
+        "unsafe_share": 0.0123
+      },
+      {
+        "cap_mgd": 5,
+        "unsafe_share": 0.0136
+      },
+      {
+        "cap_mgd": 10,
+        "unsafe_share": 0.014
+      },
+      {
+        "cap_mgd": 15,
+        "unsafe_share": 0.0356
+      },
+      {
+        "cap_mgd": 20,
+        "unsafe_share": 0.0429
+      },
+      {
+        "cap_mgd": 25,
+        "unsafe_share": 0.0537
+      },
+      {
+        "cap_mgd": 30,
+        "unsafe_share": 0.0789
+      },
+      {
+        "cap_mgd": 35,
+        "unsafe_share": 0.0791
+      },
+      {
+        "cap_mgd": 40,
+        "unsafe_share": 0.0895
+      },
+      {
+        "cap_mgd": 45,
+        "unsafe_share": 0.0988
+      },
+      {
+        "cap_mgd": 50,
+        "unsafe_share": 0.099
+      },
+      {
+        "cap_mgd": 55,
+        "unsafe_share": 0.099
+      },
+      {
+        "cap_mgd": 60,
+        "unsafe_share": 0.1068
+      },
+      {
+        "cap_mgd": 65,
+        "unsafe_share": 0.1128
+      },
+      {
+        "cap_mgd": 70,
+        "unsafe_share": 0.1223
+      },
+      {
+        "cap_mgd": 75,
+        "unsafe_share": 0.1237
+      },
+      {
+        "cap_mgd": 80,
+        "unsafe_share": 0.1259
+      },
+      {
+        "cap_mgd": 85,
+        "unsafe_share": 0.1259
+      },
+      {
+        "cap_mgd": 90,
+        "unsafe_share": 0.1261
+      },
+      {
+        "cap_mgd": 95,
+        "unsafe_share": 0.1264
+      },
+      {
+        "cap_mgd": 100,
+        "unsafe_share": 0.1272
+      }
+    ]
+  },
+  "sea_level": {
+    "period": "2014\u20132025",
+    "minor_flood_ft_mllw": 7.59,
+    "rises": [
+      {
+        "rise_ft": 0.0,
+        "days_per_year": 6.9
+      },
+      {
+        "rise_ft": 0.25,
+        "days_per_year": 17.7
+      },
+      {
+        "rise_ft": 0.5,
+        "days_per_year": 33.8
+      },
+      {
+        "rise_ft": 0.75,
+        "days_per_year": 54.6
+      },
+      {
+        "rise_ft": 1.0,
+        "days_per_year": 85.6
+      },
+      {
+        "rise_ft": 1.25,
+        "days_per_year": 119.8
+      },
+      {
+        "rise_ft": 1.5,
+        "days_per_year": 162.9
+      },
+      {
+        "rise_ft": 1.75,
+        "days_per_year": 202.8
+      },
+      {
+        "rise_ft": 2.0,
+        "days_per_year": 244.7
+      },
+      {
+        "rise_ft": 2.25,
+        "days_per_year": 279.8
+      },
+      {
+        "rise_ft": 2.5,
+        "days_per_year": 312.5
+      },
+      {
+        "rise_ft": 2.75,
+        "days_per_year": 337.9
+      },
+      {
+        "rise_ft": 3.0,
+        "days_per_year": 354.8
+      }
+    ]
+  }
+}

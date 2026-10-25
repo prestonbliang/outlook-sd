@@ -6,8 +6,12 @@ for (const place of ["imperial-beach", "la-jolla"]) {
   test(`Today renders five hazard rows with text for ${place}`, async ({ page }) => {
     await page.goto(`/?place=${place}`);
     const rows = page.locator("main section");
-    await expect(rows).toHaveCount(5);
-    for (const name of ["Water", "Air", "Heat", "Flood", "Fire"]) await expect(page.getByText(name, { exact: true })).toBeVisible();
-    for (let i = 0; i < 5; i++) await expect(rows.nth(i)).toContainText(WORDS);
+    await expect(rows.first()).toBeVisible();
+    // Air without an AirNow connection is a one-line note instead of a card.
+    const airNote = await page.locator(".not-connected").count();
+    await expect(rows).toHaveCount(5 - airNote);
+    for (const name of ["Beach water", "Heat", "Coastal flooding", "Wildfire", ...(airNote ? [] : ["Air quality"])])
+      await expect(page.getByText(name, { exact: true })).toBeVisible();
+    for (let i = 0; i < 5 - airNote; i++) await expect(rows.nth(i)).toContainText(WORDS);
   });
 }

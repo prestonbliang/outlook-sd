@@ -8,7 +8,7 @@ import SourceLine from "@/components/SourceLine";
 import ForecastStatus from "@/components/ForecastStatus";
 import { dateLabel, observationIsCurrent } from "@/lib/forecast";
 import { usePlace } from "@/lib/usePlace";
-import { Hazard, TILE_NAME, TileName, dayName, get } from "@/lib/api";
+import { Hazard, TILE_LABEL, tileMeaning, TILE_NAME, TileName, dayName, get } from "@/lib/api";
 
 function windowText(h: Hazard) {
   const w = h.window;
@@ -55,7 +55,8 @@ export default function HazardDetail({ tile }: { tile: TileName }) {
   return (
     <main className="wrap">
       <p className="small"><Link href={`/?place=${h.place.id}`}>← {h.place.name}</Link></p>
-      <h1>{TILE_NAME[tile]} · {h.place.name}</h1>
+      <h1>{TILE_LABEL[tile]} · {h.place.name}</h1>
+      <p className="small muted" style={{ margin: "6px 0 0" }}>{tileMeaning(h)}</p>
       <ForecastStatus tile={h} />
       <p style={{ fontSize: 20, fontWeight: 600, margin: "8px 0 4px" }}>{windowText(h)}</p>
       {d0 && <p style={{ margin: 0 }}><LevelBadge tile={tile} level={d0.level} /> <span className="muted">· {valueText(tile, d0)}</span></p>}
@@ -97,6 +98,14 @@ export default function HazardDetail({ tile }: { tile: TileName }) {
 
       <h2 style={{ marginTop: 20 }}>What to do</h2>
       <p>{h.what_to_do}</p>
+      {h.cool_zones && h.cool_zones.length > 0 && <>
+        <h2 style={{ marginTop: 20 }}>Air-conditioned places nearby</h2>
+        <p className="small muted">County of San Diego Cool Zones: free, air-conditioned public places (season June 1 – October 31). Check hours before you go.</p>
+        <ul className="cool-list">{h.cool_zones.map(z => <li key={z.name}><strong>{z.name}</strong> · {(z.km * 0.621).toFixed(1)} mi
+          <br /><span className="small">{z.address}{z.phone ? ` · ${z.phone}` : ""}{z.pets ? ` · Pets: ${z.pets}` : ""}</span>
+          {z.hours && <details><summary>Hours</summary><p className="small" style={{ whiteSpace: "pre-line", margin: 0 }}>{z.hours}</p></details>}</li>)}</ul>
+        <p className="small"><a href="https://www.sandiegocounty.gov/hhsa/programs/ais/cool_zones.html">All County Cool Zones</a></p>
+      </>}
 
       <p><Link href={`/map/?place=${h.place.id}&hazard=${tile}`}>Explore this hazard on the map →</Link></p>
       {tile === "water" && h.place.coastal === false ? <p className="notice">Choose a coastal neighborhood on the map to report beach conditions.</p> :

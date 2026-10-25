@@ -73,6 +73,8 @@ Full metrics: `models/artifacts/<tile>/metrics.json`.
 - **Fire** labels after 2020 come from CAL FIRE incidents and perimeter centroids, so some ignition points are approximate. The hazard-zone layer covers State Responsibility Areas only.
 - **Air** live forecasts need the AirNow key. AirNow's own forecast becomes the comparison baseline from the day the key is added.
 - **Community reports** are unverified, rate-limited and published only as counts. They never change a forecast.
+- **Sewage smell** is shown as a record, not a forecast. `models/eval_odor.py` tested whether night-time weather predicts days with 3+ South Bay odor complaints beyond recent complaints. It did not (Brier gain −0.003, 95% CI −0.017 to +0.012), so no smell forecast ships. Complaints are a proxy with reporting bias.
+- **"What if" estimates** are the Water model's learned association with border flow, not a causal effect. The sea-level shift ignores waves and local subsidence.
 
 ## How it works
 
@@ -82,6 +84,8 @@ Full metrics: `models/artifacts/<tile>/metrics.json`.
 - **Your places:** save up to eight neighborhoods on your device and switch between them from Today or the map.
 - **Map & reports:** explore hazards and forecast days, inspect layers, search neighborhoods, share a link with the selected place/day/hazard/reporting window, and use browser back/forward to restore selections.
 - **Community coverage:** see recent aggregate observations and areas needing more reports. Blind spots describe participation, not safety. Failed reads never become zero-report claims, and reports never alter model forecasts.
+- **What if:** two sliders. Cap the Tijuana River's border flow and see how many South Bay beach tests the Water model would flag as unsafe (2017–2021, the years with flow records). Raise the sea and count the days per year San Diego Bay would reach NOAA's minor-flood level (the real 2014–2025 gauge record, shifted up). Built by `models/scenarios.py`.
+- **South Bay smell record and cool zones:** South Bay places show the last 30 days of APCD odor complaints. Heat and Air show the nearest County Cool Zones.
 - **Details and track record:** inspect source freshness, exact chart values in accessible tables, model performance against baselines, and official sources.
 
 See the [engineering audit](docs/AUDIT.md) for the improvement scope, validation evidence, and remaining release requirements.
@@ -99,8 +103,8 @@ GitHub Actions (hourly)
 - `pipeline/sources/`: one module per data source (`fetch_live`, `fetch_history`). `pipeline/probes/`: one probe script per source.
 - `pipeline/features/`: feature builders per tile, with plain-language labels for the "why" lines.
 - `models/train_<tile>.py`: training and evaluation. Artifacts go to `models/artifacts/<tile>/`.
-- `api/main.py`: the FastAPI app (`/places`, `/outlook`, `/hazard/{tile}`, `/map/{tile}`, `/track-record`, `/health`).
-- `web/`: Next.js app (Today, Detail, Map, Track record, Data).
+- `api/main.py`: the FastAPI app (`/places`, `/outlook`, `/hazard/{tile}`, `/map/{tile}`, `/scenarios`, `/track-record`, `/health`).
+- `web/`: Next.js app (Today, Detail, Map, What if, Track record, Data).
 
 ## Run it
 
