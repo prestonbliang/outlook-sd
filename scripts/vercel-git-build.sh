@@ -17,7 +17,12 @@ fi
 "$outlook_uv" sync --frozen --python 3.12
 "$outlook_uv" run --frozen python scripts/vercel_state.py --published
 "$outlook_uv" run --frozen python -m api.export
-npm --prefix web run build
+# The web package also supports Vercel projects using the ordinary npm build.
+# Its data guard calls this export-only mode, which never invokes Next recursively.
+if [[ "${1:-}" == "--export-only" ]]; then
+  exit 0
+fi
+OUTLOOK_API_PREPARED=1 npm --prefix web run build
 
 # Reuse the same completeness/freshness/private-key checks as the hourly release.
 node --input-type=module <<'JS'
