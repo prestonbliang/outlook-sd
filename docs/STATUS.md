@@ -6,6 +6,19 @@ Vercel GitHub integration is now configured explicitly in the root `vercel.json`
 
 Deployment follow-up verification: **65 Python tests passed, 9 existing source-data tests skipped; 27 frontend unit tests and 15 browser smoke/journey executions passed.** Strict TypeScript, Ruff, shell syntax, the Git build with uv bootstrap, and prebuilt service packaging passed. Enabling the live-forecast requirement correctly rejected the state-free build. The local Vercel CLI used temporary fixture project settings and did not contact or change a hosted project.
 
+## Real-data verification (Oct 24, 2026, maintainer checkout with restored state)
+
+Run against the actual processed source tables, forecast log and all 32 weather archives (not fixtures):
+
+- Python suite: **75 passed, 0 skipped**. The 9 source-data tests skipped in the clean checkout pass with the real files.
+- Live `pipeline.run_all`: Flood, Water, Heat and Fire forecasts produced. The first live scores were logged: Flood 2 of 2 matched; Fire scored county-wide.
+- Web: 27 unit tests and **84 of 84** Playwright executions passed (Chromium, Firefox, WebKit). Supabase schema applied twice and `supabase/tests.sql` passed on PostgreSQL 17.
+- **Fixed:**
+  - the static export crashed once a Fire score existed (Fire has no yes/no hit, so `SUM(hit)` is NULL); a regression test was added;
+  - `.eyebrow` labels were rendered in ALL CAPS at 12 px, against the brief's sentence-case rule and type scale; they are now sentence case at 14 px;
+  - the Codex disclosure was moved from "Student contributions" to "AI tools" in CREDITS;
+  - the macOS-WebKit skip-link test now uses Option+Tab (Safari's default Tab behavior skips links).
+
 ## Completed
 
 - Cohesive navigation, responsive hazard cards, saved neighborhoods, shareable map views, browser history restoration, loading/error recovery and keyboard controls.

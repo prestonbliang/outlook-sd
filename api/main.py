@@ -663,9 +663,10 @@ def track_summary(tile):
 def live_log():
     s = query("SELECT f.tile, COUNT(*) n, SUM(s.hit) hits, MIN(f.target_date) since, SUM(s.observed_value) obs, "
               "SUM(f.value) expected FROM scores s JOIN forecasts f ON f.id = s.forecast_id GROUP BY f.tile")
-    out = {r.tile: {"scored": int(r.n), "hits": int(r.hits or 0), "since": r.since} for r in s.itertuples()}
+    num = lambda v: 0 if pd.isna(v) else v  # SUM over only-NULL values (e.g. fire's yes/no hit) is NaN, not 0
+    out = {r.tile: {"scored": int(r.n), "hits": int(num(r.hits)), "since": r.since} for r in s.itertuples()}
     for r in s[s.tile == "fire"].itertuples():  # fire is scored county-wide: expected vs observed large fires
-        out["fire"].update({"observed_fires": int(r.obs or 0), "expected_fires": round(float(r.expected or 0), 1)})
+        out["fire"].update({"observed_fires": int(num(r.obs)), "expected_fires": round(float(num(r.expected)), 1)})
     return out
 
 

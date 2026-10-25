@@ -51,10 +51,10 @@ Tools: go-pmtiles 1.31 (BSD-3) to cut the San Diego basemap; uv (Astral) for Pyt
 - write the Next.js front end, the tests, and the first drafts of README.md and this file;
 - design and test the community-report database schema (`supabase/schema.sql`) and report features, after a teammate proposed crowdsourcing.
 
+**Codex (OpenAI)** was used to audit fresh-clone behavior, improve missing-data and forecast-date handling, extend the interactive map and community reporting/coverage features, refine navigation and saved places, fix production map-worker initialization, harden release configuration, and write/run regression, browser, accessibility and database checks. Validation results and remaining service configuration are recorded in `docs/STATUS.md`.
+
 No AI model produces the forecasts or the text shown in the app. Forecasts come from the LightGBM models trained here on the data above. Verdicts and advice come from the fixed tables in `api/verdicts.json` and `api/actions.json`.
 
 ### Student contributions
-
-**Codex (OpenAI)** was used to audit fresh-clone behavior, improve missing-data and forecast-date handling, extend the interactive map and community reporting/coverage features, refine navigation and saved places, fix production map-worker initialization, harden release configuration, and write/run regression, browser, accessibility and database checks. Validation results and remaining service configuration are recorded in `docs/STATUS.md`.
 
 The student proposed crowdsourced condition reports and an interactive San Diego map, defined reporting blind spots as part of crowdsourcing, selected Vercel for deployment, and directed iterative development and quality assurance. The implementation assistance is described above.

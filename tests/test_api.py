@@ -179,3 +179,14 @@ def test_stale_incidents_are_not_shown_as_current_map_markers(client, monkeypatc
     assert "older incident markers are hidden" in result["context_notice"]
     monkeypatch.setattr(api, "source_status", lambda: {"calfire": {"stale": False}})
     assert api.map_layer("fire")["features"][0]["properties"]["active_fire"] is True
+
+
+def test_track_record_with_fire_scores_that_have_no_hit(client):
+    # Fire is scored county-wide (expected vs observed count) with hit = NULL; SUM(hit) must not crash the log.
+    with sqlite3.connect(api.DB) as con:
+        con.executescript(SCHEMA)
+        con.execute("INSERT INTO forecasts (id, run_ts, tile, unit_id, target_date, lead_days, value, level, factors_json, "
+                    "extra_json) VALUES (1, '2026-10-23T00:00:00+00:00', 'fire', 'county', '2026-10-23', 0, 0.2, NULL, '[]', '{}')")
+        con.execute("INSERT INTO scores VALUES (1, 1.0, NULL, NULL, '2026-10-24T00:00:00+00:00')")
+    live = client.get("/track-record").json()["tiles"]["fire"]["live"]
+    assert live["hits"] == 0 and live["observed_fires"] == 1 and live["expected_fires"] == 0.2
