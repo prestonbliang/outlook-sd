@@ -88,6 +88,12 @@ For a public GitHub repository with a populated `state` release, its asset URL c
 
 ## Hourly forecasts and existing prebuilt deployments
 
+### Protection against an incomplete standalone web build
+
+`web`'s ordinary `npm run build` now detects Vercel and prepares the published source state and Python API export before running Next.js. This also covers an existing dashboard configured to build the web package directly. The repository-root build marks its already-completed export to avoid duplicate preparation; both paths verify the required JSON exists. Preparation failures stop the build instead of publishing a frontend whose `/api/places.json` returns 404. Local and GitHub Actions builds keep their explicit export workflow. The recommended project Root Directory remains the repository root so all configuration and route/security headers apply.
+
+Environment variables belong to each Vercel project separately. Configuring Supabase on `outlook-sd-kof2` does not configure `outlook-sd`; both projects need their own Production/Preview public values if both are maintained. A Vercel success status alone is not a functional check: run the hosted checker against the exact domain users will open.
+
 A GitHub push rebuilds code, not hourly weather data. Keep the `hourly-pipeline` workflow enabled once its `state` release is available. It restores state, fetches sources, performs inference/logging/scoring, exports API JSON, builds/tests the site, and publishes the snapshot to the **same Vercel project**.
 
 The CLI packager now emits the web service under `.vercel/output/services/web/` with a top-level service route, matching the Git integration. The deployment guard reads service build metadata and still rejects test reporting builds. Manual `deploy-vercel` and hourly workflows remain supported without deploying Python as a server.

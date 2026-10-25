@@ -4,7 +4,7 @@
   "scripts": {
     "fonts": "node scripts/copy-fonts.mjs",
     "dev": "npm run assets && next dev",
-    "build": "npm run assets && next build",
+    "build": "node scripts/ensure-vercel-data.mjs && npm run assets && next build",
     "test:e2e": "playwright test",
     "test:unit": "node --experimental-strip-types --test tests/unit/*.test.mjs",
     "typecheck": "tsc --noEmit",
