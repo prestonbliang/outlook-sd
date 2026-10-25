@@ -300,3 +300,18 @@ def test_detail_carries_dated_advice_when_forecast_levels_change(client, monkeyp
     response = client.get("/hazard/heat?place_id=imperial-beach").json()
     assert response["what_to_do_by_date"][dates[0]] == api.ACTIONS["heat"]["low"]
     assert response["what_to_do_by_date"][dates[1]] == api.ACTIONS["heat"]["high"]
+
+
+def test_context_observations_are_never_counted_as_forecast_agreements_or_all_clears(client, monkeypatch):
+    reports = pd.DataFrame([
+        {"place_id": "downtown", "hazard": "water", "kind": kind, "day": "2026-10-25", "n": n}
+        for kind, n in [("water_sewage", 1), ("water_ok", 1), ("water_debris", 3), ("unknown_future_kind", 2)]
+    ])
+    monkeypatch.setattr(api, "read_parquet", lambda name: reports if name == "community_reports" else None)
+    monkeypatch.setattr(api, "query", lambda *args: pd.DataFrame([
+        {"place_id": "downtown", "hazard": "water", "day": "2026-10-25", "level": "low"}
+    ]))
+    summary = api.community_check()["water"]
+    assert summary["problem_reports"] == 1
+    assert summary["all_clear_reports"] == summary["all_clear_on_low_days"] == 1
+    assert summary["context_reports"] == 5

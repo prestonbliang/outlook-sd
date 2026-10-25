@@ -743,6 +743,7 @@ def live_log():
 
 
 PROBLEM_KINDS = {"water_sewage", "water_sign", "air_smoke", "heat_extreme", "flood_street", "flood_overtop", "fire_smoke"}
+CLEAR_KINDS = {"water_ok", "air_ok", "heat_ok", "flood_ok", "fire_ok"}
 ELEVATED = {"moderate", "high", "very_high", "usg", "unhealthy", "very_unhealthy", "hazardous"}
 
 
@@ -758,13 +759,15 @@ def community_check():
     rep = rep.assign(day=rep.day.astype(str)).merge(lv, on=["place_id", "hazard", "day"], how="left")
     out = {}
     for hz, g in rep.groupby("hazard"):
-        prob, ok = g[g.kind.isin(PROBLEM_KINDS)], g[~g.kind.isin(PROBLEM_KINDS)]
+        # Additional observations (e.g. litter or access to shade) are context, not model outcome labels.
+        prob, ok = g[g.kind.isin(PROBLEM_KINDS)], g[g.kind.isin(CLEAR_KINDS)]
+        context = g[~g.kind.isin(PROBLEM_KINDS | CLEAR_KINDS)]
         rated_p, rated_o = prob[prob.level.notna()], ok[ok.level.notna()]
         out[hz] = {"problem_reports": int(prob.n.sum()), "all_clear_reports": int(ok.n.sum()),
                    "problem_on_elevated_days": int(rated_p[rated_p.level.isin(ELEVATED)].n.sum()),
                    "problem_rated": int(rated_p.n.sum()),
                    "all_clear_on_low_days": int(rated_o[~rated_o.level.isin(ELEVATED)].n.sum()),
-                   "all_clear_rated": int(rated_o.n.sum()), "since": str(g.day.min())}
+                   "all_clear_rated": int(rated_o.n.sum()), "context_reports": int(context.n.sum()), "since": str(g.day.min())}
     return out
 
 
