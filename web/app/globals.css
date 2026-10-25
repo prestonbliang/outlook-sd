@@ -263,11 +263,22 @@ details[open] > summary { margin-bottom: 8px; }
 .observation-group legend { font-size: 12px; font-weight: 600; margin-bottom: 10px; }
 .observation-button { width: 100%; min-height: 48px; height: 100%; padding: 13px 15px; border: 1px solid #B9CDC5; border-radius: 8px; text-align: left; background: white; color: var(--signal); font-size: 13px; cursor: pointer; transition: border-color .18s, background .18s, transform .18s; }
 .observation-button:hover:not(:disabled) { background: var(--sea-light); border-color: var(--signal); transform: translateY(-1px); }
+.observation-button[aria-pressed="true"] { background: var(--sea-light); border-color: var(--signal); box-shadow: inset 0 0 0 1px var(--signal); }
+.observation-selected { float: right; margin-left: 8px; font-weight: 600; }
 .clear-observation .observation-button { width: auto; max-width: 100%; background: var(--canvas); color: var(--ink); }
 .coverage-note { padding: 16px 18px; margin: 20px 0; background: #F0F3F6; border-left: 3px solid #7A6F9B; border-radius: 8px; }
 .coverage-note strong { font-size: 13px; } .coverage-note p { margin: 7px 0 0; }
 .coverage-reported { border-left-color: var(--signal); background: var(--sea-light); }
 .observation-counts { padding-left: 18px; }
+.observation-summary { padding: 18px; margin: 20px 0; border: 1px solid var(--rule); border-radius: 10px; background: var(--canvas); }
+.observation-summary h3, .own-observations h3 { margin: 0 0 10px; font-size: 16px; }
+.observation-summary p { font-size: 14px; line-height: 1.65; margin: 10px 0 0; }
+.own-observations { margin: 22px 0; padding: 18px 0; border-block: 1px solid var(--rule); }
+.own-observations ul { list-style: none; padding: 0; }
+.own-observations li { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 10px 0; font-size: 13px; }
+.own-observations li > span { min-width: 0; } .own-observations li span span { display: block; }
+.own-observations button { min-height: 44px; flex-shrink: 0; }
+.observation-details, .report-safeguards { margin: 16px 0; font-size: 13px; }
 
 /* Data, charts and scientific context */
 table { width: 100%; border-collapse: collapse; font-size: 13px; }

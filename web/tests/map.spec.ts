@@ -69,7 +69,8 @@ test.describe("community reporting", () => {
     await page.getByRole("button", { name: "Sewage smell or brown water", exact: true }).click();
     await expect(page.getByText("Thanks. Your observation for Imperial Beach was saved.")).toBeVisible();
     await expect(page.getByText(/1 observation from 1 browser/)).toBeVisible();
-    expect(Object.keys(payload!).sort()).toEqual(["client_id", "hazard", "kind", "place_id"]);
+    expect(Object.keys(payload!).sort()).toEqual(["client_id", "hazard", "kind", "place_id", "withdrawal_hash"]);
+    expect(payload!.withdrawal_hash).toMatch(/^[0-9a-f]{64}$/);
     expect(payload!.place_id).toBe("imperial-beach");
     expect(payload!.kind).toBe("water_sewage");
     expect(payload!.client_id).toMatch(/^[0-9a-f-]{36}$/);

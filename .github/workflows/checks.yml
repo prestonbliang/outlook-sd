@@ -51,6 +51,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f supabase/schema.sql
           psql -v ON_ERROR_STOP=1 -f supabase/tests.sql
           psql -v ON_ERROR_STOP=1 -f supabase/observation-options.tests.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/report-management.tests.sql
       - run: uv run python -m api.export
       - run: npm run test:unit
         working-directory: web
