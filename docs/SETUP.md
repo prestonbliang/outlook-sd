@@ -69,6 +69,14 @@ Reporting requires browser storage and a secure context (HTTPS or localhost). Ra
 
 Coverage is calculated separately for each neighborhood and hazard over the past 24 hours or 7 days. Fewer than three reporting browsers is a participation gap, not a hazard assessment. If reporting is disconnected or fails to load, coverage is unknown. Map observations remain historical observations when a future forecast day is selected.
 
+### Expanded observation choices
+
+The app offers 27 structured choices across the five hazards. Existing projects can run `supabase/observation-options.sql` in the SQL Editor to add the 15 new choices, preserving all existing reports, permissions, repeat limits and hourly limits. The full `schema.sql` includes the same repeatable migration for new installations. The read-only `report_kinds()` RPC advertises which choices the database accepts; until the update is applied, or when that metadata is unavailable, the browser retains its original 12 choices. Reload an already-open app after upgrading to load the new labels.
+
+Additional choices cover floating debris/foam/oily water, airborne dust/odors/ash, shade and cooling access/hot nights, flooded paths/drains/blocked roads, and fire-related ash/flames/closures. They appear in recent community counts but are contextual observations, not outcome labels for the models. They are excluded from forecast-agreement calculations; unknown future kinds are never treated as all-clear reports. Reports still have no free text or precise user location.
+
+`supabase/observation-options.tests.sql` checks every choice, aggregate classification, unknown/mismatched rejection and raw-row privacy in a transaction that rolls back. Run it only in a disposable development database; browser tests intercept submissions and do not create production reports.
+
 ## Build and test
 
 ```bash

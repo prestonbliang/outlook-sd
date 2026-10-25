@@ -1,5 +1,5 @@
 import type { TileName } from "./api";
-import { KINDS, validateSummaries, type Summary } from "./community";
+import { KINDS, LEGACY_KINDS, parseReportKinds, validateSummaries, type Summary } from "./community";
 import { reportingHeaders } from "./reporting-headers";
 export { KINDS, KIND_LABEL } from "./community";
 export type { Summary } from "./community";
@@ -10,6 +10,25 @@ const PUBLIC_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim()
 export const reportsEnabled = Boolean(URL_ && PUBLIC_KEY);
 export const REPORTS_CHANGED = "outlook-sd-reports-changed";
 export interface Count { place_id: string; hazard: TileName; kind: string; day: string; n: number }
+
+let kindRequest: Promise<string[]> | undefined;
+/** Discover the database vocabulary before offering choices it may not accept yet. */
+export function availableReportKinds(): Promise<string[]> {
+  if (!reportsEnabled) return Promise.resolve([]);
+  if (!kindRequest) {
+    kindRequest = fetch(`${URL_}/rest/v1/rpc/report_kinds`, {
+      method: "POST", headers: headers(), body: "{}", signal: AbortSignal.timeout(15000), cache: "no-store",
+    }).then(async response => {
+      if (!response.ok) throw new Error("Observation options are unavailable");
+      return parseReportKinds(await response.json());
+    }).catch(() => {
+      // Older databases keep their working original choices. A new page load retries discovery.
+      kindRequest = undefined;
+      return [...LEGACY_KINDS];
+    });
+  }
+  return kindRequest;
+}
 
 function headers() {
   return reportingHeaders(PUBLIC_KEY!);

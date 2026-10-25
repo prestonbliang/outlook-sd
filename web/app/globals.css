@@ -37,7 +37,12 @@ button:disabled { cursor: wait; opacity: .6; }
 .notice { background: #FFF4DB; border-left: 3px solid #B47B00; padding: 10px 12px; }
 .form-error { color: #A02218; }
 .report-box { border-top: 1px solid var(--rule); margin-top: 20px; padding-top: 20px; }
-.report-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.report-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.observation-group { border: 0; padding: 0; margin: 16px 0; min-width: 0; }
+.observation-group legend { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+.observation-group button { width: 100%; height: 100%; }
+.clear-observation .observation-button { width: auto; max-width: 100%; }
+@media (max-width: 600px) { .report-options { grid-template-columns: 1fr; } }
 .observation-button { padding: 12px 14px; border: 1px solid var(--signal); color: var(--signal); background: var(--paper); border-radius: 6px; text-align: left; cursor: pointer; }
 .observation-button:hover:not(:disabled) { background: #E8F3FA; }
 .coverage-note { border-radius: 6px; background: var(--fog); padding: 12px; margin-top: 12px; border-left: 3px solid #6A4C93; }

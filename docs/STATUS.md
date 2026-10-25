@@ -2,6 +2,14 @@
 
 Outlook SD is deployed at https://outlook-sd-kof2.vercel.app and remains a release candidate. The current pass refreshes real sources, fixes morning Air inference, bootstraps the fork's `state` release, and verifies a read-only connection to Supabase. The hosted build now reports community configuration present; hourly Vercel publishing still needs credentials and a post-deployment strict check. See [IMPROVEMENT_REVIEW.md](IMPROVEMENT_REVIEW.md) for the audit, 18 evaluated innovations, tradeoffs, limits and five-item roadmap.
 
+## Latest verification — expanded community observations
+
+Added 15 structured choices for 27 total across Water, Air, Heat, Flood and Fire. Concern and no-concern choices are grouped, with two columns on wider screens and one on mobile. The browser reads the database's `report_kinds()` vocabulary before enabling new choices and keeps original choices if the capability endpoint is unavailable. Existing IDs, duplicate rejection, hourly limits, privacy and aggregate-only reads are preserved. Additional contextual observations are excluded from forecast-agreement calculations; unknown types cannot become all-clear reports.
+
+The maintainer applied `supabase/observation-options.sql`; a read-only check of the actual project returned all 27 types. No test observations were inserted into the live database.
+
+Executed checks: **106 Python tests (15 subtests), 49 frontend unit tests, and 156 Playwright executions passed**, with no tests skipped in those local runs. Chromium, Firefox and WebKit cover all five option groups, mobile layout/accessibility, new-type submission/count refresh, duplicate rejection and old/unavailable option metadata. Production build, strict TypeScript, Ruff and release packaging passed. In disposable PostgreSQL 17, the migration and full schema each reapplied twice while preserving an existing report; all 27 types inserted under anon, aggregates classified them correctly, invalid/mismatched types were rejected, and raw-row reads remained denied. Existing rate-limit tests passed. The database tests rolled back their observations and the container was removed.
+
 ## Current improvement pass — October 25, 2026
 
 Implemented local three-day planning preferences/presets, on-demand saved-neighborhood comparison, source-specific expiry checks on open pages, qualified official warnings/incident context, publication/community connection diagnostics, resilient scenario states/controls, dated advice, Pacific-midnight rollover and bounded Parquet caching. Static hosting, existing models, RLS and anonymous reporting remain in place. No model was retrained or test observation inserted into the live project.

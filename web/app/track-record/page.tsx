@@ -5,7 +5,7 @@ import { TILE_LABEL, TILE_ORDER, TileName, TrackSummary, get } from "@/lib/api";
 import { usePlace } from "@/lib/usePlace";
 
 type Community = { problem_reports: number; all_clear_reports: number; problem_on_elevated_days: number; problem_rated: number;
-  all_clear_on_low_days: number; all_clear_rated: number; since: string };
+  all_clear_on_low_days: number; all_clear_rated: number; context_reports?: number; since: string };
 type Live = { scored: number; hits: number; since: string; observed_fires?: number; expected_fires?: number };
 type Odor = { test_days: number; event_days: number; auc: Record<string, number>; weather_adds_skill: boolean; period: { test: string } };
 type TR = { tiles: Record<TileName, { held_out: TrackSummary | null; live: Live | null;
@@ -26,10 +26,11 @@ function Reliability({ bins }: { bins: NonNullable<TrackSummary["reliability"]> 
 function communityText(c: Community | null) {
   if (!c) return "Community reports: none yet.";
   const total = c.problem_reports + c.all_clear_reports;
-  if (total < 5) return `Community reports: ${total} so far, too few to compare with the forecast.`;
+  const context = c.context_reports ? ` ${c.context_reports} additional observations describe local conditions or access; they are not counted as forecast matches.` : "";
+  if (total < 5) return `Community reports: ${total} eligible for comparison so far, too few to compare with the forecast.${context}`;
   return `Community reports since ${c.since}: ${c.problem_on_elevated_days} of ${c.problem_rated} problem reports came on days we rated ` +
     `Moderate or higher, and ${c.all_clear_on_low_days} of ${c.all_clear_rated} all-clear reports came on Low days. ` +
-    "Reports are from app users and are not verified.";
+    `Reports are from app users and are not verified.${context}`;
 }
 const fmt = (v: number | null | undefined) => (v === null || v === undefined ? "—" : Number.isInteger(v) ? String(v) : Math.abs(v) < 1 ? v.toFixed(3) : v.toFixed(1));
 

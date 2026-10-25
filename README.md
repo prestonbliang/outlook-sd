@@ -12,6 +12,8 @@ Community observations include counts, time since the latest report, and coverag
 
 Community reporting requires Supabase configuration and the current `supabase/schema.sql`, including its `report_summary` function. Disconnected or failed requests show coverage as unavailable. Reports remain observations about recent conditions when a future forecast day is selected.
 
+There are 27 structured observation choices, including debris and oily water, airborne dust, cooling access, flooded paths and fire-related closures. Existing Supabase projects can apply [`supabase/observation-options.sql`](supabase/observation-options.sql) to enable the 15 added choices; the app checks the database vocabulary before offering them. Additional contextual observations are shown in community counts and kept out of model-agreement calculations.
+
 ## What each tile forecasts
 
 | Tile | Question | Unit | Status |
