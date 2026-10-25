@@ -9,6 +9,7 @@ import ForecastStatus from "@/components/ForecastStatus";
 import { advisoryIsCurrent, currentDay, dateLabel, localDate, observationIsCurrent } from "@/lib/forecast";
 import { usePlace } from "@/lib/usePlace";
 import { useNow } from "@/lib/useNow";
+import PageIntro from "@/components/PageIntro";
 import { Hazard, TILE_LABEL, tileMeaning, TILE_NAME, TileName, dayName, get } from "@/lib/api";
 
 function windowText(h: Hazard) {
@@ -63,12 +64,12 @@ export default function HazardDetail({ tile }: { tile: TileName }) {
   const advice = d0 && h.what_to_do_by_date?.[d0.date] ? h.what_to_do_by_date[d0.date] :
     !h.days.length || h.days[0]?.date === d0?.date ? h.what_to_do : "Guidance for the current day is unavailable in this snapshot. Check the official source for current advice.";
   return (
-    <main className="wrap">
+    <main className="wrap detail-page">
       <p className="small"><Link href={`/?place=${h.place.id}`}>← {h.place.name}</Link></p>
-      <h1>{TILE_LABEL[tile]} · {h.place.name}</h1>
-      <p className="small muted" style={{ margin: "6px 0 0" }}>{tileMeaning(h)}</p>
+      <PageIntro eyebrow={`${TILE_NAME[tile]} / Neighborhood forecast`} title={`${TILE_LABEL[tile]} · ${h.place.name}`} description={tileMeaning(h)} icon={tile} />
+      <section className="detail-summary" aria-label="Current forecast">
       <ForecastStatus tile={h} />
-      <p style={{ fontSize: 20, fontWeight: 600, margin: "8px 0 4px" }}>{windowText(h)}</p>
+      <p className="detail-verdict">{windowText(h)}</p>
       {d0 && <p style={{ margin: 0 }}><LevelBadge tile={tile} level={d0.level} /> <span className="muted">· {valueText(tile, d0)}</span></p>}
       {h.unit && <p className="small muted" style={{ margin: "4px 0 0" }}>
         {tile === "water" ? `Nearest monitored beach: ${h.unit.name}` : tile === "flood" ? `${h.unit.name}; levels in ${h.units}` : h.unit.name}
@@ -79,6 +80,7 @@ export default function HazardDetail({ tile }: { tile: TileName }) {
           {!advisoryIsCurrent(h.official_advisory) && " · Last recorded warning; check the official source for its current status."}</p>
       )}
       {(tile === "flood" || tile === "fire") && (h.official_advisory.active === null || !advisoryIsCurrent(h.official_advisory)) && <p className="notice small">Official alert status could not be confirmed. <a href={h.official_advisory.url}>Check the official source</a>.</p>}
+      </section>
 
       {h.factors.length > 0 && <>
         <h2 style={{ marginTop: 20 }}>Why</h2>
@@ -107,8 +109,9 @@ export default function HazardDetail({ tile }: { tile: TileName }) {
         </table></div>
       </>}
 
-      <h2 style={{ marginTop: 20 }}>What to do</h2>
+      <section className="detail-advice"><h2>What to do</h2>
       <p>{advice}</p>
+      </section>
       {h.cool_zones && h.cool_zones.length > 0 && <>
         <h2 style={{ marginTop: 20 }}>Air-conditioned places nearby</h2>
         <p className="small muted">County of San Diego Cool Zones: free, air-conditioned public places (season June 1 – October 31). Check hours before you go.</p>

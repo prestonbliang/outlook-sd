@@ -33,7 +33,7 @@ export default function PlanningBrief({ outlook }: { outlook: Outlook }) {
     {warnings.length > 0 && <p className="notice small" role="note">Official warnings recorded: {warnings.map((t, i) => <span key={t.tile}>
       {i > 0 && "; "}<a href={t.official_advisory.url}>{t.official_advisory.headline}</a>
       {!advisoryIsCurrent(t.official_advisory, now) && " (status needs checking)"}</span>)}. Follow official guidance.</p>}
-    <div className="planning-presets" aria-label="Planning presets">{PRESETS.map(p => <button key={p.name} className="place-chip"
+    <div className="planning-layout"><div className="planning-controls"><div className="planning-presets" aria-label="Planning presets">{PRESETS.map(p => <button key={p.name} className="place-chip"
       aria-pressed={p.tiles.length === focus.length && p.tiles.every(t => focus.includes(t))} onClick={() => select(p.tiles)}>{p.name}</button>)}</div>
     <details className="planning-focus"><summary>Choose hazards ({focus.length})</summary><fieldset>
       <legend className="sr-only">Hazards in your planning brief</legend>
@@ -41,6 +41,7 @@ export default function PlanningBrief({ outlook }: { outlook: Outlook }) {
         onChange={() => select(focus.includes(t) ? focus.filter(x => x !== t) : [...focus, t])} />{TILE_LABEL[t]}</label>)}
     </fieldset></details>
     {notice && <p role="status" className="small">{notice}</p>}
+    </div>
     {!focus.length ? <p className="small" role="status">Select at least one hazard to see your planning brief.</p> :
       <div className="planning-days">{days.map(d => <article key={d.date} className={`planning-day ${d.attention.length ? "planning-attention" : ""}`}>
         <h3>{dateLabel(d.date, new Date(now || Date.now()))}</h3>
@@ -52,7 +53,7 @@ export default function PlanningBrief({ outlook }: { outlook: Outlook }) {
           <span className={`plan-state state-${item.state}`}>{item.state === "current" ? LEVEL_WORD[item.day?.level ?? ""] ?? "Not rated" :
             item.state === "stale" ? "Needs updating" : item.state === "not_applicable" ? "Outside coverage" : "No forecast"}</span>
         </li>)}</ul></details>
-      </article>)}</div>}
+      </article>)}</div>}</div>
     <p className="small muted planning-method">Attention means Moderate or higher; for air, Unhealthy for sensitive groups or higher.
       Only current forecasts contribute. Missing data is unknown. This is not a combined risk score or an official advisory.</p>
   </section>;

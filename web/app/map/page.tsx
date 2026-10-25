@@ -14,6 +14,8 @@ import { COVERAGE_LABEL, coverageFor, reportAge } from "@/lib/community";
 import { useCommunity } from "@/lib/useCommunity";
 import { usePlace } from "@/lib/usePlace";
 import { useNow } from "@/lib/useNow";
+import PageIntro from "@/components/PageIntro";
+import Icon from "@/components/Icon";
 
 const HazardMap = dynamic(() => import("@/components/HazardMap"), {
   ssr: false, loading: () => <div className="map-loading" role="status">Loading San Diego map…</div>,
@@ -46,6 +48,13 @@ export default function MapPage() {
   const [outlookError, setOutlookError] = useState<string | null>(null);
   const [outlookAttempt, setOutlookAttempt] = useState(0);
   const community = useCommunity(hours);
+  useEffect(() => {
+    // Report links can arrive before the selected neighborhood exists in the DOM.
+    if (place && window.location.hash === "#map-report") {
+      const frame = requestAnimationFrame(() => document.getElementById("map-report")?.scrollIntoView({ block: "start", behavior: "instant" }));
+      return () => cancelAnimationFrame(frame);
+    }
+  }, [place]);
   useEffect(() => {
     if (!new URLSearchParams(window.location.search).get("date") && dates.includes(today)) setDate(today);
   }, [today, dates]);
@@ -116,18 +125,17 @@ export default function MapPage() {
   const windowLabel = hours === 24 ? "24 hours" : "7 days";
   return (
     <main className="map-page">
-      <header className="explorer-header">
-        <div><p className="eyebrow">Outlook SD · San Diego County</p><h1>Explore your neighborhood</h1>
-          <p className="muted">Local forecasts and observations from people nearby.</p></div>
+      <PageIntro eyebrow="The county, in context" title="Explore your neighborhood" description="Look closer. Follow the forecasts, explore your surroundings, and see what people nearby are noticing." icon="map">
+        {place && <a className="primary-link" href="#map-report">Report a condition <Icon name="community" size={17} /></a>}
         <button className="secondary-button" onClick={share} disabled={!placeId}>Share this view ↗</button>
-      </header>
+      </PageIntro>
       {shareMessage && <div className="share-panel"><p role="status" className="small">{shareMessage}</p>
         <label className="sr-only" htmlFor="share-url">Link to this map view</label><input id="share-url" readOnly value={shareURL ?? ""} onFocus={event => event.target.select()} /></div>}
       {dates.length > 0 && dates[0] !== localDate() && <p className="notice" role="status">This map uses an older forecast snapshot. Check the date and official sources before making plans.</p>}
       <fieldset className="hazard-switcher">
         <legend className="sr-only">Choose a hazard</legend>
         {TILE_ORDER.map((t) => <label key={t} className={tile === t ? "hazard-option selected" : "hazard-option"}>
-          <input type="radio" name="hazard" checked={tile === t} onChange={() => selectTile(t)} />{TILE_NAME[t]}</label>)}
+          <input type="radio" name="hazard" checked={tile === t} onChange={() => selectTile(t)} /><Icon name={t} size={19} />{TILE_NAME[t]}</label>)}
       </fieldset>
       <div className="explorer-grid">
         <aside className="explorer-sidebar" aria-label="Map controls and observations">
@@ -180,7 +188,7 @@ export default function MapPage() {
           </ul>
           <p className="small muted">Tap a station, shaded area, or neighborhood circle to inspect it. You can also select a neighborhood below.</p>
           {place && <section className="selected-neighborhood" id="map-report" tabIndex={-1} aria-label="Selected neighborhood">
-            <div className="selected-heading"><div><p className="eyebrow">Selected neighborhood · ZIP {place.zip}</p><h2>{place.name}</h2></div>
+            <div className="selected-heading"><div className="selected-context"><Icon name={tile} size={24} /><div><p className="eyebrow">Selected neighborhood · ZIP {place.zip}</p><h2>{place.name}</h2></div></div>
               <Link href={`/hazard/${tile}/?place=${place.id}`}>Full {TILE_NAME[tile].toLowerCase()} forecast →</Link></div>
             {current && <ForecastStatus tile={current} date={date} />}
             {outlookError ? <p role="status">The neighborhood forecast could not load. <button className="button-link" onClick={() => setOutlookAttempt(x => x + 1)}>Try again</button></p> : !outlook ? <p role="status">Loading neighborhood forecast…</p> :

@@ -6,6 +6,7 @@ import { usePlace } from "@/lib/usePlace";
 import SnapshotStatus from "@/components/SnapshotStatus";
 import { sourceDateLabel, sourceIsCurrent } from "@/lib/forecast";
 import { useNow } from "@/lib/useNow";
+import PageIntro from "@/components/PageIntro";
 
 type Health = { sources: Record<string, { last_success: string | null; newest_data: string | null; stale: boolean;
   reference_at?: string | null; max_age_hours?: number; error?: string | null }> };
@@ -65,15 +66,15 @@ export default function DataPage() {
     return () => controller.abort();
   }, [attempt]);
   return (
-    <main className="wrap">
+    <main className="wrap data-page">
       <p className="small"><Link href={`/?place=${placeId ?? ""}`}>← Today</Link></p>
-      <h1>Data</h1>
+      <PageIntro eyebrow="Nothing behind the curtain" title="Data" description="Know what goes into your outlook. Public sources, visible timestamps, and a clear distinction between a forecast and an observation." icon="data" />
       <p>Forecasts use these public datasets. An hourly pipeline refreshes sources when configured; the website serves its published snapshot.
         Source update times describe the data actually available, including any delays.</p>
       <SnapshotStatus />
       {error && <p className="notice" role="status">Source update times could not load. The source links below are still available. <button className="button-link" onClick={() => setAttempt(x => x + 1)}>Try again</button></p>}
       {!health && !error && <p className="small muted" role="status">Loading source update times…</p>}
-      <div className="table-scroll"><table>
+      <div className="table-scroll source-directory" tabIndex={0} role="region" aria-label="Data source directory"><table>
         <caption className="sr-only">Public data sources, use, licenses, and update times</caption>
         <thead><tr><th scope="col">Source</th><th scope="col">Used for</th><th scope="col">License</th><th scope="col">Last update</th></tr></thead>
         <tbody>
@@ -91,7 +92,7 @@ export default function DataPage() {
           })}
         </tbody>
       </table></div>
-      <h2 id="community" style={{ marginTop: 24 }}>Community reports</h2>
+      <section className="data-notes"><h2 id="community">Community reports</h2>
       <p>Anyone can report conditions on a hazard page or from the map. We store the neighborhood, hazard, report type, time, and a random browser code to limit repeat reports. We do not store names, emails, exact locations or free text. Only aggregate counts, reporting-browser counts, and the latest report time are published; raw reports and browser codes are not readable by public users. Reports are unverified, never change the forecasts, and are compared with them on the Track record page.</p>
       <p>The map can highlight reporting blind spots: neighborhoods with observations from fewer than three browsers for a hazard over the past 24 hours or 7 days. This is a participation goal, not a measure of safety or model confidence. A browser code does not establish a unique person. Missing reports never mean missing hazards. Observations about water appearance cannot establish bacteria levels.</p>
       <h2 style={{ marginTop: 24 }}>How AI was used</h2>
@@ -99,6 +100,7 @@ export default function DataPage() {
       <p>The forecasts themselves come from this project's LightGBM models trained on the data above. No chatbot generates forecasts or advice at runtime: verdicts and advice come from fixed tables.</p>
       <h2 style={{ marginTop: 24 }}>Libraries</h2>
       <p className="small">Python: pandas, NumPy, PyArrow, requests, LightGBM, scikit-learn, GeoPandas, Shapely, FastAPI. Web: Next.js, React, U.S. Web Design System (Public Sans font), MapLibre GL JS, react-map-gl, PMTiles, Protomaps basemaps, Observable Plot.</p>
+      </section>
     </main>
   );
 }

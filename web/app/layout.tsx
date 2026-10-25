@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import AppHeader from "@/components/AppHeader";
+import AppFooter from "@/components/AppFooter";
 
 export const metadata: Metadata = {
   title: "Outlook SD",
@@ -13,8 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body><a className="skip-link" href="#main-content">Skip to main content</a><AppHeader />
         <div id="main-content" tabIndex={-1}>{children}</div>
-        <footer className="app-footer"><strong>Outlook SD</strong><span>Built by San Diego students for the 2026 Congressional App Challenge. Not a government website.</span>
-          <span>Forecasts are not official advisories. Follow official alerts and posted signs.</span></footer>
+        <AppFooter />
       </body>
     </html>
   );

@@ -32,23 +32,21 @@ export default function PlacePicker({ places, onPick }: { places: Place[]; onPic
   }
 
   return (
-    <div style={{ padding: "8px 0 12px" }}>
+    <div className="place-picker">
       <label htmlFor={id} className="small" style={{ display: "block", fontWeight: 600 }}>Neighborhood or ZIP</label>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+      <div className="place-picker-search">
         <input id={id} type="search" value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" aria-controls={matches.length ? `${id}-results` : undefined}
                onKeyDown={event => { if (event.key === "Enter" && matches.length === 1) { event.preventDefault(); onPick(matches[0]); setQ(""); } }}
-               placeholder="e.g. Imperial Beach or 92109"
-               style={{ flex: "1 1 200px", font: "inherit", padding: "8px 10px", border: "1px solid var(--slate)", borderRadius: 2 }} />
+               placeholder="e.g. Imperial Beach or 92109" />
         <button onClick={locate} disabled={locating || !places.length} className="secondary-button">{locating ? "Locating…" : "Use my location"}</button>
       </div>
       {msg && <p className="small muted" role="status">{msg}</p>}
       {q.trim() && <p className="sr-only" role="status">{matches.length} matching neighborhoods shown. Tab to a result to choose it.</p>}
       {matches.length > 0 && (
-        <ul id={`${id}-results`} aria-label="Matching neighborhoods" style={{ listStyle: "none", margin: "4px 0 0", padding: 0, border: "1px solid var(--rule)" }}>
+        <ul id={`${id}-results`} className="place-results" aria-label="Matching neighborhoods">
           {matches.map((p) => (
             <li key={p.id}>
-              <button onClick={() => { onPick(p); setQ(""); }} className="button-link"
-                      style={{ display: "block", width: "100%", textAlign: "left", padding: "8px 10px", textDecoration: "none" }}>
+              <button onClick={() => { onPick(p); setQ(""); }} className="button-link">
                 {p.name} <span className="muted">· {p.zip}</span>
               </button>
             </li>

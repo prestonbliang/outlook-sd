@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { TILE_LABEL, TILE_ORDER, TileName, TrackSummary, get } from "@/lib/api";
 import { usePlace } from "@/lib/usePlace";
+import PageIntro from "@/components/PageIntro";
+import Icon from "@/components/Icon";
 
 type Community = { problem_reports: number; all_clear_reports: number; problem_on_elevated_days: number; problem_rated: number;
   all_clear_on_low_days: number; all_clear_rated: number; context_reports?: number; since: string };
@@ -47,9 +49,7 @@ export default function TrackRecord() {
   return (
     <main className="wrap">
       <p className="small"><Link href={`/?place=${placeId ?? ""}`}>← Today</Link></p>
-      <h1>Track record</h1>
-      <p>Would you trust a forecast that never shows its homework? Each model was tested on years it never saw and compared
-        with a simple guess. Every live forecast is saved and scored when the real answer comes in.</p>
+      <PageIntro eyebrow="Trust, earned in the open" title="Track record" description="A forecast should show its homework. Explore tests on unseen years, comparisons with simple baselines, and scores as real outcomes arrive." icon="chart" />
       {err && <div className="error-panel" role="alert"><p>{err}</p><button className="secondary-button" onClick={() => setAttempt(x => x + 1)}>Try again</button></div>}
       {!tr && !err && <p role="status">Loading the forecast track record…</p>}
       {tr && TILE_ORDER.map((t) => {
@@ -57,10 +57,10 @@ export default function TrackRecord() {
         const baselines = [...new Set(s?.table.flatMap(row => Object.keys(row.baselines)) ?? [])];
         return (
           <section key={t} className="track-card">
-            <h2>{TILE_LABEL[t]}</h2>
+            <div className="track-card-heading"><h2><Icon name={t} size={25} />{TILE_LABEL[t]}</h2>
+              {s && <span className={`track-verdict ${s.beats_baseline ? "good" : ""}`}>{s.beats_baseline ? "✓ Beats the simple guess" : "Mixed results across measures"}</span>}</div>
             {!s ? <p className="muted">No model released yet. The app shows live official data only.</p> : <>
-              <p className={`track-verdict ${s.beats_baseline ? "good" : ""}`}>{s.beats_baseline ? "✓ Beats the simple guess" : "Does not beat the simple guess on every measure"}</p>
-              <p style={{ fontWeight: 600 }}>{s.headline}</p>
+              <p className="model-headline">{s.headline}</p>
               {s.reliability && s.reliability.length > 1 && <Reliability bins={s.reliability} />}
             </>}
             <p className="small muted">Live: {!live ? "no outcomes have arrived yet for forecasts made so far." :

@@ -1,10 +1,19 @@
 :root {
-  --paper: #FFFFFF;      /* main background */
-  --fog: #F1F4F6;        /* side panel, map background */
-  --ink: #16324F;        /* text and headings */
-  --slate: #566573;      /* secondary text, timestamps, sources */
-  --rule: #D5DCE3;       /* row dividers */
-  --signal: #005EA2;     /* links, selection, focus ring */
+  --paper: #FFFFFF;
+  --canvas: #F5F6F3;
+  --fog: #EDF1EF;
+  --ink: #142F35;
+  --slate: #52656A;
+  --rule: #DCE3DF;
+  --signal: #086A70;
+  --deep: #102E35;
+  --sea-light: #E7F2EF;
+  --sand: #EFC58A;
+  --radius-sm: 8px;
+  --radius: 16px;
+  --radius-lg: 28px;
+  --shadow: 0 8px 28px #16352B08, 0 1px 3px #16352B05;
+  --header-height: 80px;
   --lvl-low: #2E8540; --lvl-moderate: #E5A000; --lvl-high: #D54309; --lvl-very-high: #8B1A3A;
   --aqi-good: #00E400; --aqi-moderate: #FFFF00; --aqi-usg: #FF7E00;
   --aqi-unhealthy: #FF0000; --aqi-very-unhealthy: #8F3F97; --aqi-hazardous: #7E0023;
