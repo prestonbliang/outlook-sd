@@ -1,8 +1,8 @@
 {
   "site": "This monitor's usual levels",
   "lead_k": "Days ahead",
-  "aqi_prev": "AQI the day before",
-  "aqi_prev_mean7": "AQI, last 7 days",
+  "aqi_prev": "Yesterday",
+  "aqi_prev_mean7": "Average over the past week",
   "tmax": "High temperature",
   "tmin": "Low temperature",
   "rh_mean": "Humidity",

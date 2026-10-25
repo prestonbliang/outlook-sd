@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { CoolZone, TILE_LABEL, tileMeaning, Tile, levelColor } from "@/lib/api";
+import { CoolZone, ELEVATED, TILE_LABEL, tileMeaning, Tile, levelColor } from "@/lib/api";
 import DayStrip from "./DayStrip";
 import SourceLine from "./SourceLine";
 import ForecastStatus from "./ForecastStatus";
@@ -15,7 +15,8 @@ export default function HazardRow({ tile, placeId, onSelect, coolZone }: { tile:
   const verdict = today?.verdict ?? tile.verdict ?? "No forecast for today";
   const showReason = tile.reason && (level === null || !["low", "good"].includes(level));
   const id = `row-${tile.tile}`;
-  const coolOff = coolZone && level && level !== "low" && level !== "good";
+  // Heat: Moderate or worse. Air: only when it is unhealthy for sensitive groups or worse.
+  const coolOff = coolZone && level && (tile.tile === "air" ? ELEVATED.has(level) : level !== "low");
   return (
     <section className="hazard-card" style={{ display: "flex", borderBottom: "1px solid var(--rule)" }} aria-labelledby={id}>
       <div aria-hidden style={{ width: 6, background: levelColor(tile.tile, level), flex: "none" }} />
@@ -31,7 +32,7 @@ export default function HazardRow({ tile, placeId, onSelect, coolZone }: { tile:
           </span>
           <DayStrip tile={tile.tile} days={tile.days} />
         </button>
-        {coolOff && <p className="small cool-line">Cool off nearby: {coolZone.name}, {(coolZone.km * 0.621).toFixed(1)} mi</p>}
+        {coolOff && <p className="small cool-line">{tile.tile === "air" ? "Clean indoor air nearby" : "Cool off nearby"}: {coolZone.name}, {(coolZone.km * 0.621).toFixed(1)} mi</p>}
         <ForecastStatus tile={tile} />
         {tile.official_advisory.active && tile.official_advisory.headline && <p className="notice small"><a href={tile.official_advisory.url}>{tile.official_advisory.headline}</a></p>}
         {!today && tile.days[0] && <p className="small muted">Next available forecast: {dateLabel(tile.days[0].date)}</p>}
