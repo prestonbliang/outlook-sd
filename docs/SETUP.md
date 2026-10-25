@@ -61,7 +61,7 @@ After changing geography, run `python scripts/sync_report_places.py` and reapply
 
 1. Create/open your Supabase project.
 2. Run the entire `supabase/schema.sql` in its SQL Editor, including when upgrading the older reporting implementation. It is repeatable and preserves existing reports. It installs the neighborhood whitelist, insert policy, repeat limits, daily counts, and recent-coverage RPC.
-3. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env` and as GitHub Actions secrets.
+3. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `.env`, Vercel's Production/Preview environment variables and GitHub Actions secrets. Copy them from the project's Connect dialog / Settings → API Keys. Legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY` also works; the publishable key takes precedence when both are set. Use only browser-safe keys.
 4. Rebuild the web app. Visit a coastal neighborhood, submit an observation, and confirm that its count and freshness update on the hazard page and map.
 5. Optionally run `supabase/tests.sql` in the SQL Editor. All its test data is rolled back. Run it during development, since the tests temporarily insert reports inside a transaction.
 

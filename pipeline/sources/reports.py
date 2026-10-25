@@ -8,11 +8,16 @@ from ._common import redact, upsert
 
 
 def fetch_live(days=30):
-    url, key = os.environ.get("NEXT_PUBLIC_SUPABASE_URL"), os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY")
+    url = os.environ.get("NEXT_PUBLIC_SUPABASE_URL", "").strip().rstrip("/")
+    key = (os.environ.get("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "").strip()
+           or os.environ.get("NEXT_PUBLIC_SUPABASE_ANON_KEY", "").strip())
     if not url or not key:
-        raise RuntimeError("Supabase is not configured (NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY)")
+        raise RuntimeError("Supabase is not configured (NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY or legacy anon key)")
+    headers = {"apikey": key, "Content-Type": "application/json"}
+    if not key.startswith("sb_publishable_"):
+        headers["Authorization"] = f"Bearer {key}"
     r = requests.post(f"{url}/rest/v1/rpc/report_counts", json={"days": days}, timeout=60,
-                      headers={"apikey": key, "Authorization": f"Bearer {key}", "Content-Type": "application/json"})
+                      headers=headers)
     if r.status_code != 200:
         raise RuntimeError(redact(f"reports: HTTP {r.status_code} {r.text[:300]}"))
     df = pd.DataFrame(r.json(), columns=["place_id", "hazard", "kind", "day", "n"])

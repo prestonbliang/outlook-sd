@@ -1,18 +1,24 @@
-/** Fail before bundling if a private Supabase key is put in public configuration. */
+const keyNames = ['NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY', 'NEXT_PUBLIC_SUPABASE_ANON_KEY'];
+const publicKey = env => env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim() || env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() || '';
+
+/** Fail before bundling if a private Supabase key is put in either public variable. */
 export function validatePublicConfig(env) {
   const url = env.NEXT_PUBLIC_SUPABASE_URL?.trim() ?? '';
-  const key = env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ?? '';
-  if (Boolean(url) !== Boolean(key)) throw new Error('Set both NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY, or leave both unset.');
+  const key = publicKey(env);
+  if (Boolean(url) !== Boolean(key)) throw new Error('Set both NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (or legacy NEXT_PUBLIC_SUPABASE_ANON_KEY), or leave reporting unset.');
   if (!url) return;
   const parsed = new URL(url);
   const local = ['localhost', '127.0.0.1', '[::1]'].includes(parsed.hostname);
   if (parsed.username || parsed.password || parsed.search || parsed.hash || parsed.pathname !== '/' || !['http:', 'https:'].includes(parsed.protocol) || (parsed.protocol !== 'https:' && !local))
     throw new Error('The public reporting URL must use HTTPS, or HTTP on localhost for development.');
-  let role;
-  if (key.split('.').length === 3) {
-    try { role = JSON.parse(Buffer.from(key.split('.')[1], 'base64url').toString('utf8')).role; } catch { /* Opaque public test keys are checked by their service. */ }
+  for (const name of keyNames) {
+    const configuredKey = env[name]?.trim() || '';
+    let role;
+    if (configuredKey.split('.').length === 3) {
+      try { role = JSON.parse(Buffer.from(configuredKey.split('.')[1], 'base64url').toString('utf8')).role; } catch { /* Opaque public test keys are checked by their service. */ }
+    }
+    if (configuredKey.startsWith('sb_secret_') || role === 'service_role') throw new Error('A private Supabase key cannot be bundled in the browser. Use a publishable or anon public key.');
   }
-  if (key.startsWith('sb_secret_') || role === 'service_role') throw new Error('A private Supabase key cannot be bundled in the browser. Use the anon public key.');
 }
 
 /** Public release metadata contains configuration state, never credentials. */
@@ -22,7 +28,7 @@ export function publicBuildMetadata(env) {
   if (!url) return { schema_version: 1, reporting: 'unconfigured' };
   const host = new URL(url).hostname;
   const test = host.endsWith('.invalid') || ['localhost', '127.0.0.1', '[::1]'].includes(host)
-    || env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() === 'test-public-key';
+    || publicKey(env) === 'test-public-key';
   return { schema_version: 1, reporting: test ? 'test' : 'configured' };
 }
 

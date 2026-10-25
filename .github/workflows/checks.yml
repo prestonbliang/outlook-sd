@@ -57,7 +57,7 @@ jobs:
         working-directory: web
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://reports.example.invalid
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: test-public-key
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_browser_test_key
       - run: npm run typecheck
         working-directory: web
       - run: node scripts/prepare-vercel.mjs --allow-unavailable --allow-test-reporting

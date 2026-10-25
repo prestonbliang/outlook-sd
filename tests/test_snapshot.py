@@ -46,10 +46,11 @@ class SnapshotTests(unittest.TestCase):
         self.assertEqual(self.snapshot("invalid")["forecast_status"], "unavailable")
 
     def test_metadata_never_contains_keys(self):
-        with patch.dict("os.environ", {"NEXT_PUBLIC_SUPABASE_URL": "https://example.invalid", "NEXT_PUBLIC_SUPABASE_ANON_KEY": "not-a-real-key"}):
-            result = self.snapshot(self.now.isoformat())
-        self.assertTrue(result["reporting_configured"])
-        self.assertNotIn("not-a-real-key", json.dumps(result))
+        for name in ["NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", "NEXT_PUBLIC_SUPABASE_ANON_KEY"]:
+            with self.subTest(name=name), patch.dict("os.environ", {"NEXT_PUBLIC_SUPABASE_URL": "https://example.invalid", name: "not-a-real-key"}, clear=True):
+                result = self.snapshot(self.now.isoformat())
+                self.assertTrue(result["reporting_configured"])
+                self.assertNotIn("not-a-real-key", json.dumps(result))
 
     def test_stale_required_sources_cannot_mark_a_snapshot_ready(self):
         self.snapshot(self.now.isoformat())

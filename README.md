@@ -116,7 +116,7 @@ For a fresh clone, use the complete [setup and deployment guide](docs/SETUP.md).
 For Vercel's GitHub integration, keep the project Root Directory at the repository root and use the committed `vercel.json`. It explicitly defines the static Next.js web service, restores the project's published forecast snapshot (including for forks), and generates its API JSON during the build. Follow the [Vercel launch guide](docs/VERCEL.md) for service settings and custom runtime-state sources. The existing manual/hourly workflows remain supported and package the same web service for prebuilt deployment, with hosted page/API/map-range checks.
 
 ```bash
-cp .env.example .env          # add AIRNOW_API_KEY, FIRMS_MAP_KEY (free) and the Supabase URL + anon key
+cp .env.example .env          # add AIRNOW_API_KEY, FIRMS_MAP_KEY (free) and the Supabase URL + publishable key
 uv sync
 make probe                    # check every data source
 make history                  # download and process history (≈1 GB peak, mostly temporary)
@@ -133,8 +133,8 @@ make test                     # pytest (schema, leakage, API contract) + Playwri
 
 1. Create a free project at supabase.com.
 2. Open **SQL Editor**, paste [`supabase/schema.sql`](supabase/schema.sql) and run it. It creates an insert-only `reports` table with row-level security, a neighborhood whitelist, per-browser repeat limits, daily counts, and a recent-coverage summary. Reapply the full schema when upgrading from the older reporting implementation; existing reports are preserved.
-3. From **Project Settings → API**, copy the project URL and the `anon` public key into `.env` as `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and add both as GitHub Actions secrets.
+3. Copy the project URL from **Connect** (or **Integrations → Data API**) and the browser-safe publishable key from **Settings → API Keys**. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `.env`, Vercel's Production/Preview environment variables, and GitHub Actions secrets, then rebuild. Projects using the older `NEXT_PUBLIC_SUPABASE_ANON_KEY` remain supported; a publishable key takes precedence when both are set.
 
-The anon key is meant to be public: with the schema's policies it can only add reports and read counts. Raw rows and device IDs are never readable.
+The publishable/anon key is meant to be public: with the schema's policies it can only add reports and read counts. Raw rows and device IDs are never readable. Never use a secret or service-role key in browser configuration.
 
 Dataset licenses, libraries and AI-tool use are listed in [CREDITS.md](CREDITS.md).

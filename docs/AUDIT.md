@@ -58,7 +58,7 @@ uv run python -m api.export
 cd web
 npm ci
 npm run test:unit
-NEXT_PUBLIC_SUPABASE_URL=https://reports.example.invalid NEXT_PUBLIC_SUPABASE_ANON_KEY=test-public-key npm run build
+NEXT_PUBLIC_SUPABASE_URL=https://reports.example.invalid NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_browser_test_key npm run build
 npm run typecheck
 npx playwright install --with-deps chromium firefox webkit
 E2E_REPORTS_ENABLED=1 npm run test:e2e

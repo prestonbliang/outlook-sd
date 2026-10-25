@@ -12,7 +12,7 @@ The root [`vercel.json`](../vercel.json) supports Vercel's GitHub integration an
 | Community reports and coverage RPCs | `supabase/schema.sql`, browser `web/lib/reports.ts` | Supabase PostgreSQL/PostgREST |
 | Basemap, fonts, sprites, map worker | `web/public/`, asset-copy scripts | Static files on Vercel |
 
-The browser already requests static URLs such as `/api/places.json`, `/api/outlook/imperial-beach.json` and `/api/map/heat.json`. These are served by the **web service**, not rewritten into Python endpoints. Reports go directly to Supabase using its public anon key and database policies. There are no Next API route handlers, websocket services, or authenticated application servers to provision.
+The browser already requests static URLs such as `/api/places.json`, `/api/outlook/imperial-beach.json` and `/api/map/heat.json`. These are served by the **web service**, not rewritten into Python endpoints. Reports go directly to Supabase using its publishable or legacy anon key and database policies. There are no Next API route handlers, websocket services, or authenticated application servers to provision.
 
 ## Service calls and bindings
 
@@ -22,7 +22,7 @@ The confirmed deployment retains the existing static architecture. The service n
 | --- | --- | --- | --- |
 | Browser | `web` | Same-origin `/api/*.json`, page and asset requests | None; public HTTP |
 | Web build | Python API assembly | `python -m api.export` invokes FastAPI in-process through TestClient | None; build-time execution |
-| Browser | Supabase | `NEXT_PUBLIC_SUPABASE_URL` with the public anon key | None; external managed service |
+| Browser | Supabase | `NEXT_PUBLIC_SUPABASE_URL` with the publishable or legacy anon key | None; external managed service |
 | GitHub Actions | Source APIs | Scheduled ingestion using provider credentials | None; external providers |
 
 The `localhost:8000` development API command is for local inspection; the deployed frontend does not call it. No Docker/service-discovery hostnames or runtime server-to-server API URLs are used by the web app. `NEXT_PUBLIC_API_URL` remains `/api` by default, so client requests agree with the public paths.
@@ -62,13 +62,14 @@ Set the following in Vercel's Environment Variables UI for the environments wher
 | Variable | Needed for | Visibility |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Community reports; set together with the key below | Public, embedded in the browser build |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Community reports; use the anon/public key, never service-role or secret keys | Public by design; RLS restricts access |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Community reports; use the browser-safe `sb_publishable_...` key | Public by design; RLS restricts access |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Optional legacy fallback; the publishable key takes precedence | Public by design; never use a service-role or secret key |
 | `OUTLOOK_STATE_URL` | Optional override for the published forecast archive; Vercel defaults to the upstream public `state` release | Build-only; a signed URL must remain secret |
 | `OUTLOOK_REQUIRE_LIVE_FORECASTS` | Set `1` for a live production release; fails builds without current forecast coverage | Build-only; default `0` permits an initial unavailable-data launch |
 | `NEXT_PUBLIC_API_URL` | Optional; default `/api` already points at the generated JSON | Public |
 | `NEXT_PUBLIC_PMTILES_URL` | Optional; default `/tiles/sandiego.pmtiles` | Public |
 
-With both Supabase values unset, the app explicitly says reporting is disconnected and does not present a working submission form. A partial configuration or private Supabase key fails the build. Reserved test-reporting endpoints also fail the Git deployment build. Rebuild after changing public environment variables.
+With the Supabase URL and both key options unset, the app explicitly says reporting is disconnected and does not present a working submission form. Configure the URL and one browser-safe key. A partial configuration or private key in either public key variable fails the build, even if the other key takes precedence. Publishable keys are sent only as `apikey`, not as bearer JWTs; legacy anon keys retain their existing authentication. Reserved test-reporting endpoints also fail the Git deployment build. Rebuild after changing public environment variables.
 
 The separate **GitHub Actions** pipeline needs `AIRNOW_API_KEY`, `FIRMS_MAP_KEY`, both Supabase public values, and a `NWS_USER_AGENT` repository variable containing a project contact. Source API keys are not needed on Vercel: the Git build exports existing predictions and never runs ingestion/training. The CLI/hourly publishing workflows additionally need GitHub Actions secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, and optionally `VERCEL_AUTOMATION_BYPASS_SECRET` for protected-preview checks.
 
