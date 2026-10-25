@@ -1,4 +1,5 @@
 """Restore build-time state. Never run a pipeline or modify a remote service."""
+import argparse
 import os
 import shutil
 import tarfile
@@ -47,11 +48,11 @@ def restore(archive, root=ROOT):
                     shutil.copyfile(staging / member.name, target)
 
 
-def main():
+def main(*, published=False):
     from dotenv import load_dotenv
     load_dotenv(ROOT / ".env")
     url = os.environ.get("OUTLOOK_STATE_URL", "").strip()
-    if not url and os.environ.get("VERCEL") == "1":
+    if not url and published:
         url = PUBLISHED_STATE_URL
         print("Restoring the project's published forecast snapshot for this Vercel build.")
     if not url:
@@ -80,4 +81,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--published", action="store_true", help="Default to the project's public forecast snapshot")
+    main(published=parser.parse_args().published)
