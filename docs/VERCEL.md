@@ -49,6 +49,8 @@ Connect `raunavm/outlook-sd` to the existing Vercel project:
 | Output Directory override | Leave unset/automatic |
 | Production branch | Match the branch used by the hourly workflow; normally the repository default branch |
 
+Leave [access to Vercel system environment variables](https://vercel.com/docs/environment-variables/system-environment-variables#enable-system-environment-variables) enabled so the state restorer can detect the hosted build (`VERCEL=1`). If that setting is disabled, set `OUTLOOK_STATE_URL` explicitly.
+
 Remove old root-level build/install/output overrides or an old FastAPI service configuration from the dashboard. Build/runtime settings belong to the configured web service. Do not set Output Directory to `out`: with the Next.js framework integration, Vercel first reads Next's internal `.next` manifests, recognizes `output: "export"`, and then publishes `web/out` itself. An `out` override makes the Next builder look for `out/routes-manifest.json`, which does not exist.
 
 The top-level catch-all rewrite delegates to the web service while preserving the requested path. It is **not** an SPA rewrite to `/index.html`: exported pages retain their routes, API URLs return JSON, unknown paths return 404, and assets retain their file paths. JSON uses `Cache-Control: no-store`; hashed Next assets use immutable caching; security headers preserve geolocation for this origin. Vercel serves PMTiles with normal HTTP byte-range support.
@@ -63,7 +65,7 @@ Set the following in Vercel's Environment Variables UI for the environments wher
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Community reports; set together with the key below | Public, embedded in the browser build |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Community reports; use the anon/public key, never service-role or secret keys | Public by design; RLS restricts access |
-| `OUTLOOK_STATE_URL` | Optional HTTPS download URL for `scripts/state.sh`'s `state.tar.gz` | Build-only; a signed URL must remain secret |
+| `OUTLOOK_STATE_URL` | Optional override for the published forecast archive; Vercel defaults to the upstream public `state` release | Build-only; a signed URL must remain secret |
 | `OUTLOOK_REQUIRE_LIVE_FORECASTS` | Set `1` for a live production release; fails builds without current forecast coverage | Build-only; default `0` permits an initial unavailable-data launch |
 | `NEXT_PUBLIC_API_URL` | Optional; default `/api` already points at the generated JSON | Public |
 | `NEXT_PUBLIC_PMTILES_URL` | Optional; default `/tiles/sandiego.pmtiles` | Public |
@@ -76,12 +78,12 @@ The separate **GitHub Actions** pipeline needs `AIRNOW_API_KEY`, `FIRMS_MAP_KEY`
 
 1. `npm ci` installs the web dependencies.
 2. `scripts/vercel-git-build.sh` uses uv, or bootstraps pinned uv into an isolated temporary Python environment if the frontend build image does not have it. It installs the frozen Python dependencies using Python 3.12.
-3. If `OUTLOOK_STATE_URL` is set, it downloads the archive over HTTPS and restores only ordinary files under `data/processed/` and `data/outlook.db`. It rejects links, traversal/source-code paths, oversized archives, and failed downloads. Signed URLs are not printed. A configured download failure fails the build rather than silently substituting empty data.
-4. `python -m api.export` generates all 690 JSON files through the existing API contracts. It does not create sample forecasts or user reports.
+3. It downloads `OUTLOOK_STATE_URL`, or on Vercel (`VERCEL=1`) defaults to `https://github.com/raunavm/outlook-sd/releases/download/state/state.tar.gz`. This is the project's real published snapshot: release assets are not part of Git checkouts and are not copied into forks. It restores only ordinary files under `data/processed/` and `data/outlook.db`, rejects links, traversal/source-code paths, oversized archives and failed downloads, and never prints signed URLs. A download failure fails the build instead of silently publishing empty forecasts. An explicit URL always takes precedence.
+4. `python -m api.export` generates the neighborhood, hazard, map, scenario and health JSON through the existing API contracts. It does not create sample forecasts or user reports.
 5. `npm --prefix web run build` copies local map assets and produces the Next.js static export.
 6. The existing release validator checks complete pages, neighborhood/hazard/date JSON, map data, basemap bytes, build configuration, and freshness. `OUTLOOK_REQUIRE_LIVE_FORECASTS=1` requires current real forecast coverage.
 
-Without a state URL, an existing local state can be used for local validation. A fresh Git build has none and shows truthful unavailable states. That is sufficient to deploy the map/interface and configure reporting, but not a live forecast launch. See [SETUP.md](SETUP.md) to bootstrap actual data. Never run `make train` simply to deploy the committed models.
+Outside Vercel, leaving `OUTLOOK_STATE_URL` unset keeps local data and performs no download. A fresh Vercel build restores the public upstream snapshot automatically; a fork does not need to duplicate its release to show the same forecasts. Freshness and unavailable states still apply when the upstream pipeline stops updating. For an independently operated fork, supply its own maintained archive URL. See [SETUP.md](SETUP.md) to bootstrap actual data. Never run `make train` simply to deploy the committed models.
 
 For a public GitHub repository with a populated `state` release, its asset URL can be used as `OUTLOOK_STATE_URL`. A private repository's release asset needs a genuinely accessible signed/private-storage download URL: Vercel's GitHub checkout permission does not automatically authenticate arbitrary archive downloads. Keep the archive current through the existing pipeline. The URL is a build input, not something the browser fetches.
 

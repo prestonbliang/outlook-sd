@@ -1,11 +1,11 @@
 """Build-state restoration must never turn an archive into arbitrary source-code writes."""
 import io
 import json
-from pathlib import Path
 import tarfile
 import tempfile
 import unittest
-from unittest.mock import patch
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 from scripts import vercel_state
 from scripts.vercel_state import restore
@@ -57,6 +57,37 @@ class GitBuildTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "could not be restored") as error:
                 vercel_state.main()
             self.assertNotIn("private-build-token", str(error.exception))
+
+    def test_fresh_vercel_build_restores_published_state_without_manual_configuration(self):
+        response = MagicMock()
+        response.url = vercel_state.PUBLISHED_STATE_URL
+        response.read.side_effect = [b"archive bytes", b""]
+        response.__enter__.return_value = response
+        with patch.dict("os.environ", {"VERCEL": "1", "OUTLOOK_STATE_URL": ""}), \
+             patch("dotenv.load_dotenv"), \
+             patch.object(vercel_state, "urlopen", return_value=response) as download, \
+             patch.object(vercel_state, "restore") as restore_state:
+            vercel_state.main()
+            self.assertEqual(download.call_args.args[0].full_url, vercel_state.PUBLISHED_STATE_URL)
+            restore_state.assert_called_once()
+
+    def test_explicit_archive_takes_precedence_on_vercel(self):
+        url = "https://state.example.invalid/custom.tar.gz"
+        with patch.dict("os.environ", {"VERCEL": "1", "OUTLOOK_STATE_URL": url}), \
+             patch("dotenv.load_dotenv"), \
+             patch.object(vercel_state, "urlopen", side_effect=OSError()) as download:
+            with self.assertRaises(RuntimeError):
+                vercel_state.main()
+            self.assertEqual(download.call_args.args[0].full_url, url)
+
+    def test_local_export_does_not_download_or_replace_runtime_data(self):
+        with patch.dict("os.environ", {"VERCEL": "0", "OUTLOOK_STATE_URL": ""}), \
+             patch("dotenv.load_dotenv"), \
+             patch.object(vercel_state, "urlopen") as download, \
+             patch.object(vercel_state, "restore") as restore_state:
+            vercel_state.main()
+            download.assert_not_called()
+            restore_state.assert_not_called()
 
     def test_archive_size_limits_are_checked_before_restoration(self):
         with tempfile.TemporaryDirectory() as directory:
