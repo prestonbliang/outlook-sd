@@ -19,6 +19,10 @@ test("first-time navigation keeps the neighborhood across every page", async ({ 
     await expect(page).toHaveURL(/place=la-jolla/);
     await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
     await expect(nav.getByRole("link", { name, exact: true })).toHaveAttribute("aria-current", "page");
+    if (name === "Map") {
+      // Confirm vocabulary discovery succeeds instead of silently falling back after a real request.
+      await expect(page.getByRole("button", { name: "Floating litter or debris", exact: true })).toBeEnabled();
+    }
   }
   expect(errors).toEqual([]);
 });
