@@ -1,13 +1,16 @@
-"""Restore optional build-time state. Never run a pipeline or modify a remote service."""
+"""Restore build-time state. Never run a pipeline or modify a remote service."""
 import os
-from pathlib import Path, PurePosixPath
 import shutil
 import tarfile
 import tempfile
+from pathlib import Path, PurePosixPath
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
+# Release assets are not included in Git checkouts or copied when a repository is forked.
+# Hosted builds share the project's published forecast snapshot unless explicitly overridden.
+PUBLISHED_STATE_URL = "https://github.com/raunavm/outlook-sd/releases/download/state/state.tar.gz"
 MAX_DOWNLOAD = 1024 * 1024 * 1024
 MAX_EXPANDED = 4 * MAX_DOWNLOAD
 
@@ -48,6 +51,9 @@ def main():
     from dotenv import load_dotenv
     load_dotenv(ROOT / ".env")
     url = os.environ.get("OUTLOOK_STATE_URL", "").strip()
+    if not url and os.environ.get("VERCEL") == "1":
+        url = PUBLISHED_STATE_URL
+        print("Restoring the project's published forecast snapshot for this Vercel build.")
     if not url:
         print("No state URL configured; using local runtime data if present, otherwise explicit unavailable forecasts.")
         return
@@ -67,7 +73,7 @@ def main():
                         raise ValueError("State archive exceeds the download limit")
                     output.write(chunk)
             restore(archive)
-    except Exception:
+    except Exception:  # noqa: BLE001 -- every download/parser error must redact signed URLs
         # Signed URLs may carry credentials. Never echo the URL or urllib's original exception.
         raise RuntimeError("Runtime state could not be restored. Check archive access, format and build limits.") from None
     print("Runtime state restored for static API export.")
