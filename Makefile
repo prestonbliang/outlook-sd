@@ -29,6 +29,8 @@ train:
 	$(PY) models.train_water
 	$(PY) models.train_air
 	$(PY) models.train_fire
+	$(PY) models.eval_odor
+	$(PY) models.scenarios
 
 api:
 	uv run uvicorn api.main:app --reload --port 8000

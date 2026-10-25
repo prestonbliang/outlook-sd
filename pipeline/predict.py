@@ -16,6 +16,7 @@ BORDER_LAT = 32.5343  # U.S.–Mexico border where it meets the Pacific
 LABELS = {t: json.loads((ROOT / "pipeline" / "features" / f"{t}_labels.json").read_text())
           for t in ("flood", "heat", "water", "fire", "air")}
 C_TO_F = lambda c: c * 9 / 5 + 32
+MGD = lambda q: q / 0.0438126  # m³/s → million gallons per day, the unit used in sewage news and policy
 # feature → (unit, converter) for the plain-language "why" lines; None = show the label only
 UNITS = {
     "flood": {"resid_now": ("ft", None), "resid_mean_24h": ("ft", None), "resid_mean_7d": ("ft", None),
@@ -23,7 +24,8 @@ UNITS = {
               "wind_speed_10m": ("mph", lambda v: v * 2.237), "wind_gusts_10m": ("mph", lambda v: v * 2.237),
               "u10": ("mph", lambda v: v * 2.237), "v10": ("mph", lambda v: v * 2.237), "hs_now": ("ft", lambda v: v * 3.281),
               "tp_now": ("s", None), "sst_anom": ("°F", lambda v: v * 9 / 5)},
-    "water": {"q_24h": ("m³/s", None), "q_72h": ("m³/s", None), "q_7d": ("m³/s", None), "q_max_7d": ("m³/s", None),
+    "water": {"q_24h": ("million gal/day", MGD), "q_72h": ("million gal/day", MGD), "q_7d": ("million gal/day", MGD),
+              "q_max_7d": ("million gal/day", MGD),
               "rain_24h": ("in", lambda v: v / 25.4), "rain_72h": ("in", lambda v: v / 25.4),
               "rain_fcst": ("in", lambda v: v / 25.4), "hs": ("ft", lambda v: v * 3.281), "tp": ("s", None),
               "dp": ("°", None), "sst": ("°F", C_TO_F), "tide_max": ("ft", None), "dist_mouth_km": ("km", None)},
@@ -81,7 +83,7 @@ def forecast_hourly(point_ids):
 # ---------------------------------------------------------------- Flood
 def now_offset(resid):
     """The model forecasts the change from the current offset, so the offset itself is the first reason."""
-    return {"feature": "resid_now", "label": "Water vs predicted tide now", "value": f"{resid:+.2f} ft",
+    return {"feature": "resid_now", "label": "Ocean running above the tide table now", "value": f"{resid:+.2f} ft",
             "direction": "up" if resid > 0 else "down", "contribution": None}
 
 

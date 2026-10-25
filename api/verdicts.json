@@ -1,6 +1,6 @@
 {
   "water": {
-    "low": "Low risk",
+    "low": "Low bacteria risk",
     "moderate": "Swim with caution",
     "high": "Don't swim",
     "very_high": "Don't swim",
@@ -8,7 +8,7 @@
     "unavailable": "Water forecast unavailable"
   },
   "heat": {
-    "low": "Low",
+    "low": "Low heat risk",
     "moderate": "Moderate heat risk",
     "high": "High heat risk",
     "very_high": "Very high heat risk",
@@ -34,10 +34,10 @@
     "unavailable": "Air forecast unavailable"
   },
   "fire": {
-    "low": "Low",
-    "moderate": "Moderate",
-    "high": "High",
-    "very_high": "Very high",
+    "low": "Low fire risk",
+    "moderate": "Moderate fire risk",
+    "high": "High fire risk",
+    "very_high": "Very high fire risk",
     "none": "No fire-risk rating",
     "unavailable": "Fire forecast unavailable"
   }

@@ -14,7 +14,7 @@ test("first-time navigation keeps the neighborhood across every page", async ({ 
   await page.getByRole("button", { name: "La Jolla · 92037", exact: true }).click();
   await expect(page.getByRole("button", { name: "Change place", exact: true })).toBeFocused();
   const nav = page.getByRole("navigation", { name: "Primary navigation" });
-  for (const [name, heading] of [["Map & reports", "Explore your neighborhood"], ["Track record", "Track record"], ["Our data", "Data"], ["Today", "La Jolla"]]) {
+  for (const [name, heading] of [["Map", "Explore your neighborhood"], ["What if", "What if?"], ["Track record", "Track record"], ["Data", "Data"], ["Today", "La Jolla"]]) {
     await nav.getByRole("link", { name, exact: true }).click();
     await expect(page).toHaveURL(/place=la-jolla/);
     await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
@@ -58,7 +58,7 @@ test("forecast failures recover through the retry control", async ({ page }) => 
   await expect(page.getByRole("alert").filter({ hasText: "Your outlook could not load" })).toBeVisible();
   available = true;
   await page.getByRole("button", { name: "Try again", exact: true }).click();
-  await expect(page.locator("main .hazard-card")).toHaveCount(5);
+  await expect(page.locator("main .hazard-card")).toHaveCount(4);  // Air fixture has no data: shown as a note
   await expect(page.getByText("No forecasts are available for today.", { exact: false })).toBeVisible();
 });
 
@@ -116,7 +116,7 @@ test("a future forecast never becomes today's verdict", async ({ page }) => {
 for (const width of [320, 390, 768, 1440]) {
   test(`all major screens fit a ${width}px viewport`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
-    for (const path of ["/", "/map/", "/hazard/water/", "/track-record/", "/data/"]) {
+    for (const path of ["/", "/map/", "/hazard/water/", "/what-if/", "/track-record/", "/data/"]) {
       await page.goto(`${path}?place=imperial-beach`);
       await expect(page.locator("main h1")).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), path).toBe(true);
@@ -124,16 +124,46 @@ for (const width of [320, 390, 768, 1440]) {
   });
 }
 
-for (const path of ["/", "/map/", "/hazard/heat/", "/track-record/", "/data/"]) {
+for (const path of ["/", "/map/", "/hazard/heat/", "/what-if/", "/track-record/", "/data/"]) {
   test(`WCAG A/AA automated accessibility check: ${path}`, async ({ page }) => {
     if (path === "/hazard/heat/") await page.route("**/api/hazard/heat/*.json", route => route.fulfill({ json: heatFixture() }));
     await page.goto(`${path}?place=imperial-beach`);
     await expect(page.locator("main h1")).toBeVisible();
     // Wait for actual content rather than auditing only the loading state.
-    if (path === "/") await expect(page.locator(".hazard-card")).toHaveCount(5);
+    if (path === "/") await expect(page.locator(".hazard-card")).toHaveCount(4);  // Air fixture has no data: shown as a note
     if (path === "/map/") await expect(page.getByRole("region", { name: "Selected neighborhood" })).toBeVisible();
     if (path === "/hazard/heat/") await expect(page.getByText("View chart data (2 points)")).toBeVisible();
+    if (path === "/what-if/") await expect(page.getByLabel(/If the sea were/)).toBeVisible();
     const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
     expect(results.violations).toEqual([]);
   });
 }
+
+test("what-if sliders recompute both scenarios", async ({ page }) => {
+  await page.goto("/what-if/?place=imperial-beach");
+  const river = page.getByLabel(/If the river never carried more than/);
+  await river.fill("5");
+  await expect(page.getByText("Limit 5")).toBeVisible();
+  await expect(page.getByText("3 of 100")).toBeVisible();  // round(0.025 * 100)
+  await page.getByLabel(/If the sea were/).fill("0.5");
+  await expect(page.getByText("45 days")).toBeVisible();
+});
+
+test("two elevated hazards on one day raise a single plain-language banner, and South Bay shows the smell record", async ({ page }) => {
+  const high = (tile: string) => ({ ...emptyTile(tile), run_ts: "2026-10-24T18:00:00Z", verdict: undefined,
+    days: [{ date: "2026-10-24", value: 1, level: "high", verdict: "High" }] });
+  await page.route("**/api/outlook/*.json", route => route.fulfill({ json: { place: QA_PLACES[0], updated_at: null,
+    tiles: QA_TILES.map(t => (t === "heat" || t === "fire" ? high(t) : emptyTile(t))),
+    odor: { through: "2026-10-21", days: 30, south_bay: 20, here: 19, report_days: 14, last_here: "2026-10-19", url: "https://www.sdapcd.org/" },
+    cool_zones: [{ name: "Test Library", address: "1 Main St", km: 1.6, hours: null, phone: null, pets: null }] } }));
+  await page.goto("/?place=imperial-beach");
+  await expect(page.getByRole("note").filter({ hasText: "Two hazards at once today" })).toContainText("Heat and Wildfire");
+  await expect(page.getByText("Cool off nearby: Test Library, 1.0 mi")).toBeVisible();
+  await expect(page.getByRole("complementary", { name: "Sewage smell reports" })).toContainText("19 odor complaints");
+});
+
+test("air without any data is a one-line note, not a card", async ({ page }) => {
+  await page.goto("/?place=imperial-beach");
+  await expect(page.getByText("Air quality: live data is not connected yet.", { exact: false })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Air quality" })).toHaveCount(0);
+});

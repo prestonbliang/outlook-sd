@@ -35,6 +35,10 @@ export async function mockApi(page: Page) {
       const tile = path.split("/").at(-2)!;
       json = { ...emptyTile(tile), place, window: null, series: null, what_to_do: "No model forecast. Check the official source.", metrics: null };
     } else if (path.endsWith("health.json")) json = { sources: {} };
+    else if (path.endsWith("scenarios.json")) json = {
+      flow: { period: "2017-01-01 → 2021-05-26", samples: 100, no_cap_unsafe_share: 0.2, recent_mgd: 40,
+        caps: [0, 5, 10, 15, 20, 25].map(c => ({ cap_mgd: c, unsafe_share: c / 200 })) },
+      sea_level: { period: "2014–2025", minor_flood_ft_mllw: 7.59, rises: [0, 0.25, 0.5, 0.75, 1].map(r => ({ rise_ft: r, days_per_year: 5 + r * 80 })) } };
     else if (path.endsWith("track-record.json")) json = { tiles: Object.fromEntries(QA_TILES.map(t => [t, { held_out: null, live: null, community: null }])) };
     await route.fulfill({ json });
   });

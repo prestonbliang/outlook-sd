@@ -1,9 +1,9 @@
 {
   "lead_h": "Hours ahead",
   "tide_pred": "Predicted tide",
-  "resid_now": "Water above/below tide now",
-  "resid_mean_24h": "Water above tide, last 24 hours",
-  "resid_mean_7d": "Water above tide, last 7 days",
+  "resid_now": "Ocean running above the tide table now",
+  "resid_mean_24h": "Ocean above the tide table, past day",
+  "resid_mean_7d": "Ocean above the tide table, past week",
   "pressure": "Air pressure",
   "pressure_change": "Air pressure change",
   "wind_speed_10m": "Wind speed",

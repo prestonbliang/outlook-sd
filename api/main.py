@@ -14,6 +14,7 @@ from api.quality import quality
 from api.values import coordinates, finite_number
 from pipeline.constants import SOURCE_STALE_HOURS as STALE_HOURS
 from pipeline.security import official_link, redact
+from pipeline.sources.apcd import PAGE as APCD_PAGE, SOUTH_BAY
 
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "models" / "artifacts"
@@ -115,7 +116,8 @@ def source_status():
 SOURCE_NAMES = {"ibwc": "IBWC border flow", "noaa_tides": "NOAA tide gauge", "cdip": "CDIP wave buoy",
                 "openmeteo": "Open-Meteo weather", "sd_fire_ems": "City Fire-Rescue calls (published with a lag)",
                 "calheatscore": "CalHeatScore", "airnow": "AirNow", "firms": "NASA FIRMS", "nws": "NWS alerts",
-                "calfire": "CAL FIRE incidents", "beachwatch": "Beach Watch samples"}
+                "calfire": "CAL FIRE incidents", "beachwatch": "Beach Watch samples",
+                "apcd": "APCD odor complaints", "cool_zones": "County Cool Zones"}
 
 
 def stale_inputs(tile, status):
@@ -357,6 +359,32 @@ def fire_tile(place, status):
 BUILDERS = {"water": water_tile, "air": air_tile, "heat": heat_tile, "flood": flood_tile, "fire": fire_tile}
 
 
+def odor_reports(place, days=30):
+    """South Bay only: APCD odor complaints over the last 30 days of the log (a record, not a forecast)."""
+    if place["zip"] not in SOUTH_BAY:
+        return None
+    c = read_parquet("odor_complaints")
+    if c is None or c.empty:
+        return None
+    c = c.assign(date=pd.to_datetime(c.date))
+    through = c.date.max()
+    recent = c[c.zip.isin(SOUTH_BAY) & (c.date > through - pd.Timedelta(days=days))]
+    here = recent[recent.zip == place["zip"]]
+    return {"through": str(through.date()), "days": days, "south_bay": int(len(recent)), "here": int(len(here)),
+            "report_days": int(recent.date.nunique()),
+            "last_here": str(here.date.max().date()) if len(here) else None, "url": APCD_PAGE}
+
+
+def cool_zones_near(place, n=3):
+    z = read_parquet("cool_zones")
+    if z is None or z.empty:
+        return []
+    z = z.assign(km=[haversine_km(place["lat"], place["lon"], a, b) for a, b in zip(z.lat, z.lon)]).nsmallest(n, "km")
+    text = lambda v: v.strip() if isinstance(v, str) and v.strip() else None
+    return [{"name": r.name, "address": f"{r.address}, {r.city}", "km": round(r.km, 1), "hours": text(r.hours),
+             "phone": text(r.phone), "pets": text(r.pets)} for r in z.itertuples()]
+
+
 def outlook_for(place):
     status = source_status()
     tiles = [BUILDERS[t](place, status) for t in TILES]
@@ -364,7 +392,8 @@ def outlook_for(place):
         tile["quality"] = quality(tile)
     runs = [t.get("run_ts") for t in tiles if t.get("run_ts")]
     return {"place": {"id": place["id"], "name": place["name"], "zip": place["zip"], "coastal": place["coastal"]},
-            "updated_at": max(runs) if runs else None, "forecast_date": str(pd.Timestamp.now(tz=TZ).date()), "tiles": tiles}
+            "updated_at": max(runs) if runs else None, "forecast_date": str(pd.Timestamp.now(tz=TZ).date()), "tiles": tiles,
+            "odor": odor_reports(place), "cool_zones": cool_zones_near(place)}
 
 
 # ------------------------------------------------------------------ endpoints
@@ -457,7 +486,7 @@ def hazard(tile: str, place_id: str):
     return {"place": {"id": place["id"], "name": place["name"], "zip": place["zip"], "coastal": place["coastal"]}, **t,
             "window": window(t.get("days", [])), "series": series,
             "what_to_do": ACTIONS[tile].get(level or "none", ACTIONS[tile]["none"]),
-            "metrics": track_summary(tile)}
+            "metrics": track_summary(tile), "cool_zones": cool_zones_near(place) if tile in ("heat", "air") else []}
 
 
 @app.get("/map/dates")
@@ -589,8 +618,9 @@ def track_summary(tile):
         return out
     if tile == "water":
         a = m["all"]
-        return {"headline": f"Water-risk ranking AUC: {a['prob']['auc']:.3f}, "
-                            f"vs {a['last_ratio']['auc']:.3f} for the last test result (1 is perfect; 0.5 is random).",
+        return {"headline": f"Picks out risky beach days better than the beach's last lab result does "
+                            f"(ranking score {a['prob']['auc']:.2f} vs {a['last_ratio']['auc']:.2f}; 1 is perfect, 0.5 is a coin flip).",
+                "reliability": artifact("water", "reliability.json"),
                 "period": " → ".join(m["period"]["test"]), "provisional": m["provisional_split"], "inputs": m["inputs"],
                 "table": [{"metric": f"AUC ({REGION[r]})", "model": m[r]["prob"].get("auc"),
                            "baselines": {"Last test result": m[r]["last_ratio"].get("auc"),
@@ -603,7 +633,8 @@ def track_summary(tile):
     if tile == "heat":
         c, h = m["citywide_daily_mae"], m["citywide_hot_days"]
         return {"headline": f"Citywide daily calls within {c['pred']['value']:.0f} calls on average "
-                            f"(normal-weather model: {c['normal']['value']:.0f}; last week: {c['last_week']['value']:.0f}).",
+                            f"(normal-weather model: {c['normal']['value']:.0f}; last week: {c['last_week']['value']:.0f}). "
+                            "It under-calls the worst heat waves.",
                 "period": m["period"]["test"], "inputs": m["inputs"],
                 "table": [{"metric": "Calls per ZIP per day, error (MAE)", "model": m["zip_day_mae"]["pred"]["value"],
                            "model_ci95": m["zip_day_mae"]["pred"]["ci95"],
@@ -699,7 +730,22 @@ def community_check():
 @app.get("/track-record")
 def track_record():
     log, comm = live_log(), community_check()
-    return {"tiles": {t: {"held_out": track_summary(t), "live": log.get(t), "community": comm.get(t)} for t in TILES}}
+    return {"tiles": {t: {"held_out": track_summary(t), "live": log.get(t), "community": comm.get(t)} for t in TILES},
+            "odor": artifact("odor", "metrics.json")}
+
+
+@app.get("/scenarios")
+def scenarios():
+    out = artifact("scenarios", "scenarios.json")
+    if not out:
+        return {"flow": None, "sea_level": None}
+    f = read_parquet("ibwc_flow")
+    if f is not None and len(f):
+        week = f[f.ts_utc >= f.ts_utc.max() - pd.Timedelta(days=7)].discharge_m3s.dropna()
+        if len(week):
+            out["flow"]["recent_mgd"] = round(float(week.mean()) / 0.0438126)
+            out["flow"]["recent_through"] = str(f.ts_utc.max())
+    return out
 
 
 @app.get("/health")

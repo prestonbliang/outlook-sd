@@ -8,8 +8,8 @@ from models.common import ART
 from models.version import artifact_version
 from pipeline import db, predict
 from pipeline.features import air, fire, flood, heat, water
-from pipeline.sources import (airnow, beachwatch, calfire, calheatscore, cdip, firms, geo, ibwc, noaa_tides, nws,
-                              reports, sd_fire_ems)
+from pipeline.sources import (airnow, apcd, beachwatch, calfire, calheatscore, cdip, cool_zones, firms, geo, ibwc,
+                              noaa_tides, nws, reports, sd_fire_ems)
 from pipeline.sources._common import PROCESSED, ROOT, redact, write
 from pipeline.storage import atomic_output
 
@@ -53,6 +53,8 @@ def fetch_all(con):
     run_source(con, "firms", firms.fetch_live, "ts_utc")
     run_source(con, "sd_fire_ems", sd_fire_ems.fetch_live, "date", every_hours=24)
     run_source(con, "reports", reports.fetch_live, "day")
+    run_source(con, "apcd", apcd.fetch_live, "date", every_hours=12)
+    run_source(con, "cool_zones", cool_zones.fetch_live, every_hours=24)
     run_source(con, "calfire_year", lambda: calfire.update_incidents(pd.Timestamp.now(tz=TZ).year), "StartedDateOnly",
                every_hours=24)
     run_source(con, "beachwatch", lambda: (beachwatch.fetch_history(),

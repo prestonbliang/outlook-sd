@@ -7,6 +7,19 @@ export const TZ = "America/Los_Angeles";
 export type TileName = "water" | "air" | "heat" | "flood" | "fire";
 export const TILE_ORDER: TileName[] = ["water", "air", "heat", "flood", "fire"];
 export const TILE_NAME: Record<TileName, string> = { water: "Water", air: "Air", heat: "Heat", flood: "Flood", fire: "Fire" };
+/** Plain names and one-line meanings for the Today list. */
+export const TILE_LABEL: Record<TileName, string> = { water: "Beach water", air: "Air quality", heat: "Heat", flood: "Coastal flooding", fire: "Wildfire" };
+export const TILE_MEANING: Record<TileName, string> = {
+  water: "Chance that bacteria at the nearest tested beach are above the state's safe-swimming limit.",
+  air: "The Air Quality Index for the nearest monitor: smoke, dust and ozone.",
+  heat: "How much the heat is expected to raise 911 medical calls here, compared with a normal day.",
+  flood: "How high the bay will rise, compared with the level where low streets start to flood.",
+  fire: "How today's weather ranks for a new wildfire starting nearby, compared with other days.",
+};
+export const tileMeaning = (t: Pick<Tile, "tile" | "model">) => t.tile === "heat" && t.model === "calheatscore"
+  ? "California's CalHeatScore heat-health rating (0 to 4) for this ZIP. Our 911-call model covers City of San Diego ZIPs only."
+  : TILE_MEANING[t.tile];
+export const ELEVATED = new Set(["high", "very_high", "usg", "unhealthy", "very_unhealthy", "hazardous"]);
 
 export interface Place { id: string; name: string; zip: string; lat: number; lon: number; coastal: boolean; kind: string }
 export interface Day { date: string; level: string | null; value: number | null; verdict: string; [k: string]: unknown }
@@ -19,16 +32,19 @@ export interface Tile {
   active_fires?: { name: string; acres: number | null; km: number; url: string }[]; red_flag?: string[];
   active_fires_available?: boolean;
 }
-export interface Outlook { place: { id: string; name: string; zip: string; coastal?: boolean }; updated_at: string | null; tiles: Tile[] }
+export interface CoolZone { name: string; address: string; km: number; hours: string | null; phone: string | null; pets: string | null }
+export interface OdorRecord { through: string; days: number; south_bay: number; here: number; report_days: number; last_here: string | null; url: string }
+export interface Outlook { place: { id: string; name: string; zip: string; coastal?: boolean }; updated_at: string | null; tiles: Tile[];
+  odor?: OdorRecord | null; cool_zones?: CoolZone[] }
 export interface Series { units: string; threshold: { value: number; label: string } | null; observed_label?: string;
   observed: { t: string; v: number }[]; forecast: { t: string; v: number; hi?: number }[] }
 export interface Hazard extends Tile {
   place: Outlook["place"]; window: { verdict: string; through: string } | null; series: Series | null;
-  what_to_do: string; metrics: TrackSummary | null;
+  what_to_do: string; metrics: TrackSummary | null; cool_zones?: CoolZone[];
 }
 export interface TrackRow { metric: string; model: number | null; model_ci95?: [number, number]; baselines: Record<string, number | null> }
 export interface TrackSummary { headline: string; period: string; inputs: string; table: TrackRow[]; note?: string;
-  provisional?: boolean; beats_baseline: boolean; replays?: { name: string; issued?: string; note?: string;
+  provisional?: boolean; beats_baseline: boolean; reliability?: { predicted: number; observed: number; n: number }[] | null; replays?: { name: string; issued?: string; note?: string;
   days?: { date: string; observed: number; lvl_q50: number; lvl_q90: number; lvl_tide: number }[] }[] }
 
 export async function get<T>(path: string, signal?: AbortSignal): Promise<T> {
