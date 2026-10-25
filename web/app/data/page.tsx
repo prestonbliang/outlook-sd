@@ -3,8 +3,12 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { get, updatedText } from "@/lib/api";
 import { usePlace } from "@/lib/usePlace";
+import SnapshotStatus from "@/components/SnapshotStatus";
+import { sourceDateLabel, sourceIsCurrent } from "@/lib/forecast";
+import { useNow } from "@/lib/useNow";
 
-type Health = { sources: Record<string, { last_success: string | null; newest_data: string | null; stale: boolean }> };
+type Health = { sources: Record<string, { last_success: string | null; newest_data: string | null; stale: boolean;
+  reference_at?: string | null; max_age_hours?: number; error?: string | null }> };
 
 const SOURCES: { key?: string; name: string; url: string; license: string; use: string }[] = [
   { key: "ibwc", name: "IBWC gauge 11-0133.00, Tijuana River at International Boundary", url: "https://waterdata.ibwc.gov/",
@@ -44,12 +48,13 @@ const SOURCES: { key?: string; name: string; url: string; license: string; use: 
   { name: "City of San Diego community planning areas", url: "https://data.sandiego.gov/datasets/community-planning-district-boundaries/",
     license: "Open Data Commons Public Domain (ODC-PDDL)", use: "Named neighborhoods" },
   { key: "reports", name: "Community reports from Outlook SD users", url: "#community",
-    license: "Collected by this app; published only as daily counts", use: "Shown next to forecasts and compared with them; never used to train models" },
+    license: "Collected by this app; published only as daily counts", use: "Pipeline's historical counts for the Track record; live community connection is shown above" },
   { name: "Protomaps basemap (OpenStreetMap data)", url: "https://protomaps.com/",
     license: "© OpenStreetMap contributors, ODbL", use: "Map background" },
 ];
 
 export default function DataPage() {
+  const now = useNow();
   const { placeId } = usePlace();
   const [health, setHealth] = useState<Health | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -63,20 +68,24 @@ export default function DataPage() {
     <main className="wrap">
       <p className="small"><Link href={`/?place=${placeId ?? ""}`}>← Today</Link></p>
       <h1>Data</h1>
-      <p>Every forecast in Outlook SD comes from a model trained on these public datasets. The app checks the live sources every hour.</p>
+      <p>Forecasts use these public datasets. An hourly pipeline refreshes sources when configured; the website serves its published snapshot.
+        Source update times describe the data actually available, including any delays.</p>
+      <SnapshotStatus />
       {error && <p className="notice" role="status">Source update times could not load. The source links below are still available. <button className="button-link" onClick={() => setAttempt(x => x + 1)}>Try again</button></p>}
       {!health && !error && <p className="small muted" role="status">Loading source update times…</p>}
       <div className="table-scroll"><table>
         <caption className="sr-only">Public data sources, use, licenses, and update times</caption>
-        <thead><tr><th>Source</th><th>Used for</th><th>License</th><th>Last update</th></tr></thead>
+        <thead><tr><th scope="col">Source</th><th scope="col">Used for</th><th scope="col">License</th><th scope="col">Last update</th></tr></thead>
         <tbody>
           {SOURCES.map((s) => {
             const h = s.key ? health?.sources[s.key] : undefined;
+            const stale = h && (h.max_age_hours === undefined ? h.stale : !sourceIsCurrent({ reference_at: h.reference_at ?? null, max_age_hours: h.max_age_hours }, now));
             return (
               <tr key={s.name}>
                 <td><a href={s.url}>{s.name}</a></td><td>{s.use}</td><td>{s.license}</td>
                 <td className="small">{!s.key ? "Historical file" : !h ? "—" :
-                  `${updatedText(h.last_success)}${h.newest_data ? `; data through ${h.newest_data.slice(0, 10)}` : ""}${h.stale ? " (not current)" : ""}`}</td>
+                  `${updatedText(h.last_success)}${h.newest_data ? `; data through ${sourceDateLabel(h.newest_data)}` : ""}${stale ? " (not current)" : ""}`}
+                  {h?.error && <p className="small muted">The last refresh did not complete. Any earlier data keeps its original time.</p>}</td>
               </tr>
             );
           })}

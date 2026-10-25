@@ -164,6 +164,6 @@ test("two elevated hazards on one day raise a single plain-language banner, and 
 
 test("air without any data is a one-line note, not a card", async ({ page }) => {
   await page.goto("/?place=imperial-beach");
-  await expect(page.getByText("Air quality: live data is not connected yet.", { exact: false })).toBeVisible();
+  await expect(page.getByText("Air quality: no forecast or observation is available in this snapshot.", { exact: false })).toBeVisible();
   await expect(page.getByRole("region", { name: "Air quality" })).toHaveCount(0);
 });

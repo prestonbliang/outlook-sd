@@ -12,7 +12,7 @@ async function fixture() {
     await mkdir(join(source, path, '..'), { recursive: true });
     await writeFile(join(source, path), typeof body === 'string' ? body : JSON.stringify(body));
   }
-  for (const page of ['index.html', '404.html', 'map/index.html', 'data/index.html', 'track-record/index.html', ...tiles.map(t => `hazard/${t}/index.html`)]) await put(page, '<html>Outlook SD test fixture</html>');
+  for (const page of ['index.html', '404.html', 'map/index.html', 'data/index.html', 'track-record/index.html', 'what-if/index.html', ...tiles.map(t => `hazard/${t}/index.html`)]) await put(page, '<html>Outlook SD test fixture</html>');
   await put('app-build.json', { schema_version: 1, reporting: 'unconfigured' });
   const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
   const dates = Array.from({ length: 4 }, (_, k) => new Date(Date.parse(`${today}T12:00:00Z`) + k * 86400000).toISOString().slice(0, 10));
@@ -20,6 +20,7 @@ async function fixture() {
   await put('api/places.json', [{ id: 'test-place' }]);
   await put('api/map/dates.json', { dates });
   await put('api/health.json', {}); await put('api/track-record.json', {});
+  await put('api/scenarios.json', { flow: null, sea_level: null });
   await put('api/outlook/test-place.json', { place: { id: 'test-place' }, tiles: tiles.map(tile => ({ tile })) });
   for (const tile of tiles) {
     for (const suffix of ['', ...dates.map(d => `-${d}`)]) await put(`api/map/${tile}${suffix}.json`, { type: 'FeatureCollection', features: [] });
@@ -55,6 +56,13 @@ test('incomplete detail exports cannot deploy', async () => {
   const f = await fixture();
   try {
     await rm(join(f.source, 'api/hazard/water/test-place.json'));
+    await assert.rejects(validateExport(f.source, { allowUnavailable: true }), /ENOENT/);
+  } finally { await rm(f.root, { recursive: true, force: true }); }
+});
+test('missing interactive scenario data cannot silently ship as a completed feature', async () => {
+  const f = await fixture();
+  try {
+    await rm(join(f.source, 'api/scenarios.json'));
     await assert.rejects(validateExport(f.source, { allowUnavailable: true }), /ENOENT/);
   } finally { await rm(f.root, { recursive: true, force: true }); }
 });

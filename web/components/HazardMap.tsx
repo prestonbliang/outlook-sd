@@ -8,8 +8,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import MapGL, { Layer, Marker, NavigationControl, Popup, ScaleControl, Source } from "react-map-gl/maplibre";
 import type { MapRef, MapLayerMouseEvent } from "react-map-gl/maplibre";
 import type { ExpressionSpecification, StyleSpecification } from "maplibre-gl";
-import { AQI_HEX, LEVEL_HEX, LEVEL_WORD, PMTILES, Place, TILE_NAME, TileName, get, haversineKm, updatedText } from "@/lib/api";
+import { AQI_HEX, LEVEL_HEX, LEVEL_WORD, PMTILES, Place, TILE_NAME, TileName, get, haversineKm, updatedText, type SourceCheck } from "@/lib/api";
 import { COVERAGE_LABEL, coverageFor, reportAge, type Summary } from "@/lib/community";
+import { sourceIsCurrent } from "@/lib/forecast";
+import { useNow } from "@/lib/useNow";
 
 let protocolAdded = false;
 const ASSETS = "/map-assets";
@@ -24,7 +26,8 @@ function baseStyle(): StyleSpecification {
 const match = (prop: string, table: Record<string, string>, fallback = "#D5DCE3") =>
   ["match", ["coalesce", ["get", prop], "none"], ...Object.entries(table).flat(), fallback] as unknown as ExpressionSpecification;
 
-export type MapData = GeoJSON.FeatureCollection & { date?: string; mode?: string; run_ts?: string; stale_inputs?: string[]; context_notice?: string | null };
+export type MapData = GeoJSON.FeatureCollection & { date?: string; mode?: string; run_ts?: string; stale_inputs?: string[];
+  source_checks?: SourceCheck[]; incident_check?: SourceCheck | null; context_notice?: string | null };
 type Selection = { lon: number; lat: number; properties: Record<string, unknown>; place?: Place };
 
 export default function HazardMap({ tile, date, center, label, places = [], summaries = null, showReports = false,
@@ -33,6 +36,7 @@ export default function HazardMap({ tile, date, center, label, places = [], summ
   places?: Place[]; summaries?: Summary[] | null; showReports?: boolean; showCoverage?: boolean;
   marker?: boolean; observationsOnPage?: boolean; onPlacePick?: (place: Place) => void;
 }) {
+  const now = useNow();
   const mapRef = useRef<MapRef>(null);
   const [data, setData] = useState<MapData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +50,10 @@ export default function HazardMap({ tile, date, center, label, places = [], summ
     protocolAdded = true;
   }
   const style = useMemo(baseStyle, []);
+  const visibleData = useMemo(() => data && data.incident_check && !sourceIsCurrent(data.incident_check, now)
+    ? { ...data, features: data.features.filter(feature => !feature.properties?.active_fire) } : data, [data, now]);
+  const layerStale = Boolean(data?.stale_inputs?.length || data?.source_checks?.some(check => !sourceIsCurrent(check, now))
+    || (data?.run_ts && (!Number.isFinite(Date.parse(data.run_ts)) || now - Date.parse(data.run_ts) > (data.mode === "observation" ? 3 : 6) * 3600000)));
   useEffect(() => {
     const controller = new AbortController();
     setData(null); setError(null); setSelection(null);
@@ -112,7 +120,7 @@ export default function HazardMap({ tile, date, center, label, places = [], summ
         onLoad={() => { setReady(true); setMapError(false); }} onError={() => setMapError(true)}>
         <NavigationControl position="top-right" showCompass={false} />
         <ScaleControl position="bottom-right" unit="imperial" />
-        {data && <Source key={`${tile}-${date}`} id="hazard" type="geojson" data={data}>{hazardLayers}</Source>}
+        {visibleData && <Source key={`${tile}-${date}`} id="hazard" type="geojson" data={visibleData}>{hazardLayers}</Source>}
         {places.length > 0 && <Source id="neighborhoods" type="geojson" data={neighborhoodData}>
           <Layer id="neighborhoods" type="circle" paint={{ "circle-radius": 4, "circle-color": "#FFFFFF",
             "circle-stroke-color": "#566573", "circle-stroke-width": 1 }} />
@@ -153,9 +161,10 @@ export default function HazardMap({ tile, date, center, label, places = [], summ
       }}>Show county</button>
       <div className="map-status small" role="status">
         {error ? "Forecast layer could not load. Try another hazard or reload." : !data ? "Loading forecast layer…" :
-          !data.features.some((f) => f.properties?.level || f.properties?.active_fire) ? "No map forecast data available for this day." :
-          `${data.mode === "observation" ? "Current observations" : "Forecast"} · ${updatedText(data.run_ts ?? null)}`}
-        {data?.stale_inputs?.length ? " · Some source data is not current." : ""}
+          !visibleData?.features.some((f) => f.properties?.level || f.properties?.active_fire) ? "No map forecast data available for this day." :
+          `${data.mode === "observation" ? layerStale ? "Last recorded observations" : "Current observations" : "Forecast"} · ${updatedText(data.run_ts ?? null)}`}
+        {layerStale ? " · Some source data is not current." : ""}
+        {data?.incident_check && !sourceIsCurrent(data.incident_check, now) && <span> Incident records need updating; older incident markers are hidden.</span>}
         {data?.context_notice && <span> {data.context_notice}</span>}
         {mapError && <span> Background map or map assets could not load. Use the neighborhood list below.</span>}
       </div>

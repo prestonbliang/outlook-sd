@@ -1,19 +1,32 @@
 """Restore build-time state. Never run a pipeline or modify a remote service."""
 import argparse
 import os
+import re
 import shutil
 import tarfile
 import tempfile
 from pathlib import Path, PurePosixPath
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
+from urllib.error import HTTPError
 
 ROOT = Path(__file__).resolve().parents[1]
 # Release assets are not included in Git checkouts or copied when a repository is forked.
-# Hosted builds share the project's published forecast snapshot unless explicitly overridden.
+# Prefer a deploying fork's own state, retaining the shared snapshot for forks without a release.
 PUBLISHED_STATE_URL = "https://github.com/raunavm/outlook-sd/releases/download/state/state.tar.gz"
 MAX_DOWNLOAD = 1024 * 1024 * 1024
 MAX_EXPANDED = 4 * MAX_DOWNLOAD
+
+
+def published_urls():
+    owner = os.environ.get("VERCEL_GIT_REPO_OWNER", "")
+    repo = os.environ.get("VERCEL_GIT_REPO_SLUG", "")
+    urls = []
+    if all(re.fullmatch(r"[A-Za-z0-9_.-]+", part) and part not in {".", ".."} for part in (owner, repo)):
+        urls.append(f"https://github.com/{owner}/{repo}/releases/download/state/state.tar.gz")
+    if PUBLISHED_STATE_URL not in urls:
+        urls.append(PUBLISHED_STATE_URL)
+    return urls
 
 
 def restore(archive, root=ROOT):
@@ -51,20 +64,29 @@ def restore(archive, root=ROOT):
 def main(*, published=False):
     from dotenv import load_dotenv
     load_dotenv(ROOT / ".env")
-    url = os.environ.get("OUTLOOK_STATE_URL", "").strip()
-    if not url and published:
-        url = PUBLISHED_STATE_URL
+    explicit = os.environ.get("OUTLOOK_STATE_URL", "").strip()
+    urls = [explicit] if explicit else published_urls() if published else []
+    if not explicit and published:
         print("Restoring the project's published forecast snapshot for this Vercel build.")
-    if not url:
+    if not urls:
         print("No state URL configured; using local runtime data if present, otherwise explicit unavailable forecasts.")
         return
-    parsed = urlparse(url)
-    if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password or parsed.fragment:
-        raise ValueError("OUTLOOK_STATE_URL must be an HTTPS archive URL without embedded credentials")
+    for url in urls:
+        parsed = urlparse(url)
+        if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password or parsed.fragment:
+            raise ValueError("OUTLOOK_STATE_URL must be an HTTPS archive URL without embedded credentials")
     try:
         with tempfile.TemporaryDirectory(prefix="outlook-download-") as directory:
             archive = Path(directory) / "state.tar.gz"
-            with urlopen(Request(url, headers={"User-Agent": "OutlookSD-Vercel-build"}), timeout=60) as response, archive.open("wb") as output:
+            for index, url in enumerate(urls):
+                try:
+                    response = urlopen(Request(url, headers={"User-Agent": "OutlookSD-Vercel-build"}), timeout=60)
+                    break
+                except HTTPError as error:
+                    if error.code != 404 or index == len(urls) - 1:
+                        raise
+                    print("No repository-owned state asset; using the shared project snapshot.")
+            with response, archive.open("wb") as output:
                 if urlparse(response.url).scheme != "https":
                     raise ValueError("State download must remain on HTTPS")
                 size = 0

@@ -29,6 +29,23 @@ class QualityTests(unittest.TestCase):
         self.assertEqual(quality({**self.tile, "stale_inputs": ["weather"]}, self.now)["state"], "stale")
         self.assertEqual(quality({"status": "not_applicable"}, self.now)["state"], "not_applicable")
 
+    def test_sources_can_expire_before_the_forecast_issue_time(self):
+        tile = {**self.tile, "source_checks": [{"reference_at": (self.now - timedelta(hours=2)).isoformat(), "max_age_hours": 1}]}
+        self.assertEqual(quality(tile, self.now)["state"], "stale")
+        tile["source_checks"][0]["max_age_hours"] = 3
+        self.assertEqual(quality(tile, self.now)["state"], "current")
+
+    def test_invalid_source_timestamps_or_budgets_cannot_claim_freshness(self):
+        for value in [None, [], [{"reference_at": None, "max_age_hours": 3}],
+                      [{"reference_at": self.now.isoformat(), "max_age_hours": -1}]]:
+            with self.subTest(value=value):
+                result = quality({**self.tile, "source_checks": value}, self.now)["state"]
+                self.assertEqual(result, "current" if value == [] else "stale")
+
+    def test_missing_or_nonfinite_values_are_not_forecasts(self):
+        for value in [None, float("nan"), float("inf"), True]:
+            self.assertEqual(quality({**self.tile, "days": [{"date": "2026-10-23", "value": value}]}, self.now)["state"], "unavailable")
+
 
 if __name__ == "__main__":
     unittest.main()

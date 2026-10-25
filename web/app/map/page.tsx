@@ -13,6 +13,7 @@ import { AQI_HEX, LEVEL_HEX, LEVEL_WORD, TILE_NAME, TILE_ORDER, Outlook, TileNam
 import { COVERAGE_LABEL, coverageFor, reportAge } from "@/lib/community";
 import { useCommunity } from "@/lib/useCommunity";
 import { usePlace } from "@/lib/usePlace";
+import { useNow } from "@/lib/useNow";
 
 const HazardMap = dynamic(() => import("@/components/HazardMap"), {
   ssr: false, loading: () => <div className="map-loading" role="status">Loading San Diego map…</div>,
@@ -26,6 +27,8 @@ const NOTES: Record<TileName, string> = {
 };
 
 export default function MapPage() {
+  const now = useNow();
+  const today = localDate(new Date(now || Date.now()));
   const { places, place, placeId, choose, error: placeError, retry } = usePlace();
   const [tile, setTile] = useState<TileName>("water");
   const [dates, setDates] = useState<string[]>([]);
@@ -43,6 +46,9 @@ export default function MapPage() {
   const [outlookError, setOutlookError] = useState<string | null>(null);
   const [outlookAttempt, setOutlookAttempt] = useState(0);
   const community = useCommunity(hours);
+  useEffect(() => {
+    if (!new URLSearchParams(window.location.search).get("date") && dates.includes(today)) setDate(today);
+  }, [today, dates]);
   useEffect(() => {
     const controller = new AbortController();
     setDateError(false);

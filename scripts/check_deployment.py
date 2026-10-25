@@ -2,12 +2,18 @@
 import argparse
 import json
 import os
+import sys
 from datetime import datetime, timezone
+from pathlib import Path
 from urllib.request import Request, urlopen
 from urllib.parse import urlparse
 
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from api.quality import quality
 
-def check(base_url, *, allow_unavailable=False):
+
+def check(base_url, *, allow_unavailable=False, require_reporting=False):
     parsed = urlparse(base_url)
     if parsed.scheme not in {"http", "https"} or not parsed.netloc or parsed.query or parsed.fragment:
         raise ValueError("Provide a deployment origin such as https://outlook-sd.vercel.app")
@@ -37,8 +43,13 @@ def check(base_url, *, allow_unavailable=False):
                 return json.load(response)
             if b"Outlook SD" not in response.read():
                 raise ValueError(f"{path}: did not receive the app page")
-    for page in ["/", "/map/", "/data/", "/track-record/", "/hazard/water/"]:
+    for page in ["/", "/map/", "/data/", "/track-record/", "/what-if/", "/hazard/water/"]:
         get(page)
+    configuration = get("/app-build.json", json_body=True)
+    if configuration.get("schema_version") != 1 or configuration.get("reporting") not in {"configured", "unconfigured", "test"}:
+        raise ValueError("Unsupported reporting configuration metadata")
+    if require_reporting and configuration["reporting"] != "configured":
+        raise ValueError("Community reporting is not configured in the deployed browser build; set the public Vercel variables and rebuild")
     manifest = get("/api/build.json", json_body=True)
     if manifest.get("schema_version") != 1:
         raise ValueError("Unsupported deployment manifest")
@@ -52,11 +63,24 @@ def check(base_url, *, allow_unavailable=False):
     if not places or len(places) != manifest["places"]:
         raise ValueError("Neighborhood export is incomplete")
     get("/api/health.json", json_body=True)
+    scenarios = get("/api/scenarios.json", json_body=True)
+    if not isinstance(scenarios, dict) or not {"flow", "sea_level"} <= scenarios.keys():
+        raise ValueError("Scenario export is incomplete")
     for tile in ["water", "air", "heat", "flood", "fire"]:
         layer = get(f"/api/map/{tile}.json", json_body=True)
         if layer.get("type") != "FeatureCollection":
             raise ValueError(f"Invalid {tile} layer")
-    get(f"/api/outlook/{places[0]['id']}.json", json_body=True)
+    first = get(f"/api/outlook/{places[0]['id']}.json", json_body=True)
+    if not allow_unavailable:
+        # Build-time availability is not proof that the same sources are still fresh now.
+        current = lambda payload: any(quality(tile)["state"] == "current" for tile in payload.get("tiles", []))
+        found = current(first)
+        for place in places[1:]:
+            if found:
+                break
+            found = current(get(f"/api/outlook/{place['id']}.json", json_body=True))
+        if not found:
+            raise ValueError("Forecasts have expired since publication; refresh the source pipeline and publish a new snapshot")
     get("/tiles/sandiego.pmtiles", range_request=True)
     return manifest
 
@@ -65,9 +89,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("url")
     parser.add_argument("--allow-unavailable", action="store_true", help="Check an explicitly requested initial launch without forecasts")
+    parser.add_argument("--require-reporting", action="store_true", help="Fail when browser reporting variables were not applied to this deployment")
     args = parser.parse_args()
     try:
-        manifest = check(args.url, allow_unavailable=args.allow_unavailable)
+        manifest = check(args.url, allow_unavailable=args.allow_unavailable, require_reporting=args.require_reporting)
     except Exception as error:
         # HTTP exceptions contain no request headers; do not print request objects or environment values.
         parser.exit(1, f"Deployment check failed: {error}\n")

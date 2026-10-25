@@ -115,6 +115,19 @@ def test_forecast_window_does_not_bridge_missing_days(client):
         "verdict": "Low", "through": "2026-10-24"}
 
 
+def test_heat_map_checks_state_source_when_its_ratings_are_used(client, monkeypatch):
+    date = client.get("/map/dates").json()["dates"][0]
+    (api.PROCESSED / "map_heat.geojson").write_text(json.dumps({"type": "FeatureCollection", "features": [
+        {"type": "Feature", "geometry": {"type": "Polygon", "coordinates": []}, "properties": {"zip": "92011"}}
+    ]}))
+    pd.DataFrame({"zip": ["92011"], "issued": [date], "target_date": [date], "chs": [2]}).to_parquet(api.PROCESSED / "calheatscore_log.parquet")
+    monkeypatch.setattr(api, "source_status", lambda: {"openmeteo": {"stale": False}, "calheatscore": {"stale": True}})
+    layer = client.get("/map/heat").json()
+    assert layer["features"][0]["properties"]["source"] == "calheatscore"
+    assert "CalHeatScore" in layer["stale_inputs"]
+    assert any(check["name"] == "CalHeatScore" for check in layer["source_checks"])
+
+
 def test_optional_fire_feeds_are_not_required_weather_inputs(client):
     status = {name: {"stale": True} for name in api.STALE_HOURS}
     status["openmeteo"] = {"stale": False}
@@ -213,3 +226,77 @@ def test_cool_zones_are_sorted_by_distance_and_blank_fields_are_null(client):
 def test_scenarios_without_artifacts_is_an_explicit_empty_state(client, monkeypatch):
     monkeypatch.setattr(api, "artifact", lambda tile, name: None)
     assert client.get("/scenarios").json() == {"flow": None, "sea_level": None}
+
+
+def test_parquet_cache_is_invalidated_and_cannot_be_modified_by_a_caller(client, monkeypatch):
+    path = api.PROCESSED / "cache_test.parquet"
+    pd.DataFrame({"value": [1]}).to_parquet(path)
+    from unittest.mock import Mock
+    read = Mock(wraps=pd.read_parquet)
+    monkeypatch.setattr(api.pd, "read_parquet", read)
+    first = api.read_parquet("cache_test")
+    first.loc[0, "value"] = 99
+    assert first.value.iloc[0] == 99
+    assert api.read_parquet("cache_test").value.iloc[0] == 1
+    assert read.call_count == 1
+    pd.DataFrame({"value": [2]}).to_parquet(path)
+    assert api.read_parquet("cache_test").value.iloc[0] == 2
+    assert read.call_count == 2
+
+
+def test_query_observes_wal_commits_and_returns_independent_frames(client):
+    with sqlite3.connect(api.DB) as writer:
+        writer.execute("PRAGMA journal_mode=WAL")
+        writer.execute("CREATE TABLE cache_test (value INTEGER)")
+        writer.execute("INSERT INTO cache_test VALUES (1)")
+        writer.commit()
+        first = api.query("SELECT * FROM cache_test")
+        first.loc[0, "value"] = 99
+        assert first.value.iloc[0] == 99
+        assert api.query("SELECT * FROM cache_test").value.tolist() == [1]
+        writer.execute("INSERT INTO cache_test VALUES (2)")
+        writer.commit()
+        assert api.query("SELECT * FROM cache_test").value.tolist() == [1, 2]
+
+
+def test_sources_expose_expiry_metadata_for_a_static_browser(client):
+    now = pd.Timestamp.now(tz="UTC").isoformat()
+    with sqlite3.connect(api.DB) as con:
+        con.executescript(SCHEMA)
+        con.execute("INSERT INTO source_status VALUES ('openmeteo', ?, ?, NULL, NULL)", (now, now))
+    status = client.get("/health").json()["sources"]["openmeteo"]
+    assert status["reference_at"] == now and status["max_age_hours"] == 3 and status["stale"] is False
+    for tile in client.get("/outlook/downtown").json()["tiles"]:
+        assert tile["source_checks"]
+
+
+def test_partial_scenario_artifact_does_not_crash_with_river_history(client, monkeypatch):
+    monkeypatch.setattr(api, "artifact", lambda tile, name: {"flow": None, "sea_level": {"period": "Historical"}})
+    pd.DataFrame({"ts_utc": pd.to_datetime(["2026-10-24T00:00:00Z"]), "discharge_m3s": [1.0]}).to_parquet(api.PROCESSED / "ibwc_flow.parquet")
+    response = client.get("/scenarios")
+    assert response.status_code == 200 and response.json()["flow"] is None
+
+
+def test_state_heat_issue_dates_use_the_same_pacific_midnight_as_the_forecast(client):
+    now = pd.Timestamp.now(tz="UTC")
+    issued = now.tz_convert(api.TZ).normalize().tz_localize(None)
+    with sqlite3.connect(api.DB) as con:
+        con.executescript(SCHEMA)
+        con.execute("INSERT INTO source_status VALUES ('calheatscore', ?, ?, ?, NULL)",
+                    (now.isoformat(), now.isoformat(), str(issued)))
+    check = api.source_status()["calheatscore"]
+    assert check["reference_at"] == issued.tz_localize(api.TZ).tz_convert("UTC").isoformat()
+    assert check["stale"] is False
+
+
+def test_detail_carries_dated_advice_when_forecast_levels_change(client, monkeypatch):
+    dates = client.get("/map/dates").json()["dates"]
+    def fake_heat(place, status):
+        tile = api.empty_tile("heat", "Test record", status)
+        tile.update(model="calheatscore", days=[{"date": dates[0], "value": 0, "level": "low", "verdict": "Low"},
+                                               {"date": dates[1], "value": 3, "level": "high", "verdict": "High"}])
+        return tile
+    monkeypatch.setitem(api.BUILDERS, "heat", fake_heat)
+    response = client.get("/hazard/heat?place_id=imperial-beach").json()
+    assert response["what_to_do_by_date"][dates[0]] == api.ACTIONS["heat"]["low"]
+    assert response["what_to_do_by_date"][dates[1]] == api.ACTIONS["heat"]["high"]
