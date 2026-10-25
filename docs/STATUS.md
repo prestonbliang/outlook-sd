@@ -2,6 +2,12 @@
 
 Outlook SD is deployed at https://outlook-sd-kof2.vercel.app and remains a release candidate. The current pass refreshes real sources, fixes morning Air inference, bootstraps the fork's `state` release, and verifies a read-only connection to Supabase. The hosted build now reports community configuration present; hourly Vercel publishing still needs credentials and a post-deployment strict check. See [IMPROVEMENT_REVIEW.md](IMPROVEMENT_REVIEW.md) for the audit, 18 evaluated innovations, tradeoffs, limits and five-item roadmap.
 
+## Latest verification — visual redesign
+
+Implemented the coastal design system documented in [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md): a distinct homepage introduction and actual neighborhood map, forecast grid, planning workspace, unified navigation/footer/icons, consistent map/detail/scenario/data/model pages, clearer reporting groups, accessible hover/keyboard chart exploration and report deep-link recovery after hydration. Hazard colors, source freshness, model limits and backend/reporting contracts remain intact. Added a matching SVG site icon; no dependencies or infrastructure were added.
+
+**168 Playwright executions, 49 frontend unit tests and 106 Python tests passed**, with no skips in those local runs. Production static build, strict TypeScript and release packaging passed. The browser suite includes three engines, six-route accessibility checks and four viewport sizes, plus new journey/motion/chart/deep-link regressions. Desktop and mobile visual review informed the final spacing, planning and tap-target refinements. Production source/report checks are performed against the actual public domain after the Git deployment; local tests do not substitute for that hosted check.
+
 ## Latest verification — expanded community observations
 
 Added 15 structured choices for 27 total across Water, Air, Heat, Flood and Fire. Concern and no-concern choices are grouped, with two columns on wider screens and one on mobile. The browser reads the database's `report_kinds()` vocabulary before enabling new choices and keeps original choices if the capability endpoint is unavailable. Existing IDs, duplicate rejection, hourly limits, privacy and aggregate-only reads are preserved. Additional contextual observations are excluded from forecast-agreement calculations; unknown types cannot become all-clear reports.

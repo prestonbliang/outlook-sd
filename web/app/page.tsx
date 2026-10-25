@@ -8,7 +8,8 @@ import MapBoundary from "@/components/MapBoundary";
 import Watchlist from "@/components/Watchlist";
 import OdorCard from "@/components/OdorCard";
 import PlanningBrief from "@/components/PlanningBrief";
-import { ELEVATED, Outlook, TILE_LABEL, TILE_NAME, TileName, dayName, get, updatedText } from "@/lib/api";
+import Icon from "@/components/Icon";
+import { ELEVATED, Outlook, TILE_LABEL, TILE_NAME, TILE_ORDER, TileName, dayName, get, updatedText } from "@/lib/api";
 import { currentDay, forecastDates, forecastState, localDate } from "@/lib/forecast";
 import { usePlace } from "@/lib/usePlace";
 import { useNow } from "@/lib/useNow";
@@ -59,50 +60,65 @@ export default function Today() {
   const available = outlook?.tiles.filter(t => currentDay(t)).length ?? 0;
   const stale = outlook?.tiles.some(t => forecastState(t) === "stale");
   const together = outlook ? compound(outlook, now) : null;
-  return <div className="today">
-    <main className="side">
-      <div className="wrap today-content">
-        <p className="eyebrow">Today and the next 3 days</p>
-        <header className="neighborhood-heading">
-          <div><h1>{place?.name ?? "Your neighborhood"}</h1><p className="small muted">{place ? `ZIP ${place.zip} · Local outlook` : "Finding your neighborhood…"}</p></div>
-          <button ref={changeButton} className="secondary-button" onClick={() => setPicking(!picking)} aria-expanded={picking} aria-controls="today-place-picker">Change place</button>
-        </header>
-        <p className="outlook-intro">What will the ocean, air, heat, tides and fire do near you this week? Forecasts for your neighborhood,
-          each one checked every day against what really happened.</p>
-        {(picking || error) && <div id="today-place-picker" className="picker-panel"><PlacePicker places={places} onPick={p => { choose(p.id); setPicking(false); changeButton.current?.focus(); }} /></div>}
-        {(loadError || error) && <div className="error-panel" role="alert"><strong>Your outlook could not load.</strong>
-          <p>{loadError ?? error}</p><button className="secondary-button" onClick={() => { retry(); setAttempt(x => x + 1); }}>Try again</button>
-          <p className="small"><Link href={`/data/${q}`}>View official data sources</Link></p></div>}
-        {outlook && <div className={`outlook-status ${!available || stale ? "notice" : ""}`}>
-          <div className="outlook-refresh"><p className="small muted">{updatedText(outlook.updated_at)}</p><button className="button-link" onClick={() => setAttempt(x => x + 1)}>Refresh outlook</button></div>
-          {!available ? <p>No forecasts are available for today. You can explore the map and check the official sources linked below.</p> :
-            stale ? <p>Some forecasts use older or incomplete source data. Check the update times and official advisories.</p> : null}
-          {(!available || stale) && <p className="small muted">Refresh checks for a newer published snapshot. Official sources may update sooner.</p>}
-        </div>}
-        {!outlook && !loadError && !error && <div className="forecast-skeleton" role="status" aria-label="Loading five hazard forecasts">
-          {["Water", "Air", "Heat", "Flood", "Fire"].map(name => <div key={name}><span>{name}</span><span className="skeleton-line" /></div>)}
-        </div>}
-        {together && <div className="compound-banner" role="note"><strong>{together.count === 2 ? "Two" : together.count} hazards at once {together.day}:</strong> {together.names}. Plan ahead.</div>}
-        {outlook && <a className="planning-jump" href="#planning-heading">Open your three-day planning brief ↓</a>}
-        {outlook && <ul className="level-key" aria-label="Color key">{["low", "moderate", "high", "very_high"].map(l =>
-          <li key={l}><span style={{ background: `var(--lvl-${l.replace("_", "-")})` }} />{{ low: "Low", moderate: "Moderate", high: "High", very_high: "Very high" }[l]}</li>)}
-          <li className="muted">Tap a row for details</li></ul>}
-        <div className="hazard-list">{outlook?.tiles.filter(t => !notConnected(t)).map(t => <HazardRow key={`${placeId}-${t.tile}`} tile={t} placeId={outlook.place.id}
-          onSelect={() => setMapTile(t.tile)} coolZone={t.tile === "heat" || t.tile === "air" ? outlook.cool_zones?.[0] : undefined} />)}</div>
-        {outlook?.tiles.filter(notConnected).map(t => <p key={t.tile} className="small muted not-connected">
-          {TILE_LABEL[t.tile]}: no forecast or observation is available in this snapshot. <a href={t.official_advisory.url}>Check AirNow for current air quality</a>.</p>)}
-        {outlook && <PlanningBrief outlook={outlook} />}
-        {outlook?.odor && <OdorCard odor={outlook.odor} place={outlook.place.name} />}
-        {place && <Watchlist places={places} selected={place} onPick={choose} />}
-        <div className="community-callout"><h2>See something? Report it.</h2>
-          <p className="small muted">Brown water, smoke, a flooded street: tap what you see. Reports are anonymous and are compared with our forecasts.</p>
-          <Link className="primary-link" href={`/map/${q}&hazard=${mapTile}#map-report`}>Report what you see →</Link></div>
-        <p className="disclaimer">Outlook SD is a forecast, not an official advisory. Follow posted beach signs and official alerts.</p>
+  return <main className="home-page">
+    <header className="home-hero">
+      <div className="hero-copy">
+        <p className="eyebrow"><span className="hero-line" /> Your San Diego outlook</p>
+        <h1>Life happens outside.<span>Know what’s ahead.</span></h1>
+        <p className="hero-description">Beach water, air, heat, coastal flooding and wildfire. A neighborhood view of the next few days, with context from the people who live here.</p>
+        <div className="hero-actions"><a className="primary-link light-button" href="#local-outlook">See your local outlook <Icon name="arrow" size={18} /></a>
+          <Link className="hero-text-link" href={`/map/${q}`}>Explore the map <Icon name="map" size={18} /></Link></div>
+        <ul className="hero-signals" aria-label="Five environmental hazards">{TILE_ORDER.map(tile => <li key={tile}><Icon name={tile} size={16} />{TILE_NAME[tile]}</li>)}</ul>
       </div>
-    </main>
-    <div className="mapcol">
-      {desktopMap && place && <MapBoundary><HazardMap tile={mapTile} center={place} places={places} onPlacePick={p => choose(p.id)} label={`${TILE_NAME[mapTile]} map around ${place.name}`} /></MapBoundary>}
-      <Link className="open-map-link" href={`/map/${q}&hazard=${mapTile}`}>Open full {TILE_NAME[mapTile].toLowerCase()} map ↗</Link>
-    </div>
-  </div>;
+      <div className="hero-map-frame">
+        <div className="neighborhood-heading">
+          <div className="hero-place"><Icon name="pin" size={22} /><div><p className="eyebrow">Your neighborhood</p><h2>{place?.name ?? "Your neighborhood"}</h2>
+            <p className="small muted">{place ? `ZIP ${place.zip} · San Diego County` : "Finding your neighborhood…"}</p></div></div>
+          <button ref={changeButton} className="secondary-button" onClick={() => setPicking(!picking)} aria-expanded={picking} aria-controls="today-place-picker">Change place</button>
+        </div>
+        <div className="home-map-canvas">
+          {desktopMap && place ? <MapBoundary><HazardMap tile={mapTile} center={place} places={places} onPlacePick={p => choose(p.id)} label={`${TILE_NAME[mapTile]} map around ${place.name}`} /></MapBoundary> : <div className="map-loading" role="status">Loading neighborhood map…</div>}
+        </div>
+        <div className="hero-map-caption"><span><Icon name={mapTile} size={16} />{TILE_LABEL[mapTile]} map</span>
+          <Link href={`/map/${q}&hazard=${mapTile}`}>Open full {TILE_NAME[mapTile].toLowerCase()} map ↗</Link></div>
+      </div>
+    </header>
+    {(picking || error) && <div id="today-place-picker" className="picker-panel home-picker"><PlacePicker places={places} onPick={p => { choose(p.id); setPicking(false); changeButton.current?.focus(); }} /></div>}
+    <section className="home-outlook" aria-labelledby="local-outlook">
+      <div className="section-heading"><div><p className="eyebrow">The neighborhood brief</p><h2 id="local-outlook">Your local outlook</h2>
+        <p className="muted">Five signals. One place to make sense of them.</p></div>
+        {outlook && <a className="planning-jump" href="#planning-heading">Open your three-day planning brief ↓</a>}</div>
+      {(loadError || error) && <div className="error-panel" role="alert"><strong>Your outlook could not load.</strong>
+        <p>{loadError ?? error}</p><button className="secondary-button" onClick={() => { retry(); setAttempt(x => x + 1); }}>Try again</button>
+        <p className="small"><Link href={`/data/${q}`}>View official data sources</Link></p></div>}
+      {outlook && <div className={`outlook-status ${!available || stale ? "notice" : ""}`}>
+        <div className="outlook-refresh"><p className="small muted"><Icon name="clock" size={15} />{updatedText(outlook.updated_at)}</p><button className="button-link" onClick={() => setAttempt(x => x + 1)}>Refresh outlook</button></div>
+        {!available ? <p>No forecasts are available for today. You can explore the map and check the official sources linked below.</p> :
+          stale ? <p>Some forecasts use older or incomplete source data. Check the update times and official advisories.</p> : null}
+        {(!available || stale) && <details><summary>How updates work</summary><p className="small muted">Refresh checks for a newer published snapshot. Official sources may update sooner.</p></details>}
+      </div>}
+      {!outlook && !loadError && !error && <div className="forecast-skeleton" role="status" aria-label="Loading five hazard forecasts">
+        {["Water", "Air", "Heat", "Flood", "Fire"].map(name => <div key={name}><span>{name}</span><span className="skeleton-line" /></div>)}
+      </div>}
+      {together && <div className="compound-banner" role="note"><Icon name="shield" /><div><strong>{together.count === 2 ? "Two" : together.count} hazards at once {together.day}:</strong> {together.names}. Plan ahead.</div></div>}
+      {outlook && <ul className="level-key" aria-label="Color key">{["low", "moderate", "high", "very_high"].map(l =>
+        <li key={l}><span style={{ background: `var(--lvl-${l.replace("_", "-")})` }} />{{ low: "Low", moderate: "Moderate", high: "High", very_high: "Very high" }[l]}</li>)}
+        <li className="muted">Tap a card for details</li></ul>}
+      <div className="hazard-list">{outlook?.tiles.filter(t => !notConnected(t)).map(t => <HazardRow key={`${placeId}-${t.tile}`} tile={t} placeId={outlook.place.id}
+        onSelect={() => setMapTile(t.tile)} coolZone={t.tile === "heat" || t.tile === "air" ? outlook.cool_zones?.[0] : undefined} />)}</div>
+      {outlook?.tiles.filter(notConnected).map(t => <p key={t.tile} className="small muted not-connected">
+        <Icon name="air" size={18} />{TILE_LABEL[t.tile]}: no forecast or observation is available in this snapshot. <a href={t.official_advisory.url}>Check AirNow for current air quality</a>.</p>)}
+    </section>
+    {outlook && <PlanningBrief outlook={outlook} />}
+    <div className="home-personal">{place && <div className="personal-panel"><Watchlist places={places} selected={place} onPick={choose} /></div>}
+      {outlook?.odor && <OdorCard odor={outlook.odor} place={outlook.place.name} />}</div>
+    <section className="community-callout"><div className="community-emblem"><Icon name="community" size={34} /></div>
+      <div><p className="eyebrow">A local view, made better together</p><h2>See something? Report it.</h2>
+        <p>Share the conditions you’re already observing. Anonymous neighborhood reports add local context and never change the forecast.</p></div>
+      <Link className="primary-link" href={`/map/${q}&hazard=${mapTile}#map-report`}>Report what you see <Icon name="arrow" size={18} /></Link>
+    </section>
+    <div className="home-principles"><div><Icon name="pin" /><h3>Local by design</h3><p>{places.length ? `${places.length} neighborhoods across San Diego County.` : "Neighborhood-level views across San Diego County."}</p></div>
+      <div><Icon name="chart" /><h3>Open about accuracy</h3><p>See the models, their track record and their limits. <Link href={`/track-record/${q}`}>View the evidence ↗</Link></p></div>
+      <div><Icon name="shield" /><h3>Context, not an all-clear</h3><p>Forecasts are not official advisories. Follow official alerts and posted signs.</p></div></div>
+  </main>;
 }

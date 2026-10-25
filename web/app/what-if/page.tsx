@@ -3,6 +3,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { get } from "@/lib/api";
 import { usePlace } from "@/lib/usePlace";
+import PageIntro from "@/components/PageIntro";
+import Icon from "@/components/Icon";
 import { comparisonWidth, parseScenarios, scenarioStep, type Scenarios } from "@/lib/scenarios";
 
 /** Two bars: what happens now vs. under the scenario. Widths are shares of the larger value. */
@@ -33,8 +35,8 @@ export default function WhatIf() {
   const today = sea?.rises.find(r => r.rise_ft === 0);
   return <main className="wrap what-if">
     <p className="small"><Link href={`/?place=${placeId ?? ""}`}>← Today</Link></p>
-    <h1>What if?</h1>
-    <p>San Diego is making big decisions about sewage and rising seas. Move the sliders to see what our data says would change.</p>
+    <PageIntro eyebrow="The scenario lab" title="What if?" description="Big questions, explored through real records. Change river flow or sea level and see how the historical picture changes." icon="water" />
+    <p className="notice small">Historical comparisons and model estimates—not live forecasts or official projections.</p>
     {err && <div className="error-panel" role="alert"><p>{err}</p>
       <button className="secondary-button" onClick={() => setAttempt(x => x + 1)}>Try loading scenarios again</button></div>}
     {!s && !err && <p role="status">Loading scenarios…</p>}
@@ -46,6 +48,7 @@ export default function WhatIf() {
       <a href="https://tidesandcurrents.noaa.gov/stationhome.html?id=9410170">View NOAA’s San Diego gauge</a></section>}
 
     {flow && capped && <section className="scenario">
+      <div className="scenario-number"><Icon name="water" size={24} />01 / River flow</div>
       <h2>Less sewage in the Tijuana River</h2>
       <p>Untreated sewage flows across the border in the Tijuana River and reaches South Bay beaches. Compare the model’s estimates under different river-flow limits.</p>
       {Number.isFinite(flow.recent_mgd) && <p className="small muted">The latest recorded week in this snapshot averaged {flow.recent_mgd} million gallons a day.
@@ -61,6 +64,7 @@ export default function WhatIf() {
     </section>}
 
     {sea && raised && today && <section className="scenario">
+      <div className="scenario-number"><Icon name="flood" size={24} />02 / Sea level</div>
       <h2>Higher seas at San Diego Bay</h2>
       <p>When the bay rises above {sea.minor_flood_ft_mllw} ft, low streets near the water start to flood. California&apos;s 2024
         sea-level guidance expects nearly a foot of rise by 2050.</p>

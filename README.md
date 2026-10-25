@@ -98,6 +98,7 @@ Full metrics: `models/artifacts/<tile>/metrics.json`.
 
 See the [engineering audit](docs/AUDIT.md) for the improvement scope, validation evidence, and remaining release requirements.
 The [product improvement review](docs/IMPROVEMENT_REVIEW.md) evaluates 18 practical innovations, records this pass's changes and explains the next priorities.
+The [visual design system](docs/DESIGN_SYSTEM.md) records the coastal identity, shared components, accessibility decisions and redesign verification.
 
 ```
 GitHub Actions (hourly)
