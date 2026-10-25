@@ -11,7 +11,7 @@ for (const hazard of ["water", "air", "heat", "flood", "fire"] as const) {
     await page.goto(`/map/?place=imperial-beach&hazard=${hazard}`);
     const box = page.getByRole("region", { name: "What do you see in Imperial Beach?", exact: true });
     for (const option of KINDS[hazard]) await expect(box.getByRole("button", { name: option.label, exact: true })).toBeEnabled();
-    await expect(box.getByRole("button")).toHaveCount(KINDS[hazard].length);
+    await expect(box.locator(".observation-group").getByRole("button")).toHaveCount(KINDS[hazard].length);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
     const results = await new AxeBuilder({ page }).include(".report-box").withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
     expect(results.violations).toEqual([]);
@@ -32,9 +32,11 @@ test("a new observation saves its exact type and refreshes the summary", async (
   const box = page.getByRole("region", { name: "What do you see in Imperial Beach?", exact: true });
   await box.getByRole("button", { name: "Floating litter or debris", exact: true }).click();
   await expect(box.getByText("Thanks. Your observation for Imperial Beach was saved.")).toBeVisible();
+  await expect(box.getByRole("region", { name: "Summary of recent observations" })).toContainText("floating litter or debris");
+  await box.getByText("View observation counts", { exact: true }).click();
   await expect(box.locator(".observation-counts")).toContainText("Floating litter or debris: 1");
   expect(payload?.kind).toBe("water_debris");
-  expect(Object.keys(payload!).sort()).toEqual(["client_id", "hazard", "kind", "place_id"]);
+  expect(Object.keys(payload!).sort()).toEqual(["client_id", "hazard", "kind", "place_id", "withdrawal_hash"]);
 });
 
 for (const status of [404, 503]) {

@@ -12,7 +12,8 @@ from pipeline.sources import reports
     ("  ", "legacy.anon.jwt", "legacy.anon.jwt"),
     ("", "legacy.anon.jwt", "legacy.anon.jwt"),
 ])
-def test_count_reads_use_the_selected_public_key(monkeypatch, publishable, legacy, expected):
+def test_count_reads_use_the_selected_public_key(monkeypatch, tmp_path, publishable, legacy, expected):
+    monkeypatch.setattr(reports, "PROCESSED", tmp_path)
     monkeypatch.setenv("NEXT_PUBLIC_SUPABASE_URL", "https://reports.example.invalid/")
     monkeypatch.setenv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY", publishable)
     monkeypatch.setenv("NEXT_PUBLIC_SUPABASE_ANON_KEY", legacy)

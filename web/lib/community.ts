@@ -43,6 +43,34 @@ export function parseReportKinds(value: unknown): string[] {
 export const KIND_LABEL: Record<string, string> = Object.fromEntries(
   Object.values(KINDS).flat().map((k) => [k.kind, k.label]));
 
+const OBSERVATION_PHRASES: Record<string, string> = {
+  water_sewage: "sewage smell or discolored water", water_sign: "posted closure or warning signs",
+  water_debris: "floating litter or debris", water_foam: "unusual foam", water_oily: "an oily sheen",
+  air_smoke: "smoke, haze or ash", air_dust: "airborne dust", air_odor: "unusual outdoor odors", air_ash: "falling ash",
+  heat_extreme: "uncomfortable heat", heat_shade: "limited shade", heat_cooling: "closed or inaccessible cooling places",
+  heat_night: "unusual heat after sunset", flood_street: "water on streets or parking lots",
+  flood_overtop: "waves or tides overtopping seawalls or paths", flood_path: "flooded walking paths",
+  flood_drain: "water pooling around drains", flood_road: "roads blocked by flooding",
+  fire_smoke: "smoke from a nearby fire", fire_ash: "falling ash", fire_flames: "flames near vegetation",
+  fire_closure: "fire-related road or trail closures",
+};
+/** A deterministic account of submitted choices, never a forecast or a safety verdict. */
+export function summarizeObservations(summary: Summary) {
+  const concerns = KINDS[summary.hazard].filter(k => k.problem && summary.kinds[k.kind] > 0)
+    .sort((a, b) => summary.kinds[b.kind] - summary.kinds[a.kind])
+    .map(k => OBSERVATION_PHRASES[k.kind]);
+  const list = concerns.length < 2 ? concerns.join("") : `${concerns.slice(0, -1).join(", ")} and ${concerns.at(-1)}`;
+  const mixed = summary.problem_reports > 0 && summary.clear_reports > 0;
+  return {
+    headline: mixed ? "Observations are mixed" : concerns.length ? "Reported concerns" : "No concerns noted in these reports",
+    detail: concerns.length ? `Recent reports mention ${list}.${mixed
+      ? " Other submissions describe no concern. Conditions may differ by location or time; these reports do not establish which account is correct." : ""}`
+      : "Participating browsers reported no concern at the time of their observations. This does not establish safe conditions or replace official guidance.",
+    evidence: summary.reporters === 1 ? "Only one browser has contributed. Multiple choices from it are not independent confirmation."
+      : `${summary.reporters} browser codes contributed. These are not verified people or independent witnesses.`,
+  };
+}
+
 export interface Summary {
   place_id: string; hazard: TileName; total: number; reporters: number;
   problem_reports: number; clear_reports: number; last_report_at: string; kinds: Record<string, number>;

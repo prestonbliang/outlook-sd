@@ -30,6 +30,8 @@ export async function mockCommunityApi(page: Page) {
     json: Object.values(KINDS).flat().map(kind => kind.kind),
   }));
   await page.route("**/rest/v1/rpc/report_summary", route => route.fulfill({ json: [] }));
+  await page.route("**/rest/v1/rpc/report_features", route => route.fulfill({ json: { version: 1, withdrawal: true } }));
+  await page.route("**/rest/v1/rpc/my_report_options", route => route.fulfill({ json: [] }));
 }
 export async function mockApi(page: Page) {
   await mockCommunityApi(page);

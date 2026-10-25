@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { KINDS, LEGACY_KINDS, parseReportKinds, coverageFor, reportAge } from '../../lib/community.ts';
+import { KINDS, LEGACY_KINDS, parseReportKinds, coverageFor, reportAge, summarizeObservations } from '../../lib/community.ts';
 import { readFile } from 'node:fs/promises';
 
 test('repeat observations from one browser never meet the coverage goal', () => {
@@ -31,7 +31,8 @@ test('all 27 observation choices match the additive database migration and full 
   const frontend = Object.values(KINDS).flat().map(k => k.kind).sort();
   assert.equal(frontend.length, 27);
   assert.deepEqual(database, frontend);
-  assert.ok(schema.endsWith(migration));
+  assert.ok(schema.includes(migration));
+  assert.ok(schema.endsWith(await readFile(new URL('../../../supabase/report-management.sql', import.meta.url), 'utf8')));
 });
 test('capabilities keep original choices, enable known additions, and ignore unknown future labels', () => {
   const all = Object.values(KINDS).flat().map(k => k.kind);
@@ -63,4 +64,26 @@ test('malformed server counts stay unavailable instead of becoming coverage', as
   assert.throws(() => validateSummaries([{ ...summary, total: 10 }]));
   assert.throws(() => validateSummaries([{ ...summary, kinds: { fire_smoke: 1 } }]));
   assert.throws(() => validateSummaries([summary, summary]));
+});
+
+test('summaries explain choices and conflicting reports without inventing a safety verdict', () => {
+  const summary = { hazard: 'water', reporters: 1, problem_reports: 2, clear_reports: 0,
+    kinds: { water_debris: 1, water_foam: 1 } };
+  const narrative = summarizeObservations(summary);
+  assert.match(narrative.detail, /floating litter or debris and unusual foam/);
+  assert.match(narrative.evidence, /not independent confirmation/);
+  const mixed = summarizeObservations({ ...summary, reporters: 3, clear_reports: 1 });
+  assert.equal(mixed.headline, 'Observations are mixed');
+  assert.match(mixed.detail, /do not establish which account is correct/);
+  assert.match(mixed.evidence, /not verified people/);
+  const clear = summarizeObservations({ hazard: 'heat', reporters: 2, problem_reports: 0, clear_reports: 2, kinds: { heat_ok: 2 } });
+  assert.match(clear.detail, /does not establish safe conditions/);
+});
+
+test('every concern has a meaningful summary phrase', () => {
+  for (const [hazard, choices] of Object.entries(KINDS)) for (const choice of choices.filter(k => k.problem)) {
+    const text = summarizeObservations({ hazard, reporters: 1, problem_reports: 1, clear_reports: 0, kinds: { [choice.kind]: 1 } }).detail;
+    assert.match(text, /^Recent reports mention .+\.$/);
+    assert.ok(!text.includes('undefined'));
+  }
 });

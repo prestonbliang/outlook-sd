@@ -99,6 +99,8 @@ To serve the built app: `cd web && npx http-server out`. `make web` starts Next 
 
 ## Hosted hourly operation
 
+For summaries, protected removal, privacy limits and administrator moderation, see [Community safeguards](COMMUNITY_SAFEGUARDS.md). Existing Supabase projects need the additive `supabase/report-management.sql` update before removal is available; fresh `schema.sql` includes it.
+
 See [VERCEL.md](VERCEL.md) for project linking, Actions secrets, first launch, and the prebuilt deployment/check workflow.
 
 The hourly workflow requires the `state` release asset. For first-time setup, build the source tables and perform a live run locally, then:

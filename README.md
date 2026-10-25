@@ -8,11 +8,13 @@ Outlook SD is a forecast, not an official advisory. Every tile links to the offi
 
 The Map page lets users switch hazards and forecast days, inspect stations and shaded areas, search neighborhoods or ZIPs, and submit observations for a selected neighborhood. A neighborhood list provides the same selection controls without requiring WebGL. On small screens the controls and map stack vertically.
 
-Community observations include counts, time since the latest report, and coverage over the past 24 hours or 7 days. Reporting blind spots are places with fewer than three reporting browsers for the selected hazard and time window. They ask for more observations; they are not risk ratings or confidence scores. Browser codes are not verified people. The app stores no precise user coordinates, names, emails, or free text. Reports never modify the forecast.
+Community observations include plain-language summaries of the submitted choices, visible disagreements, expandable counts, time since the latest report, and coverage over the past 24 hours or 7 days. Reporting blind spots are places with fewer than three reporting browsers for the selected hazard and time window. They ask for more observations; they are not risk ratings or confidence scores. Browser codes are not verified people. The app stores no precise user coordinates, names, emails, or free text. Reports never modify the forecast.
 
 Community reporting requires Supabase configuration and the current `supabase/schema.sql`, including its `report_summary` function. Disconnected or failed requests show coverage as unavailable. Reports remain observations about recent conditions when a future forecast day is selected.
 
 There are 27 structured observation choices, including debris and oily water, airborne dust, cooling access, flooded paths and fire-related closures. Existing Supabase projects can apply [`supabase/observation-options.sql`](supabase/observation-options.sql) to enable the 15 added choices; the app checks the database vocabulary before offering them. Additional contextual observations are shown in community counts and kept out of model-agreement calculations.
+
+Apply [`supabase/report-management.sql`](supabase/report-management.sql) to enable protected removal of new reports within 24 hours, using the same browser and website. Selected options can be tapped again to withdraw them, or removed from Your active observations. A separate private browser token proves ownership to the database; only its hash is stored with reports. Updated aggregates deduplicate repeated choices and exclude withdrawn or administrator-hidden reports, while retaining rate-limit history. These are abuse deterrents, not proof of truthful conditions. See [Community safeguards](docs/COMMUNITY_SAFEGUARDS.md) for deployment steps, ownership limits, moderation and stronger bot-protection requirements.
 
 ## What each tile forecasts
 
@@ -77,7 +79,7 @@ Full metrics: `models/artifacts/<tile>/metrics.json`.
 - **Fire** labels after 2020 come from CAL FIRE incidents and perimeter centroids, so some ignition points are approximate. The hazard-zone layer covers State Responsibility Areas only.
 - **Air** uses the AirNow API when a key is set and falls back to AirNow's keyless public hourly files otherwise (values can differ from the API by a few AQI points). AirNow's own forecast, logged as a future baseline, needs the key; its old `/forecast/latLong/` service was retired Sep 30, 2026 and replaced by `/forecast/current/`.
 - **Backups and outages:** when CDIP's ERDDAP server is down, wave readings come from NOAA's copy of the same buoy (NDBC 46232), filling only the missing hours. Any other failed source keeps its last data and the app labels the affected forecasts as using older data.
-- **Community reports** are unverified, rate-limited and published only as counts. They never change a forecast.
+- **Community reports** are unverified, rate-limited and published as aggregate summaries. They never change a forecast.
 - **Sewage smell** is shown as a record, not a forecast. `models/eval_odor.py` tested whether night-time weather predicts days with 3+ South Bay odor complaints beyond recent complaints. It did not (Brier gain −0.003, 95% CI −0.017 to +0.012), so no smell forecast ships. Complaints are a proxy with reporting bias.
 - **"What if" estimates** are the Water model's learned association with border flow, not a causal effect. The sea-level shift ignores waves and local subsidence.
 

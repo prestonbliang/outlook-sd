@@ -32,7 +32,7 @@ The public test endpoint is intercepted by Playwright, and synthetic fixtures li
 
 The QA package cannot be deployed by `scripts/deploy-vercel.sh`: release metadata marks the test reporting configuration, and the deployment script rejects it. Rebuild with real public settings after QA. `--allow-unavailable` alone never permits test reporting settings.
 
-The `checks` workflow also creates an isolated PostgreSQL service, applies the schema twice, and runs `supabase/tests.sql`. Local database QA verified raw-read denial, restricted timestamp permissions, hazard/type validation, unknown/inland places, hourly limits, duplicate rejection and aggregate summaries. An additional two-session test verified simultaneous duplicates save exactly one row.
+The `checks` workflow also creates an isolated PostgreSQL service, applies the schema twice, and runs `supabase/tests.sql`, `supabase/observation-options.tests.sql` and `supabase/report-management.tests.sql`. Local database QA covers raw-read denial, restricted timestamps, hazard/type validation, unknown/inland places, hourly limits, duplicate rejection, all observation types, protected owner reads, forged-token rejection, withdrawal retries, rate-limit preservation after withdrawal, deduplicated summaries and moderation. An earlier two-session test verified simultaneous duplicates save exactly one row. Browser QA additionally covers reload recovery, selected-option withdrawal, storage denial, network failures, fallback to older databases and blocked submissions when safeguards cannot be checked.
 
 ## Before public release
 
