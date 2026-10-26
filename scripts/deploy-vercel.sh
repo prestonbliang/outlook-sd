@@ -16,11 +16,13 @@ case "${1:-preview}" in
 esac
 # IDs link the existing project. This file is ignored by git and contains no token.
 node --input-type=module <<'JS'
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { assertReleaseBuild } from './scripts/public-config.mjs';
 const output = JSON.parse(readFileSync('.vercel/output/config.json', 'utf8'));
-const webRoot = output.services ? '.vercel/output/services/web' : '.vercel/output';
-assertReleaseBuild(JSON.parse(readFileSync(`${webRoot}/static/app-build.json`, 'utf8')));
+if (output.version !== 3 || output.services || !existsSync('.vercel/output/static/index.html')) {
+  throw new Error('Invalid prebuilt layout: package root static/index.html with scripts/prepare-vercel.mjs before deploying.');
+}
+assertReleaseBuild(JSON.parse(readFileSync('.vercel/output/static/app-build.json', 'utf8')));
 mkdirSync('.vercel', { recursive: true });
 writeFileSync('.vercel/project.json', JSON.stringify({
   projectId: process.env.VERCEL_PROJECT_ID, orgId: process.env.VERCEL_ORG_ID,

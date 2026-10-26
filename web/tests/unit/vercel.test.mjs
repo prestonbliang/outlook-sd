@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { prepare, validateExport } from '../../../scripts/prepare-vercel.mjs';
@@ -89,17 +90,38 @@ test('test reporting builds require an explicit QA override and cannot be mistak
   } finally { await rm(f.root, { recursive: true, force: true }); }
 });
 
-test('hourly prebuilt output preserves the Git integration web service and its static API routes', async () => {
+test('the actual CLI entrypoint emits publicly servable Build Output API primitives at the root', async () => {
   const f = await fixture();
   try {
-    await prepare({ ...f, allowUnavailable: true, services: true });
-    const config = JSON.parse(await readFile(join(f.output, 'config.json'), 'utf8'));
-    assert.deepEqual(config.services, [{ name: 'web', root: 'web' }]);
-    assert.deepEqual(config.routes[0].destination, { service: 'web' });
-    const web = join(f.output, 'services/web');
-    const routing = JSON.parse(await readFile(join(web, 'config.json'), 'utf8'));
-    assert.ok(routing.routes.some(route => route.src === '/api/.*' && route.headers['Cache-Control'] === 'no-store'));
-    assert.ok((await readFile(join(web, 'static/api/places.json'), 'utf8')).includes('test-place'));
-    assert.ok((await readFile(join(web, 'static/404.html'), 'utf8')).includes('Outlook SD'));
+    await mkdir(join(f.root, 'scripts'), { recursive: true });
+    await mkdir(join(f.root, 'web'), { recursive: true });
+    await cp(f.source, join(f.root, 'web/out'), { recursive: true });
+    for (const file of ['prepare-vercel.mjs', 'public-config.mjs'])
+      await cp(new URL(`../../../scripts/${file}`, import.meta.url), join(f.root, 'scripts', file));
+    execFileSync(process.execPath, [join(f.root, 'scripts/prepare-vercel.mjs'), '--allow-unavailable']);
+    const output = join(f.root, '.vercel/output');
+    const config = JSON.parse(await readFile(join(output, 'config.json'), 'utf8'));
+    assert.equal(config.version, 3);
+    assert.equal(config.services, undefined);
+    assert.ok(config.routes.every(route => route.dest === undefined || typeof route.dest === 'string'));
+    assert.ok(config.routes.some(route => route.src === '/api/.*' && route.headers['Cache-Control'] === 'no-store'));
+    for (const page of ['index.html', 'map/index.html', '404.html'])
+      assert.ok((await readFile(join(output, 'static', page), 'utf8')).includes('Outlook SD'));
+    assert.ok((await readFile(join(output, 'static/api/places.json'), 'utf8')).includes('test-place'));
+  } finally { await rm(f.root, { recursive: true, force: true }); }
+});
+
+test('deployment refuses an unsupported services bundle before invoking Vercel', async () => {
+  const f = await fixture();
+  try {
+    await mkdir(join(f.root, 'scripts'), { recursive: true });
+    await mkdir(join(f.root, '.vercel/output'), { recursive: true });
+    for (const file of ['deploy-vercel.sh', 'public-config.mjs'])
+      await cp(new URL(`../../../scripts/${file}`, import.meta.url), join(f.root, 'scripts', file));
+    await writeFile(join(f.root, '.vercel/output/config.json'), JSON.stringify({ version: 3, services: [{ name: 'web' }] }));
+    assert.throws(() => execFileSync('bash', [join(f.root, 'scripts/deploy-vercel.sh'), 'production'], {
+      env: { ...process.env, VERCEL_TOKEN: 'test-only', VERCEL_ORG_ID: 'test-only', VERCEL_PROJECT_ID: 'test-only' },
+      stdio: 'pipe',
+    }), /Invalid prebuilt layout/);
   } finally { await rm(f.root, { recursive: true, force: true }); }
 });
