@@ -15,7 +15,7 @@ test -f .env || cp .env.example .env
 uv run python scripts/check_setup.py
 ```
 
-Both Python and Next read the root `.env`. Set AirNow and FIRMS keys for those sources. For community reporting, configure the Supabase URL and **publishable key** (or the legacy anon public key), never a service-role key. Rebuild the web app after changing public environment variables.
+Both Python and Next read the root `.env`. AirNow's API key is optional when using public hourly observation files; NASA satellite refreshes require a FIRMS key. For community reporting, configure the Supabase URL and **publishable key** (or the legacy anon public key), never a service-role key. Rebuild the web app after changing public environment variables.
 
 To inspect the app before downloading source data:
 
@@ -111,4 +111,4 @@ gh release create state --title "Outlook SD pipeline state" --notes "Processed s
 gh release upload state state.tar.gz --clobber
 ```
 
-Configure `AIRNOW_API_KEY`, `FIRMS_MAP_KEY`, the two Supabase public settings, and `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` in GitHub Actions secrets. Set `NWS_USER_AGENT` as a repository variable with a project contact. The hourly workflow restores and saves state, refreshes forecasts, exports the API, builds, validates the live snapshot, packages Vercel's prebuilt output, deploys, and checks the site. Do not publish the fixture build produced by the separate checks workflow.
+For publishing, configure `VERCEL_TOKEN`, `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` in GitHub Actions secrets; add the two Supabase public settings for reporting. Add `AIRNOW_API_KEY` for API observations/provider forecasts and `FIRMS_MAP_KEY` for NASA satellite refreshes. AirNow observations can use the public backup without a key. Set `NWS_USER_AGENT` as a repository variable with a project contact. The hourly workflow restores and saves state, refreshes forecasts, exports the API, builds, validates the live snapshot, packages Vercel's prebuilt output, deploys, and checks the site. Do not publish the fixture build produced by the separate checks workflow.
