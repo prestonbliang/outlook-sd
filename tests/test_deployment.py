@@ -9,10 +9,14 @@ from scripts.check_deployment import check
 
 
 class Response(io.BytesIO):
-    def __init__(self, body, *, status=200, headers=None):
+    def __init__(self, body, *, status=200, headers=None, url="https://test.vercel.app"):
         super().__init__(body)
         self.status = status
         self.headers = headers or {}
+        self.url = url
+
+    def geturl(self):
+        return self.url
 
 
 class DeploymentTests(unittest.TestCase):
@@ -25,7 +29,7 @@ class DeploymentTests(unittest.TestCase):
         if not path.endswith(".json"):
             return Response(b"<html>Outlook SD</html>")
         if path == "/api/build.json":
-            body = {"schema_version": 1, "generated_at": datetime.now(timezone.utc).isoformat(),
+            body = {"schema_version": 1, "generated_at": self.generated_at, "source_commit": self.source_commit,
                     "places": 1, "forecast_status": self.forecast_status}
         elif path == "/app-build.json":
             body = {"schema_version": 1, "reporting": self.reporting}
@@ -50,6 +54,8 @@ class DeploymentTests(unittest.TestCase):
         self.range_status = 206
         self.reporting = "configured"
         self.expired = False
+        self.generated_at = datetime.now(timezone.utc).isoformat()
+        self.source_commit = "f" * 40
 
     def test_checks_static_pages_api_and_range_support_with_get_only(self):
         with patch("scripts.check_deployment.urlopen", self.response):
@@ -86,6 +92,19 @@ class DeploymentTests(unittest.TestCase):
         self.expired = True
         with patch("scripts.check_deployment.urlopen", self.response):
             with self.assertRaisesRegex(ValueError, "expired since publication"):
+                check("https://test.vercel.app")
+
+    def test_public_domain_must_serve_the_exact_snapshot_just_built(self):
+        expected = {"source_commit": self.source_commit, "generated_at": self.generated_at}
+        with patch("scripts.check_deployment.urlopen", self.response):
+            self.assertEqual(check("https://test.vercel.app", expected_build=expected)["source_commit"], self.source_commit)
+            for field, wrong_value in [("source_commit", "0" * 40), ("generated_at", "2020-01-01T00:00:00Z")]:
+                with self.subTest(field=field), self.assertRaisesRegex(ValueError, f"Published {field}"):
+                    check("https://test.vercel.app", expected_build={**expected, field: wrong_value})
+
+    def test_protected_url_explains_authentication_instead_of_misdiagnosing_the_app(self):
+        with patch("scripts.check_deployment.urlopen", lambda *args, **kw: Response(b"Login", url="https://vercel.com/login")):
+            with self.assertRaisesRegex(ValueError, "redirects to Vercel authentication"):
                 check("https://test.vercel.app")
 
 

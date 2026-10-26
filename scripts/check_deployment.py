@@ -13,7 +13,7 @@ if __package__ in {None, ""}:
 from api.quality import quality
 
 
-def check(base_url, *, allow_unavailable=False, require_reporting=False):
+def check(base_url, *, allow_unavailable=False, require_reporting=False, expected_build=None):
     parsed = urlparse(base_url)
     if parsed.scheme not in {"http", "https"} or not parsed.netloc or parsed.query or parsed.fragment:
         raise ValueError("Provide a deployment origin such as https://outlook-sd.vercel.app")
@@ -28,6 +28,9 @@ def check(base_url, *, allow_unavailable=False, require_reporting=False):
     def get(path, *, json_body=False, range_request=False):
         request_headers = {**headers, **({"Range": "bytes=0-15"} if range_request else {})}
         with urlopen(Request(base_url + path, headers=request_headers), timeout=30) as response:
+            final_url = urlparse(response.geturl()) if hasattr(response, "geturl") else None
+            if final_url and final_url.hostname == "vercel.com" and final_url.path.startswith(("/login", "/sso-api")):
+                raise ValueError("Deployment redirects to Vercel authentication; check the public production domain or configure VERCEL_AUTOMATION_BYPASS_SECRET")
             expected = 206 if range_request else 200
             if response.status != expected:
                 raise ValueError(f"{path}: expected HTTP {expected}, got {response.status}")
@@ -53,6 +56,10 @@ def check(base_url, *, allow_unavailable=False, require_reporting=False):
     manifest = get("/api/build.json", json_body=True)
     if manifest.get("schema_version") != 1:
         raise ValueError("Unsupported deployment manifest")
+    if expected_build is not None:
+        for field in ("source_commit", "generated_at"):
+            if not expected_build.get(field) or manifest.get(field) != expected_build[field]:
+                raise ValueError(f"Published {field} does not match the snapshot just built")
     generated = datetime.fromisoformat(manifest["generated_at"].replace("Z", "+00:00"))
     age = (datetime.now(timezone.utc) - generated).total_seconds()
     if not -300 <= age <= 6 * 3600:
@@ -90,9 +97,11 @@ def main():
     parser.add_argument("url")
     parser.add_argument("--allow-unavailable", action="store_true", help="Check an explicitly requested initial launch without forecasts")
     parser.add_argument("--require-reporting", action="store_true", help="Fail when browser reporting variables were not applied to this deployment")
+    parser.add_argument("--expected-build", type=Path, help="Local api/build.json to verify the exact published commit and snapshot")
     args = parser.parse_args()
     try:
-        manifest = check(args.url, allow_unavailable=args.allow_unavailable, require_reporting=args.require_reporting)
+        expected_build = json.loads(args.expected_build.read_text()) if args.expected_build else None
+        manifest = check(args.url, allow_unavailable=args.allow_unavailable, require_reporting=args.require_reporting, expected_build=expected_build)
     except Exception as error:
         # HTTP exceptions contain no request headers; do not print request objects or environment values.
         parser.exit(1, f"Deployment check failed: {error}\n")
