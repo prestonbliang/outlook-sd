@@ -1,7 +1,8 @@
 // Package the tested static export using Vercel's Build Output API v3.
+import { realpathSync } from 'node:fs';
 import { cp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { assertReleaseBuild } from './public-config.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -93,7 +94,8 @@ export async function prepare({ source = join(ROOT, 'web/out'), output = join(RO
   return manifest;
 }
 
-if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
+// Compare real paths: on macOS /var is a symlink to /private/var, so URL strings can differ for the same file.
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {
   try {
     const unknown = process.argv.slice(2).filter(a => !['--allow-unavailable', '--allow-test-reporting'].includes(a));
     if (unknown.length) throw new Error(`Unknown arguments: ${unknown.join(' ')}`);

@@ -1,3 +1,4 @@
+import { realpathSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
@@ -37,6 +38,6 @@ export async function ensureVercelData({ env = process.env, root = repository, r
   if (policy === '1' && manifest.forecast_status !== 'ready') throw new Error('No current forecast coverage is available. Refresh the published source state before deploying with OUTLOOK_REQUIRE_LIVE_FORECASTS=1.');
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {
   await ensureVercelData();
 }

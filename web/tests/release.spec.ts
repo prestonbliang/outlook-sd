@@ -138,6 +138,8 @@ for (const path of ["/", "/map/", "/hazard/heat/", "/what-if/", "/track-record/"
     if (path === "/map/") await expect(page.getByRole("region", { name: "Selected neighborhood" })).toBeVisible();
     if (path === "/hazard/heat/") await expect(page.getByText("View chart data (2 points)")).toBeVisible();
     if (path === "/what-if/") await expect(page.getByLabel(/If the sea were/)).toBeVisible();
+    // Audit the settled page: mid-fade, entrance animations blend text into the background and read as low contrast.
+    await page.evaluate(() => Promise.all(document.getAnimations().filter(a => a.effect?.getTiming().iterations !== Infinity).map(a => a.finished)));
     const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
     expect(results.violations).toEqual([]);
   });
