@@ -66,7 +66,7 @@ jobs:
             echo "No state restored. This launch will display unavailable forecasts."
             echo "found=false" >> "$GITHUB_OUTPUT"
           else
-            echo "No state could be restored. Follow docs/VERCEL.md to bootstrap live sources."
+            echo "No state could be restored. Upload the state release asset first: scripts/state.sh pack, then gh release upload state state.tar.gz."
             exit 1
           fi
       - name: Refresh forecasts and preserve the log

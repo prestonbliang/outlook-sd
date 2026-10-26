@@ -38,7 +38,7 @@ jobs:
       - name: Restore state
         run: |
           if ! gh release download state -p state.tar.gz; then
-            echo "Pipeline state is missing. Bootstrap the source tables and upload the state release asset; see docs/SETUP.md."
+            echo "Pipeline state is missing. Bootstrap the source tables (make history), then upload the state release asset: scripts/state.sh pack, then gh release upload state state.tar.gz."
             exit 1
           fi
           scripts/state.sh unpack
