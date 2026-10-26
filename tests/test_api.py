@@ -265,7 +265,7 @@ def test_sources_expose_expiry_metadata_for_a_static_browser(client):
         con.executescript(SCHEMA)
         con.execute("INSERT INTO source_status VALUES ('openmeteo', ?, ?, NULL, NULL)", (now, now))
     status = client.get("/health").json()["sources"]["openmeteo"]
-    assert status["reference_at"] == now and status["max_age_hours"] == 3 and status["stale"] is False
+    assert status["reference_at"] == now and status["max_age_hours"] == 6 and status["stale"] is False
     for tile in client.get("/outlook/downtown").json()["tiles"]:
         assert tile["source_checks"]
 
@@ -315,3 +315,13 @@ def test_context_observations_are_never_counted_as_forecast_agreements_or_all_cl
     assert summary["problem_reports"] == 1
     assert summary["all_clear_reports"] == summary["all_clear_on_low_days"] == 1
     assert summary["context_reports"] == 5
+
+
+def test_incident_list_freshness_follows_downloads_not_the_last_fire(client, monkeypatch):
+    # No new San Diego fire for 10 days is news, not a stale feed: judge the yearly incident list by its last download.
+    now = pd.Timestamp.now(tz="UTC")
+    with sqlite3.connect(api.DB) as con:
+        con.executescript(SCHEMA)
+        con.execute("INSERT INTO source_status (source, last_attempt, last_success, newest_data, error) VALUES (?,?,?,?,NULL)",
+                    ("calfire_year", str(now), str(now - pd.Timedelta(hours=2)), str(now - pd.Timedelta(days=10))))
+    assert api.source_status()["calfire_year"]["stale"] is False

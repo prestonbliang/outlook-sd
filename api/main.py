@@ -118,7 +118,7 @@ def source_status():
             if pd.notna(issued) and issued.tzinfo is None:
                 # The provider's issue date and heat_tile's run timestamp use Pacific midnight.
                 newest = issued.tz_localize(TZ).tz_convert("UTC")
-        ref = newest if pd.notna(newest) and r.source not in {"nws", "calfire", "firms", "reports"} else \
+        ref = newest if pd.notna(newest) and r.source not in {"nws", "calfire", "calfire_year", "firms", "reports"} else \
             pd.to_datetime(r.last_success, utc=True, errors="coerce")
         age = (now - ref).total_seconds() / 3600 if pd.notna(ref) else None
         out[r.source] = {"last_success": r.last_success, "newest_data": r.newest_data, "error": redact(r.error) if r.error else None,
