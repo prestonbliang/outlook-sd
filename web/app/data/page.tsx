@@ -49,7 +49,7 @@ const SOURCES: { key?: string; name: string; url: string; license: string; use: 
   { name: "City of San Diego community planning areas", url: "https://data.sandiego.gov/datasets/community-planning-district-boundaries/",
     license: "Open Data Commons Public Domain (ODC-PDDL)", use: "Named neighborhoods" },
   { key: "reports", name: "Community reports from Outlook SD users", url: "#community",
-    license: "Collected by this app; published only as daily counts", use: "Pipeline's historical counts for the Track record; live community connection is shown above" },
+    license: "Collected by this app; published as aggregate summaries", use: "Pipeline's historical counts for the Track record; live community connection is shown above" },
   { name: "Protomaps basemap (OpenStreetMap data)", url: "https://protomaps.com/",
     license: "© OpenStreetMap contributors, ODbL", use: "Map background" },
 ];

@@ -1,6 +1,6 @@
-# Outlook SD product and engineering improvement review
+# Product and engineering review
 
-This pass improves the existing environmental-hazard application. The maintainer confirmed this scope after the supplied brief described a different energy/outage product. No energy features, accounts, persistent application servers, paid APIs, or new dependencies were added.
+Historical review of the environmental-hazard app before final deployment and reporting updates. The tables record decisions and follow-up ideas from that phase. Current release evidence and operational status are in [STATUS.md](STATUS.md).
 
 ## Audit and prioritized work
 
@@ -73,17 +73,13 @@ Validation results and commands are recorded after execution in `docs/STATUS.md`
 
 Existing browser tests continue to cover reporting success/duplicate rejection, accessibility, map assets, responsive layouts, browser history, storage errors, charts and all major routes. Browser fixtures are intercepted test data only and are never imported by production code.
 
-## Remaining release blockers
+## Deployment follow-up
 
-The hosted browser build now reports `reporting: configured`, and the supplied Supabase project answered read-only aggregate queries with raw-report reads denied. A real resident observation still needs to verify the deployed write journey. No QA reports were inserted into production. Use `python scripts/check_deployment.py https://outlook-sd-kof2.vercel.app --require-reporting` after the code deployment to verify configuration and current forecasts together.
-
-A real source refresh on October 25 produced Flood 4, Water 524, Heat 136, Fire 444 and, after fixing the calendar gap, Air 64 forecast rows. The exported snapshot has some current coverage for all five hazards. The public AirNow hourly backup worked without an API key; FIRMS remains unavailable without its key and is not presented as current. The validated archive was uploaded to the fork's `state` release. Code builds prefer that repository-owned state when Vercel Git metadata is enabled; a custom archive override remains available.
-
-This bootstrap is a point-in-time refresh, not a working hourly publisher. The fork still needs Vercel deployment credentials for its existing workflow, appropriate provider/contact settings, and a successful strict hosted check after the code deployment. Keep freshness failures visible until that operational setup is complete.
+The review originally identified state restoration, reporting setup and hourly deployment credentials as rollout blockers. These have since been configured and verified in the maintained fork. Protected observation withdrawal and corrected prebuilt publishing were added after this review. See [STATUS.md](STATUS.md) and [COMMUNITY_SAFEGUARDS.md](COMMUNITY_SAFEGUARDS.md) for current evidence and limits.
 
 ## Five highest-impact next steps
 
-1. Finish operational setup: current source data, an owned state archive, hourly publishing, reporting variables and a successful strict hosted check.
+1. Maintain operational reliability: monitor source freshness, state archives, scheduled publishing and the hosted checks.
 2. Add verified official beach closures/advisories beside model forecasts, with source and timestamps.
 3. Add reviewed Spanish-language navigation and hazard guidance; test with bilingual San Diego residents.
 4. Expand nearby cooling-resource access details and verified opening hours, including smoke/heat overlap.
@@ -93,4 +89,4 @@ This bootstrap is a point-in-time refresh, not a working hourly publisher. The f
 
 The defensible strengths are local relevance, five transparent model-backed hazards, held-out and live scoring, privacy-conscious community observations, accessible maps and planning across days/places. A reliable demonstration can show the chosen neighborhood, focus preset, exact-day map link, model limits and a genuine user observation within a minute.
 
-The main weakness remains operations: an interactive app with stale inputs or disconnected reporting is not a finished live service. The improvements make those limits visible and testable; they do not eliminate the need for credentials, source access, real participation or user research. Describe this as a tested release candidate until the strict hosted and real-report checks succeed.
+Publishing and read-only reporting checks have now succeeded. Source outages, anonymous-report abuse, model limitations and the lack of resident usability research still require honest presentation. The software release does not establish perfect coverage, verified witnesses or competition eligibility.

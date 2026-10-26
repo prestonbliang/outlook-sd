@@ -1,6 +1,6 @@
 # Outlook SD engineering and product audit
 
-October 24, 2026. Improvements are in the existing codebase. This describes implementation and local verification, not a verified production deployment.
+Historical audit snapshot: October 24, 2026, before hosted finalization. The findings and test counts below describe that stage, not current deployment status. Current verification is in [STATUS.md](STATUS.md), with release instructions in [RELEASE.md](RELEASE.md).
 
 ## Architecture and priorities
 
@@ -43,7 +43,7 @@ Finalization upgraded MapLibre to its patched 6.4.1 release and added a developm
 
 See [STATUS.md](STATUS.md) for the final executed results. The locked Python suite, frontend unit tests, production build, full TypeScript checks, cross-browser journeys, automated WCAG checks, database validation and dependency audits have now run. Earlier compatibility-runtime/direct-function checks were preliminary evidence and have been superseded by these full checks.
 
-Desktop/mobile screenshots were inspected, and the basemap was verified rendering actual local tiles. Six live source providers returned parseable responses in bounded temporary-file smoke checks. These checks do not replace model inference against restored source archives or a real Supabase/Vercel deployment; neither is configured locally.
+Desktop/mobile screenshots were inspected, and the basemap was verified rendering actual local tiles. Six live source providers returned parseable responses in bounded temporary-file smoke checks. These checks do not replace model inference against restored source archives or a real Supabase/Vercel deployment; those installations had not yet been verified at this audit stage.
 
 The browser suite now contains 28 scenarios, run in Chromium, Firefox and WebKit (84 executions). Reporting scenarios require the test build configuration below; no browser scenarios were skipped in final QA. Discovery targets `*.spec.ts`, preventing Node unit tests from running under Playwright. CI forbids focused tests and retains failure traces/screenshots. The checks workflow also verifies the reporting schema and permissions in PostgreSQL.
 
@@ -70,12 +70,12 @@ This creates a fixture reporting build for validation, with genuine unavailable 
 
 Manually verify mobile/wide screens, keyboard focus/history, denied geolocation/storage, failed reads, clipboard fallback, chart/table access, map failure recovery, warning visibility, repeat rejection, and actual report saves refreshing counts. Run `supabase/tests.sql` against an isolated database before verifying production schema/RLS. Confirm PMTiles range support with the existing hosted check.
 
-## Remaining priorities
+## Priorities recorded at the audit stage
 
 1. **Verify current live data.** Restore runtime state, set source/reporting/deployment credentials, run probes, and inspect every tile's timestamps/required sources. A static build alone cannot establish live data availability. Inspect hourly runs and hosted snapshot metadata.
 2. **Validate reporting and abuse controls.** The schema restricts raw-row reads and limits per-browser repeats, but UUIDs are resettable and do not identify unique people. Measure abuse before choosing server rate limits/challenges. Keep aggregate reports separate from forecast probabilities and define retention/monitoring based on real usage.
 3. **Revisit scientific evaluation.** Water evaluation remains provisional pending recent IBWC history. Audit censored laboratory results and the full-record SST climatology for leakage before retraining. Re-evaluate heat-wave underprediction, fire calibration, and air high-end false alarms against documented baselines. Preserve transparent track-record limitations.
-4. **Test restored data.** Runtime source tables and forecast state are absent locally. Run schema/leakage/API/browser checks against real state and empty fixtures. Measure chart payloads and map responsiveness before adding workers, virtualization or infrastructure.
+4. **Test restored data.** The audit-stage fresh checkout lacked runtime source tables and forecast state. Run schema/leakage/API/browser checks against real state and empty fixtures. Measure chart payloads and map responsiveness before adding workers, virtualization or infrastructure.
 5. **Verify the hosted release and intended devices.** Automated accessibility and keyboard checks now pass in three browser engines, and dependency audits reported no known vulnerabilities. Check the configured preview on real devices and with intended assistive technologies before submission; local tests do not establish hosted service configuration.
 
-The next product milestone is a verified live neighborhood workflow: select/save a place, inspect current hazards and official warnings, report an observation, see refreshed coverage, and share the same map view.
+The audit identified this target workflow: select/save a place, inspect current hazards and official warnings, report an observation, see refreshed coverage, and share the same map view.

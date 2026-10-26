@@ -1,6 +1,8 @@
-# Outlook SD visual redesign
+# Outlook SD visual design
 
-## Audit
+Design rationale and verification from the redesign stage. The audit describes the interface before these changes; historical test counts below are superseded by [STATUS.md](STATUS.md).
+
+## Before the redesign
 
 The static Next.js app already has neighborhood selection, five hazard forecasts, an interactive map, planning preferences, saved comparisons, anonymous Supabase reporting, historical scenarios and model/source transparency. Preserve these contracts and the existing Python export and Vercel build paths.
 

@@ -1,151 +1,45 @@
 # Outlook SD
 
-A 3-day, neighborhood-level forecast for five hazards in San Diego County: beach water quality, air quality, heat, coastal flooding and wildfire. Each forecast comes from a model trained on real local outcomes. The app logs every forecast it makes and scores it once the real outcome arrives.
+Neighborhood environmental outlooks for San Diego County: **beach water, air quality, heat, coastal flooding and wildfire**.
 
-Outlook SD is a forecast, not an official advisory. Every tile links to the official source.
+**[Open the app](https://outlook-sd.vercel.app/) · [v1.0.0 release](https://github.com/prestonbliang/outlook-sd/releases/tag/v1.0.0)**
 
-## Map and community observations
+## Features
 
-The Map page lets users switch hazards and forecast days, inspect stations and shaded areas, search neighborhoods or ZIPs, and submit observations for a selected neighborhood. A neighborhood list provides the same selection controls without requiring WebGL. On small screens the controls and map stack vertically.
+- Local forecasts with source timestamps, official warning links, interactive charts and a transparent track record.
+- A San Diego map with hazard/date filters, neighborhood and ZIP search, shareable views and a list alternative to WebGL.
+- Saved neighborhoods, side-by-side comparisons and a three-day planning brief.
+- Community observations with 27 choices, plain-language summaries, reporting gaps and protected withdrawal of new reports within 24 hours.
+- Historical river-flow and sea-level scenarios, nearby Cool Zones and a South Bay odor-complaint record.
 
-Community observations include plain-language summaries of the submitted choices, visible disagreements, expandable counts, time since the latest report, and coverage over the past 24 hours or 7 days. Reporting blind spots are places with fewer than three reporting browsers for the selected hazard and time window. They ask for more observations; they are not risk ratings or confidence scores. Browser codes are not verified people. The app stores no precise user coordinates, names, emails, or free text. Reports never modify the forecast.
+Forecasts are estimates, not official advisories. Community reports are unverified and never change the forecasts. Missing reports do not establish safety. [Model results and limitations](docs/MODELS.md).
 
-Community reporting requires Supabase configuration and the current `supabase/schema.sql`, including its `report_summary` function. Disconnected or failed requests show coverage as unavailable. Reports remain observations about recent conditions when a future forecast day is selected.
+## Run locally
 
-There are 27 structured observation choices, including debris and oily water, airborne dust, cooling access, flooded paths and fire-related closures. Existing Supabase projects can apply [`supabase/observation-options.sql`](supabase/observation-options.sql) to enable the 15 added choices; the app checks the database vocabulary before offering them. Additional contextual observations are shown in community counts and kept out of model-agreement calculations.
-
-Apply [`supabase/report-management.sql`](supabase/report-management.sql) to enable protected removal of new reports within 24 hours, using the same browser and website. Selected options can be tapped again to withdraw them, or removed from Your active observations. A separate private browser token proves ownership to the database; only its hash is stored with reports. Updated aggregates deduplicate repeated choices and exclude withdrawn or administrator-hidden reports, while retaining rate-limit history. These are abuse deterrents, not proof of truthful conditions. See [Community safeguards](docs/COMMUNITY_SAFEGUARDS.md) for deployment steps, ownership limits, moderation and stronger bot-protection requirements.
-
-## What each tile forecasts
-
-| Tile | Question | Unit | Status |
-|---|---|---|---|
-| Water | Will bacteria exceed the state standard at the nearest monitored beach? | Beach Watch station-day | Inference implemented; provisional evaluation split, see below |
-| Heat | How many extra emergency calls will heat cause in my ZIP? | ZIP-day, City of San Diego Fire-Rescue area | Inference implemented; levels need ACS population |
-| Flood | How high will the bay and coast get at the next high tides? | Hourly water level, NOAA 9410170 | Inference implemented |
-| Air | AQI for PM2.5 and ozone | Monitor-day | Inference implemented; AirNow API or public hourly-file observations |
-| Fire | Chance a new fire starts and grows past 10 acres | 2 km cell-day | Inference implemented; levels are ranks (riskiest 25 / 10 / 2% of days) |
-
-Current availability depends on source and publication freshness. Check the deployed Data page; the table describes implemented models, not a guarantee that every live feed is connected.
-
-## Results on held-out data
-
-Each model was trained on earlier years and scored on years it never saw, against a simple baseline. These scores use the weather that actually happened (ERA5), so they are an upper bound on live accuracy. The live log on the Track record page measures real forecast skill.
-
-**Flood.** Test period Jan 2025 → Oct 14, 2026. With the weather forecasts that were actually available at the time (Open-Meteo archived runs), the error is 0.112 ft and 69 of 81 minor-flood days were caught with 13 false alarms (persistence: 69 caught, 16 false alarms). The table below uses actual weather.
-
-| | Outlook SD | Persistence (yesterday's offset) | Tide only |
-|---|---|---|---|
-| Residual RMSE, ft (95% CI) | **0.108** (0.100–0.117) | 0.145 (0.138–0.153) | 0.453 |
-| Minor-flood days caught | **70 of 81** (12 false alarms) | 69 of 81 (16 false alarms) | 0 of 81 |
-
-Tropical Storm Rachel replay (forecast issued Oct 9, 5 am PT): forecast peaks of 11.54, 11.79 and 11.84 ft STND against observed peaks of 11.49, 11.71 and 11.64 ft. That is minor flooding correctly called on all three days. The tide alone predicted no flooding.
-
-**Heat.** Test period Jan 2025 → Aug 31, 2026, the last published EMS date.
-
-| | Outlook SD | Normal-weather model | Same day last week |
-|---|---|---|---|
-| Calls per ZIP per day, MAE | **3.19** | 3.22 | 4.38 |
-| Citywide calls per day, MAE | **28.5** | 31.7 | 35.6 |
-| Hot-day excess error (14 days) | 37.6 | — | **32.7** |
-
-The model under-calls heat waves: on hot test days it expected 26 extra calls and 56 arrived. On that hot-day measure it loses to the "same day last week" baseline. We report this rather than hide it.
-
-**Air.** Test year 2025. AQI error (MAE): PM2.5 8.6 (95% CI 7.8–9.3) vs 12.4 for yesterday's AQI; ozone 5.0 (4.5–5.6) vs 7.2. The median forecast never reaches "Unhealthy for sensitive groups"; the high-end forecast caught 57 of 80 such ozone monitor-days (181 false alarms) vs 10 for yesterday's AQI.
-
-**Fire.** Test period Jan 2025 → Oct 17, 2026: 46 new fires reached 10 acres in 1.9 million area-days. 30 of 46 started in an area rated High or Very high that day. Flagging the same 2.4% of area-days as Red Flag Warnings, the model caught 10 fires and the Red Flag rule caught 3. Ranking skill: AUC-PR 2.7× the fire rate (month only 2.0×, Red Flag days 1.1×), AUC-ROC 0.77 (month only 0.71). The Brier score is no better than the month-only average, so the levels are best read as ranks.
-
-Henderson Fire replay (Oct 15, 2026): county-wide risk jumped to 0.13–0.15 expected large fires per day (normal 0.08), and 43–65% of areas were rated High. But the coastal Camp Pendleton area where it started was rated only Moderate.
-
-**Water.** Provisional split: test Jan → May 2021. Border-flow history for 2021-06 onward is pending.
-
-| AUC | Outlook SD | Last test result | Rain rule (0.1 in) |
-|---|---|---|---|
-| All beaches (95% CI) | **0.854** (0.817–0.890) | 0.822 | 0.536 |
-| South Bay | **0.809** | 0.786 | 0.526 |
-| Rest of county | **0.870** | 0.813 | 0.517 |
-
-Brier score 0.071; recall at 80% precision 0.28, vs 0.22 for the last test result.
-
-Full metrics: `models/artifacts/<tile>/metrics.json`.
-
-## Known limits
-
-- **Beach Watch** San Diego results end Mar 4, 2026. Water forecasts are scored live only when new samples are published.
-- **City Fire-Rescue calls** are published about two months late (data runs through Aug 31, 2026). Heat forecasts can't be scored for recent weeks.
-- **CalHeatScore** has no public history, so it is compared on live days only. Logging started Oct 23, 2026.
-- **Heat model coverage:** City of San Diego Fire-Rescue ZIPs only. Other ZIPs show the state CalHeatScore.
-- **Flood** uses one gauge, San Diego Bay. The map marks shoreline places, not individual streets.
-- **Fire** labels after 2020 come from CAL FIRE incidents and perimeter centroids, so some ignition points are approximate. The hazard-zone layer covers State Responsibility Areas only.
-- **Air** uses the AirNow API when a key is set and falls back to AirNow's keyless public hourly files otherwise (values can differ from the API by a few AQI points). AirNow's own forecast, logged as a future baseline, needs the key; its old `/forecast/latLong/` service was retired Sep 30, 2026 and replaced by `/forecast/current/`.
-- **Backups and outages:** when CDIP's ERDDAP server is down, wave readings come from NOAA's copy of the same buoy (NDBC 46232), filling only the missing hours. Any other failed source keeps its last data and the app labels the affected forecasts as using older data.
-- **Community reports** are unverified, rate-limited and published as aggregate summaries. They never change a forecast.
-- **Sewage smell** is shown as a record, not a forecast. `models/eval_odor.py` tested whether night-time weather predicts days with 3+ South Bay odor complaints beyond recent complaints. It did not (Brier gain −0.003, 95% CI −0.017 to +0.012), so no smell forecast ships. Complaints are a proxy with reporting bias.
-- **"What if" estimates** are the Water model's learned association with border flow, not a causal effect. The sea-level shift ignores waves and local subsidence.
-
-## How it works
-
-### Using the app
-
-- **Today:** five hazard cards, visible forecast freshness, official warnings, and links into the matching map and detail view. Missing or stale forecasts remain explicit; tomorrow's outlook is never labelled as today's.
-- **Planning brief:** review three Pacific calendar days with beach/outdoor presets or your own hazard focus, remembered only on your device. Attention counts use current ratings, preserve unknowns and link to the exact map day. They are not a combined risk score.
-- **Your places:** save up to eight neighborhoods on your device and switch between them from Today or the map.
-- **Compare saved places:** open an on-demand table of today's five hazards across saved neighborhoods. A failed place can be retried without hiding the others; old or missing ratings stay marked.
-- **Map & reports:** explore hazards and forecast days, inspect layers, search neighborhoods, share a link with the selected place/day/hazard/reporting window, and use browser back/forward to restore selections.
-- **Community coverage:** see recent aggregate observations and areas needing more reports. Blind spots describe participation, not safety. Failed reads never become zero-report claims, and reports never alter model forecasts.
-- **What if:** two sliders. Cap the Tijuana River's border flow and see how many South Bay beach tests the Water model would flag as unsafe (2017–2021, the years with flow records). Raise the sea and count the days per year San Diego Bay would reach NOAA's minor-flood level (the real 2014–2025 gauge record, shifted up). Built by `models/scenarios.py`.
-- **South Bay smell record and cool zones:** South Bay places show the last 30 days of APCD odor complaints. Heat and Air show the nearest County Cool Zones.
-- **Details and track record:** inspect source freshness, exact chart values in accessible tables, model performance against baselines, and official sources.
-- **Connection status:** Data separates the published forecast snapshot from live community reads, with publication details and time-aware source status. Open pages update freshness as time passes.
-
-See the [engineering audit](docs/AUDIT.md) for the improvement scope, validation evidence, and remaining release requirements.
-The [product improvement review](docs/IMPROVEMENT_REVIEW.md) evaluates 18 practical innovations, records this pass's changes and explains the next priorities.
-The [visual design system](docs/DESIGN_SYSTEM.md) records the coastal identity, shared components, accessibility decisions and redesign verification.
-
-```
-GitHub Actions (hourly)
-  restore state (GitHub release asset "state")
-  pipeline/run_all.py   fetch live sources → predict days 0–3 → log to data/outlook.db → score matured forecasts
-  api/export.py         render every FastAPI response to web/public/api/*.json
-  next build            static site (web/out)
-  vercel deploy         publish
-  save state
-```
-
-- `pipeline/sources/`: one module per data source (`fetch_live`, `fetch_history`). `pipeline/probes/`: one probe script per source.
-- `pipeline/features/`: feature builders per tile, with plain-language labels for the "why" lines.
-- `models/train_<tile>.py`: training and evaluation. Artifacts go to `models/artifacts/<tile>/`.
-- `api/main.py`: the FastAPI app (`/places`, `/outlook`, `/hazard/{tile}`, `/map/{tile}`, `/scenarios`, `/track-record`, `/health`).
-- `web/`: Next.js app (Today, Detail, Map, What if, Track record, Data).
-
-## Run it
-
-Needs Python 3.12 with [uv](https://docs.astral.sh/uv/), and Node 22.
-
-For a fresh clone, use the complete [setup and deployment guide](docs/SETUP.md). Run `make doctor` to see which dependencies, source tables, and service settings are missing. Run `make init` after dependency installation to explore the app with explicit missing-data states before restoring source data. Existing deployments should restore the `state` release rather than download and retrain everything.
-
-For Vercel's GitHub integration, keep the project Root Directory at the repository root and use the committed `vercel.json`. It explicitly defines the static Next.js web service, restores the project's published forecast snapshot (including for forks), and generates its API JSON during the build. Follow the [Vercel launch guide](docs/VERCEL.md) for service settings and custom runtime-state sources. The existing manual/hourly workflows remain supported and package the same web service for prebuilt deployment, with hosted page/API/map-range checks.
+Requires **Python 3.12+, uv and Node.js 22**.
 
 ```bash
-cp .env.example .env          # add AIRNOW_API_KEY, FIRMS_MAP_KEY (free) and the Supabase URL + publishable key
-uv sync
-make probe                    # check every data source
-make history                  # download and process history (≈1 GB peak, mostly temporary)
-make train                    # deliberately rebuild all five models (overwrites artifacts)
-uv run python -m pipeline.run_all   # one live run: forecasts into data/outlook.db
-uv run python -m api.export   # static API for the web app
-cd web && npm ci && npm run build && npx http-server out   # or: make api / make web for development
-make test                     # pytest (schema, leakage, API contract) + Playwright smoke test
+uv sync --frozen
+npm --prefix web ci
+test -f .env || cp .env.example .env
+uv run python -m api.export
+npm --prefix web run dev
 ```
 
-`make refresh` combines the live pipeline and API export. `make build` exports the API and builds the site. Core API and leakage tests run on fixtures without the historical archive; processed-data schema tests require their source tables. Browser tests require a completed static build. See the setup guide for type checks, browser installation, Supabase database tests, and the first state-release upload.
+A fresh clone has no live forecast data. This starts the app with explicit unavailable states; follow [Setup](docs/SETUP.md) to restore the existing `state` release and configure reporting. Do not retrain the committed models just to run the app. Never commit `.env` or use private Supabase keys in browser settings.
 
-### Community reports (Supabase)
+## Architecture and deployment
 
-1. Create a free project at supabase.com.
-2. Open **SQL Editor**, paste [`supabase/schema.sql`](supabase/schema.sql) and run it. It creates an insert-only `reports` table with row-level security, a neighborhood whitelist, per-browser repeat limits, daily counts, and a recent-coverage summary. Reapply the full schema when upgrading from the older reporting implementation; existing reports are preserved.
-3. Copy the project URL from **Connect** (or **Integrations → Data API**) and the browser-safe publishable key from **Settings → API Keys**. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `.env`, Vercel's Production/Preview environment variables, and GitHub Actions secrets, then rebuild. Projects using the older `NEXT_PUBLIC_SUPABASE_ANON_KEY` remain supported; a publishable key takes precedence when both are set.
+Python ingestion and LightGBM inference run in GitHub Actions. FastAPI assembles static JSON during the build; Next.js serves the exported site on Vercel. Supabase stores structured observations and enforces reporting permissions and limits.
 
-The publishable/anon key is meant to be public: with the schema's policies it can only add reports and read counts. Raw rows and device IDs are never readable. Never use a secret or service-role key in browser configuration.
+This fork runs the live site and hourly publishing. Vercel Git builds use the root `vercel.json`; scheduled publishing uses Vercel's prebuilt static format. [Deployment guide](docs/VERCEL.md).
 
-Dataset licenses, libraries and AI-tool use are listed in [CREDITS.md](CREDITS.md).
+## Documentation
+
+- [Verification and current status](docs/STATUS.md)
+- [Release checks and demo guide](docs/RELEASE.md)
+- [Community privacy, withdrawal and abuse controls](docs/COMMUNITY_SAFEGUARDS.md)
+- [Model results and limitations](docs/MODELS.md)
+- [Data, software and AI-use credits](CREDITS.md)
+
+The repository includes tests for model/data boundaries, reporting permissions, deployment packaging, browser journeys, accessibility and responsive layouts. Reproduction commands are in the release guide.

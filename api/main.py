@@ -43,7 +43,7 @@ OFFICIAL = {"water": "https://www.sdbeachinfo.com/", "heat": "https://calheatsco
 AQI_CATS = [(50, "good"), (100, "moderate"), (150, "usg"), (200, "unhealthy"), (300, "very_unhealthy"),
             (10_000, "hazardous")]
 
-app = FastAPI(title="Outlook SD", description="3-day neighborhood hazard outlook for San Diego County")
+app = FastAPI(title="Outlook SD", version="1.0.0", description="Neighborhood hazard outlooks for San Diego County")
 
 
 # ------------------------------------------------------------------ data access

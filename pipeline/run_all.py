@@ -99,7 +99,7 @@ def forecast_all(con, run_ts):
         if not (ART / tile / "metrics.json").exists():
             continue
         if tile == "air" and not (PROCESSED / "airnow_obs.parquet").exists():
-            continue  # live Air needs AirNow observations (AIRNOW_API_KEY)
+            continue  # live Air needs AirNow API or public hourly-file observations
         try:
             rows, detail = fn(now, wx)
             db.log_forecasts(con, run_ts, tile, rows, model_version(tile))

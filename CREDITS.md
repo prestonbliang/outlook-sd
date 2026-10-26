@@ -1,6 +1,6 @@
 # Credits
 
-Outlook SD is built from public data and open-source software. Everything outside code written for this project is listed here, as the Congressional App Challenge rules require.
+Outlook SD is built from public data and open-source software. This file records data and software attribution, development tools, and the student contributions documented during development.
 
 ## Datasets
 
@@ -26,7 +26,7 @@ Outlook SD is built from public data and open-source software. Everything outsid
 | FIRMS VIIRS active-fire detections | NASA | Freely available; acknowledgement requested | Fire: satellite detections |
 | Cartographic boundaries (county, ZCTA, places), TIGER roads and area water, Gazetteer | U.S. Census Bureau | U.S. government work (public domain) | Neighborhoods, ZIPs, shoreline, roads |
 | ACS 2019–2023 5-year summary files (tables B01003, B01001, B19013, B25035) | U.S. Census Bureau | U.S. government work (public domain) | Heat: population for per-resident levels; context |
-| Community reports (one-tap, structured) | Outlook SD users, stored in Supabase | Collected by this app; published only as daily counts | Shown next to forecasts; compared with forecasts; never used for training |
+| Community reports (one-tap, structured) | Outlook SD users, stored in Supabase | Collected by this app; public aggregate summaries | Shown next to forecasts; compared with forecasts; never used for training |
 | Community planning areas | City of San Diego | Open Data Commons PDDL | Named neighborhoods |
 | Air-quality complaint log, 2018 → present (Complaint-Report.xlsx) | San Diego County Air Pollution Control District | Public records dataset (no license listed) | South Bay sewage-smell record; odor-forecast test (not shipped) |
 | Cool Zones (hosted feature layer) | County of San Diego HHSA, via SANDAG GIS | Public GIS layer (no license listed) | Nearest air-conditioned public places on Heat and Air |
@@ -56,9 +56,9 @@ Tools: go-pmtiles 1.31 (BSD-3) to cut the San Diego basemap; uv (Astral) for Pyt
 - write the Next.js front end, the tests, and the first drafts of README.md and this file;
 - design and test the community-report database schema (`supabase/schema.sql`) and report features, after a teammate proposed crowdsourcing.
 
-**Codex (OpenAI)** was used to audit fresh-clone behavior, improve missing-data and forecast-date handling, extend the interactive map and community reporting/coverage features, refine navigation and saved places, fix production map-worker initialization, harden release configuration, and write/run regression, browser, accessibility and database checks. Validation results and remaining service configuration are recorded in `docs/STATUS.md`.
+**Codex (OpenAI)** was used for repository audits and code changes across the frontend, source handling, static export and deployment tooling. This included the visual redesign, planning and saved-place comparisons, map fixes, community summaries and token-protected withdrawal, reporting migrations, deployment fixes, documentation and release preparation. It also wrote and ran regression, browser, accessibility and database checks. Validation evidence is recorded in [STATUS.md](docs/STATUS.md).
 
-No AI model produces the forecasts or the text shown in the app. Forecasts come from the LightGBM models trained here on the data above. Verdicts and advice come from the fixed tables in `api/verdicts.json` and `api/actions.json`.
+The running app does not call a generative-AI or language-model service. Forecasts use trained LightGBM machine-learning models. Verdicts and advice use the fixed tables in `api/verdicts.json` and `api/actions.json`; community summaries use deterministic text derived from selected observations. AI development assistance is described above, separately from runtime behavior.
 
 ### Student contributions
 

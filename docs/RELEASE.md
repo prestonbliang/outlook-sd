@@ -1,12 +1,10 @@
-# Release candidate and Congressional App Challenge demo
+# Release verification and demo
 
-Validated locally on October 24, 2026. The application is not deployed. See [STATUS.md](STATUS.md) for executed checks and remaining operational requirements.
+The v1.0 release is available at https://outlook-sd.vercel.app/. Hourly publishing and the public-site check have passed. See [STATUS.md](STATUS.md) for evidence and [MODELS.md](MODELS.md) for scientific limits. This guide reproduces QA and describes setup for other installations.
 
 ## Product scope
 
 Outlook SD helps San Diego residents understand beach water, air, heat, coastal flooding and fire conditions in the neighborhoods they care about. It combines model forecasts, official warning links, an interactive county map, and structured community observations. Reporting blind spots identify where more observations are needed; they never imply safety. Saved places and shared map views make this a repeatable daily workflow.
-
-Energy dashboards, outage monitoring and GridLab are not implemented features of this repository. They are not part of this release or its claims.
 
 ## Reproduce complete QA
 
@@ -34,14 +32,14 @@ The QA package cannot be deployed by `scripts/deploy-vercel.sh`: release metadat
 
 The `checks` workflow also creates an isolated PostgreSQL service, applies the schema twice, and runs `supabase/tests.sql`, `supabase/observation-options.tests.sql` and `supabase/report-management.tests.sql`. Local database QA covers raw-read denial, restricted timestamps, hazard/type validation, unknown/inland places, hourly limits, duplicate rejection, all observation types, protected owner reads, forged-token rejection, withdrawal retries, rate-limit preservation after withdrawal, deduplicated summaries and moderation. An earlier two-session test verified simultaneous duplicates save exactly one row. Browser QA additionally covers reload recovery, selected-option withdrawal, storage denial, network failures, fallback to older databases and blocked submissions when safeguards cannot be checked.
 
-## Before public release
+## Deploy another installation
 
-1. Configure the actual Supabase project and apply/verify `supabase/schema.sql`. Set both public settings in the repository-root `.env` and GitHub Actions secrets. Public builds reject private service-role keys. Verify an actual report saves and updates its count; the local fixtures do not prove the hosted database is configured.
-2. Restore or bootstrap the runtime source tables and forecast log using [SETUP.md](SETUP.md). Supply AirNow/FIRMS keys and the project contact for NWS. The `state` release returned 404 when checked; the checkout has no forecast database or source archive. Do not retrain the committed models merely to restore state.
-3. Run `make refresh`, inspect source freshness, and confirm real current forecasts. Source-provider availability alone does not prove model inference or scoring against restored state. Packaging rejects a normal live release without current forecast coverage; forecasts whose required inputs are stale do not establish readiness.
-4. Set the existing Vercel project IDs/token and follow [VERCEL.md](VERCEL.md). Rebuild with real public settings, package the release, deploy a preview, and run the hosted deployment check. Inspect the preview with real data before publishing production. No Vercel settings, remote database or public site were modified during local QA.
+1. Configure Supabase with `supabase/schema.sql` and browser-safe URL/publishable-key values. Existing projects can apply the additive migrations. Use a separate database only when separate observations are intended.
+2. Restore the runtime `state` archive or bootstrap genuine source tables with [SETUP.md](SETUP.md). Source data and credentials are not committed; do not retrain the included models merely to deploy.
+3. Configure the existing Vercel project and GitHub Actions credentials using [VERCEL.md](VERCEL.md). Set the repository variable `OUTLOOK_PUBLIC_URL` to the public production origin; protected preview URLs require a bypass secret for automated checks.
+4. Run the pipeline and inspect source health. Verify the public site with `python scripts/check_deployment.py https://YOUR-PUBLIC-DOMAIN --require-reporting`. Confirm a real, truthful observation when appropriate; do not seed production with QA reports.
 
-A first launch with explicitly unavailable forecasts remains possible with `--allow-unavailable`, but that is a setup milestone, not a completed live forecast demonstration.
+Publishing succeeds only after build/package validation and the hosted check. A successful check requires some current forecast coverage; inspect individual hazards for their availability. A first setup with `--allow-unavailable` is not evidence of live forecasts.
 
 ## A focused 60-second demonstration
 
@@ -52,4 +50,4 @@ Use the real configured release; check its timestamps and connectivity before re
 - **30–45 seconds:** Show recent community coverage and submit one truthful observation for conditions you are actually observing. Explain that reports never alter forecast probabilities and blind spots describe participation. If reporting is not configured, do not present the submission as working.
 - **45–60 seconds:** Show a saved neighborhood and the Track record page. Explain one model result and its limitation, then show the Data page's sources and privacy explanation.
 
-The distinctive value is the combination of transparent local forecasts, an inspectable map, and community coverage without inventing a safety score. Avoid claiming perfect accuracy, verified unique people, street-level flooding, complete wildfire detection, or energy/outage functionality. The existing model limitations and AI-tool/student contribution disclosures are in the README and [CREDITS.md](../CREDITS.md).
+The distinctive value is the combination of transparent local forecasts, an inspectable map, and community coverage without inventing a safety score. Avoid claiming perfect accuracy, verified unique people, street-level flooding, complete wildfire detection, or energy/outage functionality. Model limitations are in [MODELS.md](MODELS.md); AI-tool and recorded student contributions are in [CREDITS.md](../CREDITS.md).
