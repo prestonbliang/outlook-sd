@@ -3,24 +3,32 @@ import argparse
 import json
 import os
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.request import Request, urlopen
 from urllib.parse import urlparse
+from urllib.error import HTTPError, URLError
+from uuid import uuid4
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from api.quality import quality
 
 
-def check(base_url, *, allow_unavailable=False, require_reporting=False, expected_build=None):
+def check(base_url, *, allow_unavailable=False, require_reporting=False, expected_build=None,
+          snapshot_attempts=1, retry_delay=10):
+    if not 1 <= snapshot_attempts <= 13 or not 0 <= retry_delay <= 30:
+        raise ValueError("Use 1–13 snapshot attempts and a retry delay of 0–30 seconds")
+    if expected_build is not None and any(not expected_build.get(field) for field in ("source_commit", "generated_at")):
+        raise ValueError("Expected build must include source_commit and generated_at")
     parsed = urlparse(base_url)
     if parsed.scheme not in {"http", "https"} or not parsed.netloc or parsed.query or parsed.fragment:
         raise ValueError("Provide a deployment origin such as https://outlook-sd.vercel.app")
     if parsed.path not in {"", "/"}:
         raise ValueError("Use the deployment origin without a path")
     base_url = base_url.rstrip("/")
-    headers = {"User-Agent": "OutlookSD-deployment-check"}
+    headers = {"User-Agent": "OutlookSD-deployment-check", "Cache-Control": "no-cache"}
     bypass = os.environ.get("VERCEL_AUTOMATION_BYPASS_SECRET")
     if bypass:
         headers["x-vercel-protection-bypass"] = bypass
@@ -53,13 +61,39 @@ def check(base_url, *, allow_unavailable=False, require_reporting=False, expecte
         raise ValueError("Unsupported reporting configuration metadata")
     if require_reporting and configuration["reporting"] != "configured":
         raise ValueError("Community reporting is not configured in the deployed browser build; set the public Vercel variables and rebuild")
-    manifest = get("/api/build.json", json_body=True)
-    if manifest.get("schema_version") != 1:
-        raise ValueError("Unsupported deployment manifest")
-    if expected_build is not None:
-        for field in ("source_commit", "generated_at"):
-            if not expected_build.get(field) or manifest.get(field) != expected_build[field]:
-                raise ValueError(f"Published {field} does not match the snapshot just built")
+    # The production alias can still serve the previous snapshot immediately after
+    # the CLI reports Ready. Poll only its manifest; never relax exact identity or
+    # retry away a failed content, freshness, authentication, or map validation.
+    attempts = snapshot_attempts if expected_build is not None else 1
+    for attempt in range(1, attempts + 1):
+        try:
+            path = "/api/build.json"
+            if expected_build is not None:
+                path += "?_outlook_check=" + uuid4().hex
+            manifest = get(path, json_body=True)
+        except HTTPError as error:
+            if error.code not in {404, 429, 500, 502, 503, 504} or attempt == attempts:
+                raise
+            pending = f"manifest returned HTTP {error.code}"
+        except (URLError, TimeoutError):
+            if attempt == attempts:
+                raise
+            pending = "manifest request temporarily unavailable"
+        else:
+            if manifest.get("schema_version") != 1:
+                raise ValueError("Unsupported deployment manifest")
+            mismatches = [field for field in ("source_commit", "generated_at")
+                          if expected_build is not None and manifest.get(field) != expected_build[field]]
+            if not mismatches:
+                break
+            pending = "; ".join(f"Published {field} does not match the snapshot just built "
+                                f"(expected {expected_build[field]!r}, received {manifest.get(field)!r})"
+                                for field in mismatches)
+            if attempt == attempts:
+                raise ValueError(pending)
+        print(f"Waiting for published snapshot ({attempt}/{attempts}): {pending}; retrying in {retry_delay}s",
+              file=sys.stderr)
+        time.sleep(retry_delay)
     generated = datetime.fromisoformat(manifest["generated_at"].replace("Z", "+00:00"))
     age = (datetime.now(timezone.utc) - generated).total_seconds()
     if not -300 <= age <= 6 * 3600:
@@ -98,10 +132,13 @@ def main():
     parser.add_argument("--allow-unavailable", action="store_true", help="Check an explicitly requested initial launch without forecasts")
     parser.add_argument("--require-reporting", action="store_true", help="Fail when browser reporting variables were not applied to this deployment")
     parser.add_argument("--expected-build", type=Path, help="Local api/build.json to verify the exact published commit and snapshot")
+    parser.add_argument("--snapshot-attempts", type=int, default=1, help="Manifest attempts while a new deployment propagates (1–13; exact identity is still required)")
+    parser.add_argument("--retry-delay", type=float, default=10, help="Seconds between manifest attempts (0–30)")
     args = parser.parse_args()
     try:
         expected_build = json.loads(args.expected_build.read_text()) if args.expected_build else None
-        manifest = check(args.url, allow_unavailable=args.allow_unavailable, require_reporting=args.require_reporting, expected_build=expected_build)
+        manifest = check(args.url, allow_unavailable=args.allow_unavailable, require_reporting=args.require_reporting,
+                         expected_build=expected_build, snapshot_attempts=args.snapshot_attempts, retry_delay=args.retry_delay)
     except Exception as error:
         # HTTP exceptions contain no request headers; do not print request objects or environment values.
         parser.exit(1, f"Deployment check failed: {error}\n")

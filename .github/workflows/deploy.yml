@@ -108,4 +108,4 @@ jobs:
         run: |
           flags=()
           if [[ "$ALLOW_UNAVAILABLE" == "true" ]]; then flags+=(--allow-unavailable); fi
-          python scripts/check_deployment.py "$DEPLOY_URL" --expected-build web/out/api/build.json "${flags[@]}"
+          python scripts/check_deployment.py "$DEPLOY_URL" --expected-build web/out/api/build.json --snapshot-attempts 13 --retry-delay 10 "${flags[@]}"
